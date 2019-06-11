@@ -37,9 +37,3 @@ puncNames = { ';': "semicolon"
 
 charName = lambda c: puncNames[c] if c in puncNames else c
 
-bools = [False, True]
-modKeyGroups = [(charName(k), a, c, s, pr) for k in keyChars for a in bools for c in bools for s in bools for pr in bools]
-
-def sayKey (key, nameCmdName):
-    print key, nameCmdName
-
