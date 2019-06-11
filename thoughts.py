@@ -73,19 +73,3 @@ puncNames = { ';': "semicolon"
 
 charName = lambda c: puncNames[c] if c in puncNames else c
 
-# create all name commands and hook them up to hotkeys
-# This just echoes everything typed, with nameCommand names
-
-keys=" abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890# `-=~!@#$%^&*()_+,./<>?;:'\"{[}]|\\"
-for key in keys:
-    for a in [False, True]:
-        for c in [False, True]:
-            for s in [False, True]:
-                modTag = ("_alt" if a else "") + ("_ctrl" if c else "") + ("_shift" if s else "")
-                nameCommandName= "key" + (modTag if modTag else "") + "_" + charName(key)
-                print key, modTag, nameCommandName
-                if key == '"':
-                    key = '\\\\\\\"' #ugh
-                cmds.nameCommand(nameCommandName, annotation=nameCommandName, command='python("sayKey(\\\"' + key + '\\\", \\\"' + nameCommandName + '\\\")")')
-                cmds.hotkey(keyShortcut=key, name=nameCommandName, altModifier=a, ctrlModifier=c, shiftModifier=s)
-
