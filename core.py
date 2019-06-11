@@ -3,9 +3,6 @@ import maya.cmds as cmds
 from . import util
 
 
-# create all name commands and hook them up to hotkeys
-# This just echoes everything typed, with nameCommand names
-
 class Tomayto (object):
 
     prefix = "tomayto"
@@ -17,7 +14,12 @@ class Tomayto (object):
             print "released: " + ("alt + " if alt else "") + ("ctrl + " if ctrl else "") + util.charName(key)
 
     def createNameCommands (self):
-        # generates the cartesian product of chars and alt/ctrl modifiers
+        """
+        Generates the cartesian product of all key characters and modifiers,
+        and whether then work on press or release, creates nameCommands for
+        each, and hooks them up to hotkeys to call (in a badly hardcoded way)
+        to the getch method on a blessed instance of the class.
+        """
         for keyChar in util.keyChars :
             for a in [False, True]:
                 for c in [False, True]:
@@ -50,13 +52,13 @@ class Tomayto (object):
                         print "created", nameCommandName, " press/release hotkey"
 
     def clearNameCommands (self):
-        '''
+        """
         nameCommands are accessible through assignCommand, but only by index.
         Deleting one causes all with greater indices to move down to fill those
         indices. This means a group of nameCommands must be deleted from the
         end (the highest indices) to the beginning, which is what this does,
         finding all with the matching prefix, working backwards from the end.
-        '''
+        """
         nameCmdCount = cmds.assignCommand(query=True, numElements=True)
         for i in reversed(xrange(1, nameCmdCount + 1)):
             keyString = cmds.assignCommand(i, query=True, name=True)
