@@ -73,9 +73,6 @@ puncNames = { ';': "semicolon"
 
 charName = lambda c: puncNames[c] if c in puncNames else c
 
-def sayKey (key, nameCmdName):
-    print key, nameCmdName
-
 # create all name commands and hook them up to hotkeys
 # This just echoes everything typed, with nameCommand names
 
