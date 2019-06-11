@@ -23,10 +23,6 @@ for index in range(1, count+1):
         print index, cmds.assignCommand(index, query=True, name=True), displayString
 
 
-delNameCmd = lambda i: cmds.assignCommand(edit=True, delete=i)
-delNameCmdAbove = lambda n: [delNameCmd(n) for i in xrange(1000)][0] # useful hack
-
-
 # how to play with hotkey sets
 
 cmds.hotkeySet(query=True, hotkeySetArray=True)
