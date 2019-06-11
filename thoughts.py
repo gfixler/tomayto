@@ -1,3 +1,12 @@
+A word on naming...
+
+automata + maya
+automaya (like a contraction of Autodesk Maya)
+automayta ("automater?")
+tomayta
+tomayto
+mayta - nah, sounds like "mater"
+
 # from http://help.autodesk.com/cloudhelp/2018/ENU/Maya-Tech-Docs/CommandsPython/assignCommand.html
 
 count = cmds.assignCommand(query=True, numElements=True)
