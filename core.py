@@ -23,33 +23,33 @@ class Tomayto (object):
         for keyChar in util.keyChars :
             for a in [False, True]:
                 for c in [False, True]:
-                        modTag = ("_alt" if a else "") + ("_ctrl" if c else "")
-                        nameCommandName = Tomayto.prefix + (modTag if modTag else "") + "_" + util.charName(keyChar)
-                        # print keyChar, modTag, nameCommandName
-                        if keyChar == '"':
-                            keyChar = '\\\\\\\"' # ugh
-                        if keyChar == '\\':
-                            keyChar = '\\\\\\\\' # ugh
-                        # press nameCommand
-                        cmds.nameCommand( nameCommandName + "_press"
-                                        , annotation = nameCommandName + "_press"
-                                        , command = 'python("tomayto.core.tomayto.getch(\\\"' + keyChar + '\\\", ' + str(a) + ', ' + str(c) + ', True)")'
-                                        ) # HACK - tomayto.core.tomayto = gross
-                        print "created", nameCommandName + "_press nameCommand"
-                        # release nameCommand
-                        cmds.nameCommand( nameCommandName + "_release"
-                                        , annotation = nameCommandName + "_release"
-                                        , command = 'python("tomayto.core.tomayto.getch(\\\"' + keyChar + '\\\", ' + str(a) + ', ' + str(c) + ', False)")'
-                                        ) # HACK - tomayto.core.tomayto = gross
-                        print "created", nameCommandName + "_release nameCommand"
-                        # hotkey for both press and release nameCommands
-                        cmds.hotkey( keyShortcut = keyChar
-                                   , name = nameCommandName + "_press"
-                                   , releaseName = nameCommandName + "_release"
-                                   , altModifier = a
-                                   , ctrlModifier = c
-                                   )
-                        print "created", nameCommandName, " press/release hotkey"
+                    modTag = ("_alt" if a else "") + ("_ctrl" if c else "")
+                    nameCommandName = Tomayto.prefix + (modTag if modTag else "") + "_" + util.charName(keyChar)
+                    # print keyChar, modTag, nameCommandName
+                    if keyChar == '"':
+                        keyChar = '\\\\\\\"' # ugh
+                    if keyChar == '\\':
+                        keyChar = '\\\\\\\\' # ugh
+                    # press nameCommand
+                    cmds.nameCommand( nameCommandName + "_press"
+                                    , annotation = nameCommandName + "_press"
+                                    , command = 'python("tomayto.core.tomayto.getch(\\\"' + keyChar + '\\\", ' + str(a) + ', ' + str(c) + ', True)")'
+                                    ) # HACK - tomayto.core.tomayto = gross
+                    print "created", nameCommandName + "_press nameCommand"
+                    # release nameCommand
+                    cmds.nameCommand( nameCommandName + "_release"
+                                    , annotation = nameCommandName + "_release"
+                                    , command = 'python("tomayto.core.tomayto.getch(\\\"' + keyChar + '\\\", ' + str(a) + ', ' + str(c) + ', False)")'
+                                    ) # HACK - tomayto.core.tomayto = gross
+                    print "created", nameCommandName + "_release nameCommand"
+                    # hotkey for both press and release nameCommands
+                    cmds.hotkey( keyShortcut = keyChar
+                               , name = nameCommandName + "_press"
+                               , releaseName = nameCommandName + "_release"
+                               , altModifier = a
+                               , ctrlModifier = c
+                               )
+                    print "created", nameCommandName, " press/release hotkey"
 
     def clearNameCommands (self):
         """
