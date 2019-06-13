@@ -5,7 +5,11 @@ from . import util
 
 class Tomayto (object):
 
-    prefix = "tomayto"
+    nameCommandPrefix = "tomayto"
+
+    def __init__ (self, callbackName="tomaytoCB", callbackIsMEL=False):
+        self.callbackName = callbackName
+        self.callbackIsMEL = callbackIsMEL
 
     def getch (self, key, alt, ctrl, press):
         if press:
@@ -24,7 +28,7 @@ class Tomayto (object):
             for a in [0, 1]:
                 for c in [0, 1]:
                     modTag = ("_alt" if a else "") + ("_ctrl" if c else "")
-                    nameCommandName = Tomayto.prefix + (modTag if modTag else "") + "_" + util.charName(keyChar)
+                    nameCommandName = Tomayto.nameCommandPrefix + (modTag if modTag else "") + "_" + util.charName(keyChar)
                     # print keyChar, modTag, nameCommandName
                     if keyChar == '"':
                         keyChar = '\\\\\\\"' # ugh
