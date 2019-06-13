@@ -7,9 +7,8 @@ class Tomayto (object):
 
     nameCommandPrefix = "tomayto"
 
-    def __init__ (self, callbackName="tomaytoCB", callbackIsMEL=False):
+    def __init__ (self, callbackName="tomaytoCB"):
         self.callbackName = callbackName
-        self.callbackIsMEL = callbackIsMEL
 
     def getch (self, key, alt, ctrl, press):
         if press:
@@ -37,27 +36,19 @@ class Tomayto (object):
                         keyChar = '\\\\\\\\'
 
                     # press nameCommand
-                    if self.callbackIsMEL:
-                        tfint = lambda x: "1" if a else "0"
-                        callback = self.callbackName + ' \"' + keyChar + '\" ' + tfint(a) + " " + tfint(c) + " 1;"
-                    else:
-                        callback = "python(\"" + self.callbackName + "(\\\"" + keyChar + "\\\", " + str(a) + ", " + str(c) + ", True)\")"
-                    print "callback:", callback
+                    callback = "python(\"" + self.callbackName + "(\\\"" + keyChar + "\\\", " + str(a) + ", " + str(c) + ", True)\")"
                     cmds.nameCommand( nameCommandName + "_press"
                                     , annotation = nameCommandName + "_press"
                                     , command = callback
+                                    )
                     print "created", nameCommandName + "_press nameCommand"
 
                     # release nameCommand
-                    if self.callbackIsMEL:
-                        tfint = lambda x: "1" if a else "0"
-                        callback = self.callbackName + ' \"' + keyChar + '\" ' + tfint(a) + " " + tfint(c) + " 0;"
-                    else:
-                        callback = "python(\"" + self.callbackName + "(\\\"" + keyChar + "\\\", " + str(a) + ", " + str(c) + ", False)\")"
-                    print "callback:", callback
+                    callback = "python(\"" + self.callbackName + "(\\\"" + keyChar + "\\\", " + str(a) + ", " + str(c) + ", False)\")"
                     cmds.nameCommand( nameCommandName + "_release"
                                     , annotation = nameCommandName + "_release"
                                     , command = callback
+                                    )
                     print "created", nameCommandName + "_release nameCommand"
 
                     # hotkey for both press and release nameCommands
