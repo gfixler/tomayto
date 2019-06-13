@@ -31,7 +31,6 @@ class Tomayto (object):
                     nameCommandName = Tomayto.nameCommandPrefix + (modTag if modTag else "") + "_" + util.charName(keyChar)
 
                     # Over-escaping required for when callback lines are nested in mel python calls
-                    # if not self.callbackIsMEL:
                     if keyChar == '"':
                         keyChar = '\\\\\\\"'
                     if keyChar == '\\':
@@ -46,9 +45,7 @@ class Tomayto (object):
                     print "callback:", callback
                     cmds.nameCommand( nameCommandName + "_press"
                                     , annotation = nameCommandName + "_press"
-                                    # , command = 'python("tomayto.core.tomayto.getch(\\\"' + keyChar + '\\\", ' + str(a) + ', ' + str(c) + ', True)")'
                                     , command = callback
-                                    ) # HACK - tomayto.core.tomayto = gross
                     print "created", nameCommandName + "_press nameCommand"
 
                     # release nameCommand
@@ -60,9 +57,7 @@ class Tomayto (object):
                     print "callback:", callback
                     cmds.nameCommand( nameCommandName + "_release"
                                     , annotation = nameCommandName + "_release"
-                                    # , command = 'python("tomayto.core.tomayto.getch(\\\"' + keyChar + '\\\", ' + str(a) + ', ' + str(c) + ', False)")'
                                     , command = callback
-                                    ) # HACK - tomayto.core.tomayto = gross
                     print "created", nameCommandName + "_release nameCommand"
 
                     # hotkey for both press and release nameCommands
