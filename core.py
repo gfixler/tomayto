@@ -25,35 +25,52 @@ class Tomayto (object):
         to the getch method on a blessed instance of the class.
         """
         for keyChar in util.keyChars :
-            for a in [0, 1]:
-                for c in [0, 1]:
+            for a in [False, True]:
+                for c in [False, True]:
                     modTag = ("_alt" if a else "") + ("_ctrl" if c else "")
                     nameCommandName = Tomayto.nameCommandPrefix + (modTag if modTag else "") + "_" + util.charName(keyChar)
-                    # print keyChar, modTag, nameCommandName
+
+                    # Over-escaping required for when callback lines are nested in mel python calls
+                    # if not self.callbackIsMEL:
                     if keyChar == '"':
-                        keyChar = '\\\\\\\"' # ugh
+                        keyChar = '\\\\\\\"'
                     if keyChar == '\\':
-                        keyChar = '\\\\\\\\' # ugh
+                        keyChar = '\\\\\\\\'
+
                     # press nameCommand
+                    if self.callbackIsMEL:
+                        tfint = lambda x: "1" if a else "0"
+                        callback = self.callbackName + ' \"' + keyChar + '\" ' + tfint(a) + " " + tfint(c) + " 1;"
+                    else:
+                        callback = "python(\"" + self.callbackName + "(\\\"" + keyChar + "\\\", " + str(a) + ", " + str(c) + ", True)\")"
+                    print "callback:", callback
                     cmds.nameCommand( nameCommandName + "_press"
                                     , annotation = nameCommandName + "_press"
-                                    , command = 'tomaytoRelay "' + keyChar + '" ' + str(a) + ' ' + str(c) + ' true'
                                     # , command = 'python("tomayto.core.tomayto.getch(\\\"' + keyChar + '\\\", ' + str(a) + ', ' + str(c) + ', True)")'
+                                    , command = callback
                                     ) # HACK - tomayto.core.tomayto = gross
                     print "created", nameCommandName + "_press nameCommand"
+
                     # release nameCommand
+                    if self.callbackIsMEL:
+                        tfint = lambda x: "1" if a else "0"
+                        callback = self.callbackName + ' \"' + keyChar + '\" ' + tfint(a) + " " + tfint(c) + " 0;"
+                    else:
+                        callback = "python(\"" + self.callbackName + "(\\\"" + keyChar + "\\\", " + str(a) + ", " + str(c) + ", False)\")"
+                    print "callback:", callback
                     cmds.nameCommand( nameCommandName + "_release"
                                     , annotation = nameCommandName + "_release"
-                                    , command = 'tomaytoRelay "' + keyChar + '" ' + str(a) + ' ' + str(c) + ' false'
                                     # , command = 'python("tomayto.core.tomayto.getch(\\\"' + keyChar + '\\\", ' + str(a) + ', ' + str(c) + ', False)")'
+                                    , command = callback
                                     ) # HACK - tomayto.core.tomayto = gross
                     print "created", nameCommandName + "_release nameCommand"
+
                     # hotkey for both press and release nameCommands
                     cmds.hotkey( keyShortcut = keyChar
                                , name = nameCommandName + "_press"
                                , releaseName = nameCommandName + "_release"
-                               , altModifier = True if a else False
-                               , ctrlModifier = True if c else False
+                               , altModifier = a
+                               , ctrlModifier = c
                                )
                     print "created", nameCommandName, " press/release hotkey"
 
@@ -73,7 +90,4 @@ class Tomayto (object):
                 print "deleted", keyString
             else:
                 print "preserved", keyString
-
-
-tomayto = Tomayto()
 
