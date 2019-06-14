@@ -18,10 +18,9 @@ class Tomayto (object):
 
     def createNameCommands (self):
         """
-        Generates the cartesian product of all key characters and modifiers,
-        and whether then work on press or release, creates nameCommands for
-        each, and hooks them up to hotkeys to call (in a badly hardcoded way)
-        to the getch method on a blessed instance of the class.
+        Generates cartesian product of all key characters and modifiers,
+        for press and release states, creates nameCommands for each that call
+        to a passed or default callback name (by string), and creates hotkeys.
         """
         for keyChar in util.keyChars :
             for a in [False, True]:
