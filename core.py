@@ -32,12 +32,22 @@ class Tomayto (object):
                 ("l", False, True, True): lambda: cmds.scriptEditorInfo(clearHistory=True),
                 ("w", False, False, True): lambda: self.tempWin(),
                 ("w", False, False, False): lambda: self.noTempWin(),
+                ("f", False, False, True): lambda: toState("fun"),
             },
             "list": {
                 ("j", False, False, True): lambda: [say(cmds.ls(type="joint")), toState("idle")],
                 ("m", False, False, True): lambda: [say(cmds.ls(type="mesh")), toState("idle")],
                 ("l", False, False, True): lambda: [say(cmds.ls(type="locator")), toState("idle")],
                 ("c", False, False, True): lambda: [say(cmds.ls(type="nurbsCurve")), toState("idle")],
+            },
+            "fun": {
+                ("f", False, False, True): lambda: toState("idle"),
+                ("a", False, False, True): lambda: [cmds.polySphere(name="ballA"), cmds.move(-3, 0, 0), cmds.select(None)],
+                ("a", False, False, False): lambda: cmds.delete("ballA"),
+                ("b", False, False, True): lambda: [cmds.polySphere(name="ballB"), cmds.select(None)],
+                ("b", False, False, False): lambda: cmds.delete("ballB"),
+                ("c", False, False, True): lambda: [cmds.polySphere(name="ballC"), cmds.move(3, 0, 0), cmds.select(None)],
+                ("c", False, False, False): lambda: cmds.delete("ballC"),
             },
         }
 
