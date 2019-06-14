@@ -15,6 +15,13 @@ class Tomayto (object):
 
     nameCommandPrefix = "tomayto"
 
+    def tempWin (self):
+        self.win = cmds.window()
+        cmds.showWindow()
+
+    def noTempWin (self):
+        cmds.deleteUI(self.win)
+
     def __init__ (self, callbackName="tomaytoCB"):
         self.callbackName = callbackName
         self.state = "idle"
@@ -23,6 +30,8 @@ class Tomayto (object):
             "idle": {
                 ("l", False, False, True): lambda: toState("list"),
                 ("l", False, True, True): lambda: cmds.scriptEditorInfo(clearHistory=True),
+                ("w", False, False, True): lambda: self.tempWin(),
+                ("w", False, False, False): lambda: self.noTempWin(),
             },
             "list": {
                 ("j", False, False, True): lambda: [say(cmds.ls(type="joint")), toState("idle")],
