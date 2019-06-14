@@ -22,6 +22,11 @@ class Tomayto (object):
     def noTempWin (self):
         cmds.deleteUI(self.win)
 
+    def winCreate (self):
+        print 'ya'
+        self.win = cmds.window()
+        cmds.showWindow()
+
     def __init__ (self, callbackName="tomaytoCB"):
         self.callbackName = callbackName
         self.state = "idle"
@@ -33,6 +38,7 @@ class Tomayto (object):
                 ("w", False, False, True): lambda: self.tempWin(),
                 ("w", False, False, False): lambda: self.noTempWin(),
                 ("f", False, False, True): lambda: toState("fun"),
+                ("W", False, False, True): lambda: toState("win"),
             },
             "list": {
                 ("j", False, False, True): lambda: [say(cmds.ls(type="joint")), toState("idle")],
@@ -48,6 +54,17 @@ class Tomayto (object):
                 ("b", False, False, False): lambda: cmds.delete("ballB"),
                 ("c", False, False, True): lambda: [cmds.polySphere(name="ballC"), cmds.move(3, 0, 0), cmds.select(None)],
                 ("c", False, False, False): lambda: cmds.delete("ballC"),
+            },
+            "win": {
+                ("W", False, False, True): lambda: self.winCreate(),
+                ("q", False, True, True): lambda: cmds.deleteUI(self.win),
+                ("c", False, False, True): lambda: cmds.columnLayout(),
+                ("b", False, False, True): lambda: cmds.button(),
+                ("f", False, False, True): lambda: cmds.frameLayout(borderVisible=True),
+                (".", False, False, True): lambda: cmds.setParent('..'),
+                ("i", False, False, True): lambda: toState("idle"),
+                ("<", False, False, True): lambda: cmds.window(self.win, edit=True, width=cmds.window(self.win, query=True, width=True) / 2 - 10),
+                (">", False, False, True): lambda: cmds.window(self.win, edit=True, width=cmds.window(self.win, query=True, width=True) / 2 + 10),
             },
         }
 
