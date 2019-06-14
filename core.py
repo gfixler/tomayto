@@ -3,23 +3,34 @@ import maya.cmds as cmds
 from . import util
 
 
+def say (msg):
+    print msg
+
+def makeStateSetter (inst):
+    def stateSetter (state):
+        inst.state = state
+    return stateSetter
+
 class Tomayto (object):
 
     nameCommandPrefix = "tomayto"
 
     def __init__ (self, callbackName="tomaytoCB"):
         self.callbackName = callbackName
+        self.state = "idle"
+        toState = makeStateSetter(self)
         self.states = {
             "idle": {
-                ("b", False, False, True): lambda: cmds.polySphere(),
-                ("b", False, False, False): lambda: cmds.delete(),
-                ("c", False, False, True): lambda: cmds.polyCube(),
-                ("c", False, False, False): lambda: cmds.delete(),
-                ("C", False, False, True): lambda: cmds.polyCylinder(),
-                ("C", False, False, False): lambda: cmds.delete()
-            }
+                ("l", False, False, True): lambda: toState("list"),
+                ("l", False, True, True): lambda: cmds.scriptEditorInfo(clearHistory=True),
+            },
+            "list": {
+                ("j", False, False, True): lambda: [say(cmds.ls(type="joint")), toState("idle")],
+                ("m", False, False, True): lambda: [say(cmds.ls(type="mesh")), toState("idle")],
+                ("l", False, False, True): lambda: [say(cmds.ls(type="locator")), toState("idle")],
+                ("c", False, False, True): lambda: [say(cmds.ls(type="nurbsCurve")), toState("idle")],
+            },
         }
-        self.state = "idle"
 
     def getch (self, key, alt, ctrl, press):
         k = (key, alt, ctrl, press)
