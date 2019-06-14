@@ -9,12 +9,29 @@ class Tomayto (object):
 
     def __init__ (self, callbackName="tomaytoCB"):
         self.callbackName = callbackName
+        self.states = {
+            "idle": {
+                ("b", False, False, True): lambda: cmds.polySphere(),
+                ("b", False, False, False): lambda: cmds.delete(),
+                ("c", False, False, True): lambda: cmds.polyCube(),
+                ("c", False, False, False): lambda: cmds.delete(),
+                ("C", False, False, True): lambda: cmds.polyCylinder(),
+                ("C", False, False, False): lambda: cmds.delete()
+            }
+        }
+        self.state = "idle"
 
     def getch (self, key, alt, ctrl, press):
-        if press:
-            print "pressed: " + ("alt + " if alt else "") + ("ctrl + " if ctrl else "") + util.charName(key)
-        else:
-            print "released: " + ("alt + " if alt else "") + ("ctrl + " if ctrl else "") + util.charName(key)
+        k = (key, alt, ctrl, press)
+        try:
+            f = self.states[self.state][k]
+            f()
+        except:
+            pass
+        # if press:
+        #     print "pressed: " + ("alt + " if alt else "") + ("ctrl + " if ctrl else "") + util.charName(key)
+        # else:
+        #     print "released: " + ("alt + " if alt else "") + ("ctrl + " if ctrl else "") + util.charName(key)
 
     def createNameCommands (self):
         """
