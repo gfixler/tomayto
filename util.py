@@ -43,7 +43,7 @@ charName = lambda c: puncNames[c] if c in puncNames else c
 
 def listAllNameCommands ():
     # from code example at bottom of this page:
-    # http://help.autodesk.com/cloudhelp/2018/ENU/Maya-Tech-Docs/CommandsPython/index.html
+    # from http://help.autodesk.com/cloudhelp/2018/ENU/Maya-Tech-Docs/CommandsPython/assignCommand.html
     count = cmds.assignCommand(query=True, numElements=True)
     print ('There are ' + str(count) + ' named command objects.')
 
