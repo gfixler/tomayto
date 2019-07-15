@@ -70,7 +70,7 @@ class Tomayto (object):
         nameCmdCount = cmds.assignCommand(query=True, numElements=True)
         for i in reversed(xrange(1, nameCmdCount + 1)):
             keyString = cmds.assignCommand(i, query=True, name=True)
-            if keyString and keyString.startswith("tomayto_"):
+            if keyString and keyString.startswith(Tomayto.nameCommandPrefix + "_"):
                 cmds.assignCommand(edit=True, delete=i)
                 print "deleted", keyString
             else:
