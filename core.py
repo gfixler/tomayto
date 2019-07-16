@@ -5,7 +5,10 @@ from . import util
 
 class Tomayto (object):
 
-    prefix = "tomayto"
+    nameCommandPrefix = "tomayto"
+
+    def __init__ (self, callbackName="tomaytoCB"):
+        self.callbackName = callbackName
 
     def getch (self, key, alt, ctrl, press):
         if press:
@@ -15,33 +18,38 @@ class Tomayto (object):
 
     def createNameCommands (self):
         """
-        Generates the cartesian product of all key characters and modifiers,
-        and whether then work on press or release, creates nameCommands for
-        each, and hooks them up to hotkeys to call (in a badly hardcoded way)
-        to the getch method on a blessed instance of the class.
+        Generates cartesian product of all key characters and modifiers,
+        for press and release states, creates nameCommands for each that call
+        to a passed or default callback name (by string), and creates hotkeys.
         """
         for keyChar in util.keyChars :
             for a in [False, True]:
                 for c in [False, True]:
                     modTag = ("_alt" if a else "") + ("_ctrl" if c else "")
-                    nameCommandName = Tomayto.prefix + (modTag if modTag else "") + "_" + util.charName(keyChar)
-                    # print keyChar, modTag, nameCommandName
+                    nameCommandName = Tomayto.nameCommandPrefix + (modTag if modTag else "") + "_" + util.charName(keyChar)
+
+                    # Over-escaping required for when callback lines are nested in mel python calls
                     if keyChar == '"':
-                        keyChar = '\\\\\\\"' # ugh
+                        keyChar = '\\\\\\\"'
                     if keyChar == '\\':
-                        keyChar = '\\\\\\\\' # ugh
+                        keyChar = '\\\\\\\\'
+
                     # press nameCommand
+                    callback = "python(\"" + self.callbackName + "(\\\"" + keyChar + "\\\", " + str(a) + ", " + str(c) + ", True)\")"
                     cmds.nameCommand( nameCommandName + "_press"
                                     , annotation = nameCommandName + "_press"
-                                    , command = 'python("tomayto.core.tomayto.getch(\\\"' + keyChar + '\\\", ' + str(a) + ', ' + str(c) + ', True)")'
-                                    ) # HACK - tomayto.core.tomayto = gross
+                                    , command = callback
+                                    )
                     print "created", nameCommandName + "_press nameCommand"
+
                     # release nameCommand
+                    callback = "python(\"" + self.callbackName + "(\\\"" + keyChar + "\\\", " + str(a) + ", " + str(c) + ", False)\")"
                     cmds.nameCommand( nameCommandName + "_release"
                                     , annotation = nameCommandName + "_release"
-                                    , command = 'python("tomayto.core.tomayto.getch(\\\"' + keyChar + '\\\", ' + str(a) + ', ' + str(c) + ', False)")'
-                                    ) # HACK - tomayto.core.tomayto = gross
+                                    , command = callback
+                                    )
                     print "created", nameCommandName + "_release nameCommand"
+
                     # hotkey for both press and release nameCommands
                     cmds.hotkey( keyShortcut = keyChar
                                , name = nameCommandName + "_press"
@@ -62,12 +70,9 @@ class Tomayto (object):
         nameCmdCount = cmds.assignCommand(query=True, numElements=True)
         for i in reversed(xrange(1, nameCmdCount + 1)):
             keyString = cmds.assignCommand(i, query=True, name=True)
-            if keyString and keyString.startswith("tomayto_"):
+            if keyString and keyString.startswith(Tomayto.nameCommandPrefix + "_"):
                 cmds.assignCommand(edit=True, delete=i)
                 print "deleted", keyString
             else:
                 print "preserved", keyString
-
-
-tomayto = Tomayto()
 
