@@ -1,3 +1,5 @@
+import time
+
 import maya.cmds as cmds
 
 from . import util
@@ -9,12 +11,26 @@ class Tomayto (object):
 
     def __init__ (self, callbackName="tomaytoCB"):
         self.callbackName = callbackName
+        self.arpeggio = {}
 
     def getch (self, key, alt, ctrl, press):
         if press:
+
+            # arpeggio additions
+            t = time.time()
+            self.arpeggio[(key, alt, ctrl)] = time.time()
+            for k, v in self.arpeggio.items():
+                if t - v > 0.1:
+                    del self.arpeggio[k]
+
             print "pressed: " + ("alt + " if alt else "") + ("ctrl + " if ctrl else "") + util.charName(key)
         else:
+
+            # # arpeggio deletions
+            # del self.arpeggio[(key, alt, ctrl)]
+
             print "released: " + ("alt + " if alt else "") + ("ctrl + " if ctrl else "") + util.charName(key)
+        print "self.arpeggio:", self.arpeggio
 
     def createNameCommands (self):
         """
