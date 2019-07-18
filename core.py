@@ -1,4 +1,5 @@
 import time
+import threading
 
 import maya.cmds as cmds
 
@@ -11,26 +12,34 @@ class Tomayto (object):
 
     def __init__ (self, callbackName="tomaytoCB"):
         self.callbackName = callbackName
-        self.arpeggio = {}
+        self.lastKeyPressed = None
+        self.chaining = False
+        self.chain = []
 
-    def getch (self, key, alt, ctrl, press):
+    def getch (self, key, alt, ctrl, press, deferred=False, pressedTime=0):
         if press:
-
-            # arpeggio additions
-            t = time.time()
-            self.arpeggio[(key, alt, ctrl)] = time.time()
-            for k, v in self.arpeggio.items():
-                if t - v > 0.1:
-                    del self.arpeggio[k]
-
-            print "pressed: " + ("alt + " if alt else "") + ("ctrl + " if ctrl else "") + util.charName(key)
-        else:
-
-            # # arpeggio deletions
-            # del self.arpeggio[(key, alt, ctrl)]
-
-            print "released: " + ("alt + " if alt else "") + ("ctrl + " if ctrl else "") + util.charName(key)
-        print "self.arpeggio:", self.arpeggio
+            now = time.time()
+            if deferred:
+                if now - pressedTime <= 0.25:
+                    if self.chaining:
+                        self.chain += self.lastKeyPressed
+                    else:
+                        self.chaining = True
+                        self.chain = [self.lastKeyPressed]
+                else:
+                    if self.chaining:
+                        self.chaining = False
+                        print "chain: " + ', '.join(self.chain)
+                        self.chain = []
+                    else:
+                        print "regular key: " + str((key, alt, ctrl))
+                self.lastKeyPressed = key
+            else:
+                threading.Timer(0.25, lambda: self.getch(key, alt, ctrl, press, deferred=True, pressedTime=now)).start()
+        # if press:
+        #     print "pressed: " + ("alt + " if alt else "") + ("ctrl + " if ctrl else "") + util.charName(key)
+        # else:
+        #     print "released: " + ("alt + " if alt else "") + ("ctrl + " if ctrl else "") + util.charName(key)
 
     def createNameCommands (self):
         """
