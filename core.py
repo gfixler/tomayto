@@ -11,6 +11,13 @@ class Tomayto (object):
         self.callbackName = callbackName
 
     def defaultCB (self, key, alt, ctrl, press):
+        """
+        This default callback simply prints out the pressed and released keys,
+        and modified variants, when assigned to the global callback name (see
+        default arg to __init__ method). It's only intended to check that the
+        nameCommands and hotkeys have been set up correctly; normal use is to
+        assign another handler to the global callback name.
+        """
         if press:
             print "pressed: " + ("alt + " if alt else "") + ("ctrl + " if ctrl else "") + util.charName(key)
         else:
@@ -18,9 +25,14 @@ class Tomayto (object):
 
     def createNameCommands (self):
         """
-        Generates cartesian product of all key characters and modifiers,
-        for press and release states, creates nameCommands for each that call
-        to a passed or default callback name (by string), and creates hotkeys.
+        Creates Maya nameCommands and hotkeys for the cartesian product of all
+        keys, modifiers, and press and release states, pointing them all toward
+        a default, global handler. This pointing is done to a default name in
+        the global space, as nameCommands are MEL-only, and, as such, are
+        difficult (but not impossible) to point to existing Python identifiers.
+        This means that, once this class has been instantiated, and all of the
+        nameCommands and hotkeys created, a second call is required, to assign
+        that global name (__init__ default arg) to a Python handler callable.
         """
         for keyChar in util.keyChars :
             for a in [False, True]:
