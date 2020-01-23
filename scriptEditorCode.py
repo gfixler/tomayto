@@ -40,7 +40,7 @@ tom.createNameCommands()
 # tomayto.util.listAllNameCommands()
 
 # hook up the Python callback (called from MEL) to our instance
-tomaytoCB = tom.getch
+tomaytoCB = tom.defaultCB
 
 """
 def tomaytoCB (key, alt, ctrl, press):

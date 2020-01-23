@@ -10,7 +10,7 @@ class Tomayto (object):
     def __init__ (self, callbackName="tomaytoCB"):
         self.callbackName = callbackName
 
-    def getch (self, key, alt, ctrl, press):
+    def defaultCB (self, key, alt, ctrl, press):
         if press:
             print "pressed: " + ("alt + " if alt else "") + ("ctrl + " if ctrl else "") + util.charName(key)
         else:
