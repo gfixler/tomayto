@@ -32,9 +32,9 @@ reload(tomayto.util)
 tom = tomayto.Tomayto()
 
 """
-# shouldn't need to do these most of the time
-tom.clearNameCommands()
-tom.createNameCommands()
+# should only need to create once
+tomayto.createTomaytoKeymap()
+tomayto.removeTomaytoKeymap()
 """
 
 # tomayto.util.listAllNameCommands()
