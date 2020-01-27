@@ -1,0 +1,79 @@
+A word on naming...
+
+automata + maya
+automaya (like a contraction of Autodesk Maya)
+automayta ("automater?")
+tomayta
+tomayto
+mayta - nah, sounds like "mater"
+
+
+# how to play with hotkey sets
+
+cmds.hotkeySet(query=True, hotkeySetArray=True)
+cmds.hotkeySet(query=True, current=True)
+
+cmds.hotkeySet("MyNewKeySet", current=True) # creates if non-existent
+
+cmds.hotkeySet("Maya_Default", edit=True, current=True)
+cmds.hotkeySet("MyNewKeySet", edit=True, current=True)
+
+
+----------------------------
+Sun Jan 26 05:23:30 PST 2020
+
+I've been trying to think through the myriad issues remaining before this is in
+any kind of useful state, and I feel I'm starting to make some headway. Here's
+a brain-dump:
+
+Just as a note, there are still hotkeys unnacounted for, like Tab.
+
+The basic idea of the state machine is that there will be a dict of states,
+with state names as keys, and the details of each state as dict values thereof.
+To switch states, an event will somehow emit another state's name, and that
+state will be looked up in the states dict, and become the new, current state.
+
+I've decided this needs to work in some kind of continuation passing style.
+There should be a default handler, tripped by all keypresses, which looks up
+the current state, looks up that state's list of events (key presses), looks
+for an event that matches what was pressed, and potentially gets back a chunk
+of data (or ??? if not), which it interprets. I.E. there won't be functionality
+in the events; they're just data, and the two aren't the same (this isn't
+Lisp). This means it's easy to write the events data out to JSON files, if not
+the code that data is used to invoke. I've been back and forth between ideas of
+all functions (capabilities) being in a big vat, like all the functions in Vim
+or Emacs being available from anywhere, or them being methods on the state
+classes/instances, available only to them. Maybe there can be common
+functionality in libraries, beyond state-level stuff? TBD...
+
+I also pondered pushing and popping of states, and replacing of the current
+state, and finally realized there isn't really a replacing, ever, just a
+pointing to a new, current state, literally just changing the string name in a
+property, which references a key in the states dict. Pushing and popping is the
+only oddity, because there needs to be a stack. I don't think there always
+needs to be a stack, though, but I'm very unsure as yet. It could be that
+everything should be a stack, and I'm also pondering everything being a
+tree(!), with timestamps, and something like Vim's earlier/later(!!!). TBD...
+
+It occurred to me that often I needed a function-like relationship between
+states, where one would pass in an argument, and the next would do some work,
+and return a value. This felt insurmountable, briefly, but then it seemed to
+fit neatly in with push/pop, and returning simple data. For example, let's say
+I want to find the midpoint of 2 other points. I can hit a key to mean that,
+which will push the point selector state onto the stack, that I may choose the
+first of the 2 points. Let's say I type "O" to mean the origin. The point
+selector state would thus return (0, 0, 0)... somehow.
+
+Well, let's say I press <C-m> to choose a midpoint. That fires off the handler,
+which gets passed a (key, alt, ctrl, press) value of ('m', False, True, True).
+The handler looks up the current state, getting back a dict. It looks in there
+for the event dict, and finds the key ('m', False, True, True), a matching
+event. Its value is ("PUSH", "PointSelectorState", None)—the equivalent of
+"call pointSelector ()"—which it returns. The handler sees that it should push
+a new state, and so it instantiates that state, puts it on the [handler's]
+state stack, and sets the instance's "pushedValue" (or whatever) property to
+None. In the new state, I press "O" to mean origin. The handler looks up the
+tuple ('O', False, False, True) in the PointSelectorState's event dict, and
+finds the matching tuple as a key. Its value is ("POP", (0, 0, 0)).
+----------------------------
+
