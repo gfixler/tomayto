@@ -20,6 +20,7 @@ cmds.hotkeySet("MyNewKeySet", edit=True, current=True)
 
 
 ----------------------------
+
 Sun Jan 26 05:23:30 PST 2020
 
 I've been trying to think through the myriad issues remaining before this is in
@@ -75,5 +76,32 @@ state stack, and sets the instance's "pushedValue" (or whatever) property to
 None. In the new state, I press "O" to mean origin. The handler looks up the
 tuple ('O', False, False, True) in the PointSelectorState's event dict, and
 finds the matching tuple as a key. Its value is ("POP", (0, 0, 0)).
+
 ----------------------------
 
+Mon Jan 27 03:28:57 PST 2020
+
+It occurred to me later that there's possibly a lot more involved in push/pop
+of states. I didn't finish the previous example of a midpoint, so I didn't get
+to the part where I need to handle 2 pushed states; I'd need to push
+PointSelectorState once, get a value popped back to me, and then push it again,
+and get a second one. Now I'm thinking that I need to either make pushing
+always happen with a list of states—which could be mapped over, and the
+resulting list of results passed to the specified function in the original push
+tuple—or I could have 2 pushes, one for pushing a single state, and one for
+pushing a list thereof via map.
+
+While I was feeling that all of this is pretty complicated, I also realized,
+from a functional programming standpoint, it's also kind of simple. Ultimately,
+I just have to put the things I need into these tuples I'm passing around, and
+then use them to accomplish what I need, and refine a bit as I understand the
+space better. I need to enter 2 states in sequence, and get the results popped
+back from each? Just put them in a list, and map over them. I need the pushing
+state to know which function to call with the value(s) it gets back from the
+state(s) return value(s)? Stick it in the pushing state's tuple, and have the
+handler know to use it in that way. Little by little, I should be able to
+flatten this space, and slowly get what I need. It really made me long for
+types, though. They can really help design a space like this, and then keep you
+honest, and on track, as you code to them.
+
+----------------------------
