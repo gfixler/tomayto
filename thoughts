@@ -105,3 +105,114 @@ types, though. They can really help design a space like this, and then keep you
 honest, and on track, as you code to them.
 
 ----------------------------
+
+Tue Feb 18 00:57:03 PST 2020
+
+I had a loud, extended conversation with myself today, during this 3-day
+weekend, about how to do the thing that's different about what I want, vs, say,
+what Vim and Emacs seem to do. The difficult thing that I want is to use states
+like functions. This has been a tricky problem. I can't even remember all of
+the thoughts and ideas I've had and thrown out so far. Currently, I'm thinking
+that all functionality should take place inside a state. If I'm making
+something, moving something, etc., there should be a state whose job that is,
+i.e., the start state shouldn't get info from a move state, and then call some
+move function specified in some returned tuple of info; you should simply enter
+the move state from the start state, for example, and return to the start state
+once you've moved what you wanted to move.
+
+I've been toying with the idea of 'callable' states, whose reason for being is
+to return a value, but the more I've thought about it, the less it's seemed
+necessary. I think now that a state should just be able to tell the handler to
+pop back to whatever the last state was, and include some value, and if that
+state was waiting for a value, great, if not, no problem. I don't have types in
+Python, so it'll have to be down to documentation that if you push the
+chooseXYZ state, you should expect a popped XYZ value at some point, though as
+I build this out, I'm sure I'll add try/excepts around things, so you won't
+need every method to exist in your state instances. To that end, re: getting
+info back to the 'caller' state, which isn't really calling anything, beyond
+pushing a new state on the stack, I'm thinking a few things...
+
+The states need to communicate with the main class. This is where things get
+more tightly coupled than I'd like, but I think when instantiating the main
+class, you need to pass in a dict of state names paired with class references.
+It will then convert the refs to instances, and the names will then refer to
+those. When instantiating each, it will also pass in a reference to its own
+instance, and each state class will tuck this away in a property for use in
+communication. This allows each state to call, e.g., push and pop methods on
+the main class.
+
+When push is called with a valid state, a tuple of the state's name and
+instance can be pushed onto the main instance's states stack, and then I think
+some kind of onEnter method should be called on the new state, if it exists.
+This will allow it to do any setup it needs to do, like resetting values. I
+don't like it, but these instances will undoubtedly become full of their own
+state of variables; I've thought of several needs to that end already. One
+issue here is that if a state gets reused, it may be holding on to values from
+the first use :( Yay, mutability. I'm thinking that instead of instantiating
+state classes up front, I do so only when they're pushed or switched to (are
+they ever switched to, but not pushed?), so every time you enter a state, it's
+a unique instance, with a fresh state, unless you're popping back to one from
+the state stack. I like that. Anyway...
+
+When pop is called on the main instance, a value may be passed (default:
+None?), and this should then be relayed to the state popped back to, through
+some callback, like "onPoppedBackTo", or even some name that isn't crap. This
+is how states can "return" values to their "callers." Imagine you want to move
+the selected object. You press 'm', which in the current state means "move".
+The handler gets back some info in a tuple, like (PUSH, "move"), where PUSH is
+some instantiated object simply used like a symbol in the main class (just a
+thought; it can be a string). It pushes the move state onto the state stack,
+and calls move's push method (which, maybe, calls to its fellow onEnter method
+before proceeding?), possibly passing in some info, like which state called it
+(or not - just a thought). I'm not sure that it's important that states know
+they were pushed, although, I do think it's at least somewhat important that,
+if you're looking for a return value, you push a state that's going to pop one
+back to you (I'll have to ponder ways of making such relations more rigorous
+later). So, now you're in the move state, and its onEnter method is called by
+the handler. The first thing it does, say, is call:
+
+    self.handlerClass.push("chooseXYZ")
+
+There would be a plethora of ways to choose some XYZ point in the chooseXYZ
+state, like asking for the origin, or the worldspace location of some existing
+object, or vertex, or some relative offset from one of them, or a user-entered
+value, or even a midpoint of two other points, or the average of a bunch of
+them. This is where it really gets interesting, because move wants a point, but
+I can now tree off through states into a complicated answer, like the midpoint
+of the origin, and the midpoint of an existing locator, and some user-entered
+point, and only when I've finished specifying all of that, would the move to
+that concocted location finally happen. This is all being done essentially
+through a message-passing system, so there have to be ways to pass messages,
+receive them, and act upon them once received. This is where the popping comes
+in...
+
+So I'm in the chooseXYZ state, and I hit 'o', say, which means "origin." The
+main instance receives (POP, (0, 0, 0)) from the event dict, or perhaps there's
+a handler, so it receives (POP, self.popOrigin), and the main handler calls the
+local handler method returned, which returns (0, 0, 0), and then it pops the
+state, gets the new current state, and calls its onPoppedBackTo method with the
+(0, 0, 0) value, which it knows (based on its own local info, and the fact it's
+the move state) to use to move the current selection (probably mapping over it)
+to that point (the origin). So complicated!
+
+It's thus really down to each state instance to keep track of what values it's
+received, and thus what its own internal state is, so that, in the case of a
+midpoint state, it would see that it has no points yet, and make a call to push
+the chooseXYZ state. When that state popped back to it with a value, it would
+have its onPoppedTo method called with that value, and would determine that
+this was its first point, and immediately push chooseXYZ again. When popped
+back to again, it would have its second value, and would thus call to pop, and
+pass the midpoint of the two values (via message passing through the main
+instance's pop method) to whatever state was beneath it on the stack.
+
+It feels tedious and overblown, but I think if I can implement this much of it,
+and start to use it, I'll see ways of simplifying, maybe with declarative
+generation, e.g. some way of saying you need values from 2 other states,
+handled by a local method, like:
+
+    self.handlerClass.stateCall(self.doMidPoint, [chooseXYZ, chooseXYZ])
+
+...which would get a value from chooseXYZ twice, and then pass the results to
+the doMidPoint method, which would then call to the handlerClass.pop method
+with the computed midpoint. Just another thought.
+
