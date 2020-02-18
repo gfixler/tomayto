@@ -13,7 +13,7 @@ class Tomayto (object):
         use is to assign another handler to the global callback name.
         """
         if press:
-            print "pressed: " + ("alt + " if alt else "") + ("ctrl + " if ctrl else "") + util.charName(key)
+            print "pressed: " + ("alt + " if alt else "") + ("ctrl + " if ctrl else "") + util.keyName(key)
         else:
-            print "released: " + ("alt + " if alt else "") + ("ctrl + " if ctrl else "") + util.charName(key)
+            print "released: " + ("alt + " if alt else "") + ("ctrl + " if ctrl else "") + util.keyName(key)
 
