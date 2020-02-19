@@ -1,6 +1,6 @@
 import maya.cmds as cmds
 
-from . import util
+import util
 
 
 class Tomayto (object):
