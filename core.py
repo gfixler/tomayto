@@ -18,6 +18,44 @@ class Tomayto (object):
         self.startState = statesMap[startStateName](self) # init start state
         self.stateStack = [] # start state doesn't go on stack/can't be popped
 
+    def currentState (self):
+        if self.stateStack:
+            return self.stateStack[-1]
+        return (self.startStateName, self.startState)
+
+    def eventHandler (self, key, alt, ctrl, press):
+        stateName, state = self.currentState()
+        event = (key, alt, ctrl, press)
+        if event in state.keymap.keys():
+            eventAction, eventActionData = state.keymap[event]
+            if eventAction == "PUSH":
+                self.pushState(eventActionData)
+            elif eventAction == "POP":
+                self.popState(eventActionData)
+
+    def pushState (self, stateName):
+        if stateName in self.statesMap:
+            stateClass = self.statesMap[stateName]
+            newState = stateClass(self)
+            self.stateStack.append((stateName, newState))
+            try:
+                newState.onEnter() # may not exist
+            except:
+                pass
+
+    def popState (self, valueAction=None):
+        if self.stateStack:
+            popStateName, popState = self.stateStack.pop()
+            stateName, state = self.currentState()
+            try:
+                if valueAction:
+                    value = valueAction()
+                    state.onPopTo(value)
+                else:
+                    state.onPopTo()
+            except:
+                pass
+
     def tester (self, key, alt, ctrl, press):
         """
         When assigned to the global callback name, this callback prints out
