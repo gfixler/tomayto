@@ -68,3 +68,17 @@ class Tomayto (object):
         else:
             print "released: " + ("alt + " if alt else "") + ("ctrl + " if ctrl else "") + util.keyName(key)
 
+
+
+def enable (hotkeySetName="Tomayto", **kwargs):
+    try:
+        cmds.hotkeySet(hotkeySetName, current=True) # create, fail on existing
+    except:
+        cmds.hotkeySet(hotkeySetName, edit=True, current=True)
+    util.createTomaytoKeymap(**kwargs)
+
+
+def disable (removeHotkeySet=False, hotkeySetName="Tomayto", **kwargs):
+    util.removeTomaytoKeymap(**kwargs)
+    cmds.hotkeySet("Maya_Default", edit=True, current=True)
+
