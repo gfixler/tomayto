@@ -47,13 +47,15 @@ allKeys = keys + specialKeys
 keyName = lambda c: keyNames[c] if c in keyNames else c
 
 
-def listAllNameCommands ():
+def listNameCommands ():
     # from code example at bottom of this page:
     # from http://help.autodesk.com/cloudhelp/2018/ENU/Maya-Tech-Docs/CommandsPython/assignCommand.html
     count = cmds.assignCommand(query=True, numElements=True)
+
     print ('There are ' + str(count) + ' named command objects.')
 
     for index in range(1, count+1):
+
         keyString = cmds.assignCommand(index, query=True, keyString=True)
 
         if  0 < len(keyString) and keyString[0] != "NONE":
