@@ -81,7 +81,7 @@ def listHotkeySets ():
 def currentHotkeySet ():
     return cmds.hotkeySet(query=True, current=True)
 
-def createTomaytoKeymap (callbackName="tomaytoCB", nameCommandPrefix = "tomayto"):
+def createTomaytoKeymap (callbackName="tomaytoCB", nameCommandPrefix="tomayto", **kwargs):
     """
     Creates Maya nameCommands and hotkeys for the cartesian product of all
     keys, modifiers, and press and release states, pointing them all toward
@@ -129,7 +129,7 @@ def createTomaytoKeymap (callbackName="tomaytoCB", nameCommandPrefix = "tomayto"
                 print "created", nameCommandName, " press/release hotkey"
 
 
-def removeTomaytoKeymap (nameCommandPrefix = "tomayto"):
+def removeTomaytoKeymap (nameCommandPrefix="tomayto", **kwargs):
     """
     nameCommands are accessible through Maya's assignCommand, but only by
     index. Deleting one causes all with greater indices to move down to fill
