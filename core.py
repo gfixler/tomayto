@@ -26,7 +26,10 @@ class Tomayto (object):
     def eventHandler (self, key, alt, ctrl, press):
         stateName, state = self.currentState()
         event = (key, alt, ctrl, press)
-        if event in state.keymap.keys():
+        if event == ('?', False, False, True):
+            self.helpOnCurrentState()
+            return
+        elif event in state.keymap.keys():
             eventAction, eventActionData = state.keymap[event]
             if eventAction == "PUSH":
                 self.pushState(eventActionData)
@@ -60,6 +63,12 @@ class Tomayto (object):
 
     def runMethod (self, methodName):
         methodName()
+
+    def helpOnCurrentState (self):
+        stateName, state = self.currentState()
+        print "HELP (" + stateName + ")"
+        for k, v in state.keymap.items():
+            print k, v
 
     def tester (self, key, alt, ctrl, press):
         """
