@@ -75,6 +75,12 @@ def listNameCommands ():
             print index, cmds.assignCommand(index, query=True, name=True), output
 
 
+def listHotkeySets ():
+    print cmds.hotkeySet(query=True, hotkeySetArray=True)
+
+def currentHotkeySet ():
+    return cmds.hotkeySet(query=True, current=True)
+
 def createTomaytoKeymap (callbackName="tomaytoCB", nameCommandPrefix = "tomayto"):
     """
     Creates Maya nameCommands and hotkeys for the cartesian product of all
