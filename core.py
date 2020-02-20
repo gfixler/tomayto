@@ -32,6 +32,8 @@ class Tomayto (object):
                 self.pushState(eventActionData)
             elif eventAction == "POP":
                 self.popState(eventActionData)
+            elif eventAction == "RUN":
+                self.runMethod(eventActionData)
 
     def pushState (self, stateName):
         if stateName in self.statesMap:
@@ -55,6 +57,9 @@ class Tomayto (object):
                     state.onPopTo()
             except:
                 pass
+
+    def runMethod (self, methodName):
+        methodName()
 
     def tester (self, key, alt, ctrl, press):
         """
