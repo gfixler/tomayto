@@ -10,7 +10,7 @@ class stateSTART (object):
         self.keymap = {
             ('m', False, False, True): ("PUSH", "move"),
             ('u', False, False, True): ("PUSH", "undo"),
-            ('U', False, False, True): ("PUSH", "redo")
+            ('r', False, True, True): ("PUSH", "redo")
         }
 
 
