@@ -17,6 +17,8 @@ class Tomayto (object):
         self.startStateName = startStateName
         self.startState = statesMap[startStateName](self) # init start state
         self.stateStack = [] # start state doesn't go on stack/can't be popped
+        self.overrides = {}
+        self.state = None
 
     def currentState (self):
         if self.stateStack:
@@ -26,9 +28,29 @@ class Tomayto (object):
     def eventHandler (self, key, alt, ctrl, press):
         stateName, state = self.currentState()
         event = (key, alt, ctrl, press)
-        if event == ('?', False, False, True):
+        overrideKey = (stateName, event)
+        if overrideKey in self.overrides:
+            self.eventHandler(self.overrides[overrideKey])
+            return
+        if self.state == "REBIND1":
+            if press:
+                return
+            self.rebindSource = event
+            self.state = "REBIND2"
+        elif self.state == "REBIND2":
+            if press:
+                return
+            self.rebindTarget = event
+            self.overrides[(stateName, self.rebindSource)] = self.rebindTarget
+            self.state = None
+        # rebind
+        elif event == ('K', True, True, False):
+            self.state = "REBIND1"
+        # help
+        elif event == ('?', False, False, True):
             self.helpOnCurrentState()
             return
+        #everything else
         elif event in state.keymap.keys():
             eventAction, eventActionData = state.keymap[event]
             if eventAction == "PUSH":

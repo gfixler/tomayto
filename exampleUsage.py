@@ -12,8 +12,16 @@ class stateSTART (object):
             ('m', False, False, True): ("PUSH", "move"),
             ('u', False, False, True): ("PUSH", "undo"),
             ('r', False, True, True): ("PUSH", "redo"),
-            ('s', False, False, True): ("PUSH", "select")
+            ('s', False, False, True): ("PUSH", "select"),
+            ('b', False, False, True): ("RUN", self.makeBall),
+            ('b', False, False, False): ("RUN", self.destroyBall)
         }
+
+    def makeBall (self):
+        self.ball = cmds.polySphere()[0]
+
+    def destroyBall (self):
+        cmds.delete(self.ball)
 
 
 class stateUndo (object):
