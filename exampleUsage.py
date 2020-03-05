@@ -12,7 +12,8 @@ class stateSTART (object):
             ('m', False, False, True): ("PUSH", "move"),
             ('u', False, False, True): ("PUSH", "undo"),
             ('r', False, True, True): ("PUSH", "redo"),
-            ('s', False, False, True): ("PUSH", "select")
+            ('s', False, False, True): ("PUSH", "select"),
+            ('w', False, False, True): ("PUSH", "makeWindow")
         }
 
 
@@ -116,6 +117,26 @@ class stateSelectMesh (object):
         return sel
 
 
+class stateMakeWindow (object):
+
+    def __init__ (self, mainInst):
+        self.mainInst = mainInst
+        try:
+            self.mainInst.winMaker
+        except:
+            self.mainInst.winMaker = {"windows": {}, "currentWindow": None, "focus": None}
+        self.keymap = {
+        }
+
+    def onEnter (self):
+        win = cmds.window()
+        wm = self.mainInst.winMaker
+        wm["windows"][win] = {"window": win, "layout": None}
+        wm["currentWindow"] = win
+        wm["focus"] = "window"
+        cmds.showWindow()
+
+
 exampleStates = {
     "START": stateSTART,
     "undo": stateUndo,
@@ -123,7 +144,8 @@ exampleStates = {
     "move": stateMove,
     "pickXYZ": statePickXYZ,
     "select": stateSelect,
-    "selectMesh": stateSelectMesh
+    "selectMesh": stateSelectMesh,
+    "makeWindow": stateMakeWindow
 }
 
 def instantiate ():
