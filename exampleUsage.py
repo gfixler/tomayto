@@ -126,6 +126,14 @@ class stateMakeWindow (object):
         except:
             self.mainInst.winMaker = {"windows": {}, "currentWindow": None, "focus": None}
         self.keymap = {
+            ("c", False, False, True): ("PUSH", ("stateCreateLayout", ["column"])),
+            ("f", False, False, True): ("PUSH", ("stateCreateLayout", ["form"])),
+            ("F", False, False, True): ("PUSH", ("stateCreateLayout", ["frame"])),
+            ("g", False, False, True): ("PUSH", ("stateCreateLayout", ["grid"])),
+            ("p", False, False, True): ("PUSH", ("stateCreateLayout", ["pane"])),
+            ("r", False, False, True): ("PUSH", ("stateCreateLayout", ["row"])),
+            ("s", False, False, True): ("PUSH", ("stateCreateLayout", ["scroll"])),
+            ("t", False, False, True): ("PUSH", ("stateCreateLayout", ["tab"]))
         }
 
     def onEnter (self):
@@ -137,6 +145,26 @@ class stateMakeWindow (object):
         cmds.showWindow()
 
 
+class stateCreateLayout (object):
+
+    import pdb
+
+    def __init__ (self, mainInst, layoutType):
+        self.mainInst = mainInst
+        self.keymap = {}
+        self.layoutType = layoutType
+        print layoutType
+
+    def onEnter (self):
+        wm = self.mainInst.winMaker
+        if wm["focus"] == "window":
+            if self.layoutType == "frame":
+                win = wm["windows"][wm["currentWindow"]]["window"]
+                lay = cmds.frameLayout(parent=win)
+                wm["windows"]["layout"] = lay
+        self.mainInst.popState()
+
+
 exampleStates = {
     "START": stateSTART,
     "undo": stateUndo,
@@ -145,7 +173,8 @@ exampleStates = {
     "pickXYZ": statePickXYZ,
     "select": stateSelect,
     "selectMesh": stateSelectMesh,
-    "makeWindow": stateMakeWindow
+    "makeWindow": stateMakeWindow,
+    "stateCreateLayout": stateCreateLayout
 }
 
 def instantiate ():
