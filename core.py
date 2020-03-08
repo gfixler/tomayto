@@ -38,10 +38,16 @@ class Tomayto (object):
             elif eventAction == "RUN":
                 self.runMethod(eventActionData)
 
-    def pushState (self, stateName):
+    def pushState (self, stateData):
+        if type(stateData) is tuple:
+            stateName, stateArgs = stateData
+        else:
+            stateName = stateData
+            stateArgs = []
+
         if stateName in self.statesMap:
             stateClass = self.statesMap[stateName]
-            newState = stateClass(self)
+            newState = stateClass(self, *stateArgs)
             self.stateStack.append((stateName, newState))
             try:
                 newState.onEnter() # may not exist
