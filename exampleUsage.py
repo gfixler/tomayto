@@ -1,5 +1,6 @@
 import maya.cmds as cmds
 
+import util
 import core
 
 wspos = lambda tf: cmds.xform(tf, query=True, worldSpace=True, translation=True)
@@ -12,7 +13,8 @@ class stateSTART (object):
             ('m', False, False, True): ("PUSH", "move"),
             ('u', False, False, True): ("PUSH", "undo"),
             ('r', False, True, True): ("PUSH", "redo"),
-            ('s', False, False, True): ("PUSH", "select")
+            ('s', False, False, True): ("PUSH", "select"),
+            ('v', False, False, True): ("PUSH", "vimLine"),
         }
 
 
@@ -116,6 +118,111 @@ class stateSelectMesh (object):
         return sel
 
 
+class stateVimLine (object):
+
+    def __init__ (self, mainInst):
+        self.mainInst = mainInst
+        try:
+            self.mainInst.vimLine
+        except:
+            self.mainInst.vimLine = {"left": "", "right": ""}
+        self.vim = self.mainInst.vimLine
+        self.keymap = { }
+
+    def onEnter (self):
+        print "entering VimLine"
+        self.mainInst.pushState("vimLineNormalMode")
+
+    def onPopTo (self, value):
+        print "exiting VimLine"
+        self.mainInst.popState()
+
+
+class stateVimLineNormalMode (object):
+
+    def __init__ (self, mainInst):
+        self.mainInst = mainInst
+        self.keymap = {
+            ("i", False, False, True): ("PUSH", ("vimLineInsertMode", ["insert"])),
+            ("I", False, False, True): ("PUSH", ("vimLineInsertMode", ["INSERT"])),
+            ("a", False, False, True): ("PUSH", ("vimLineInsertMode", ["append"])),
+            ("A", False, False, True): ("PUSH", ("vimLineInsertMode", ["APPEND"])),
+            ("h", False, False, True): ("RUN", self.cursorLeft),
+            ("l", False, False, True): ("RUN", self.cursorRight),
+            ("[", False, True, True): ("POP", self.handleEscape)
+        }
+
+    def handleEscape (self):
+        # TODO: remove visible cursor from text(?)
+        print "^["
+
+    def cursorLeft (self):
+        vim = self.mainInst.vimLine
+        if vim["left"]:
+            vim["right"] = vim["left"][-1] + vim["right"]
+            vim["left"] = vim["left"][:-1]
+            print vim["left"] + "|" + vim["right"]
+
+    def cursorRight (self):
+        vim = self.mainInst.vimLine
+        if vim["right"]:
+            vim["left"] = vim["left"] + vim["right"][0]
+            vim["right"] = vim["right"][1:]
+            print vim["left"] + "|" + vim["right"]
+
+
+class stateVimLineInsertMode (object):
+
+    def __init__ (self, mainInst, entryMode):
+        self.mainInst = mainInst
+        self.vim = self.mainInst.vimLine
+        print "entered via", entryMode
+        self.keymap = {
+            ("h", False, True, True): ("RUN", self.handleBackspace),
+            ("[", False, True, True): ("POP", self.handleEscape),
+            ("a", False, True, True): ("RUN", self.emacsHome),
+            ("e", False, True, True): ("RUN", self.emacsEnd),
+            ("Return", False, False, True): ("RUN", self.handleReturn),
+            ("Backspace", False, False, True): ("RUN", self.handleBackspace),
+        }
+        for k in util.keyChars:
+            self.keymap[(k, False, False, True)] = ("PUSH", ("vimLineInsertChar", [k]))
+
+    def handleBackspace (self):
+        print "^h"
+        if self.vim["left"]:
+            self.vim["left"] = self.vim["left"][:-1]
+        print self.vim["left"] + "|" + self.vim["right"]
+
+    def handleEscape (self):
+        print "^["
+
+    def emacsHome (self):
+        self.vim["right"] = self.vim["left"] + self.vim["right"]
+        self.vim["left"] = ""
+        print self.vim["left"] + "|" + self.vim["right"]
+
+    def emacsEnd (self):
+        self.vim["left"] = self.vim["left"] + self.vim["right"]
+        self.vim["right"] = ""
+        print self.vim["left"] + "|" + self.vim["right"]
+
+    def handleReturn (self):
+        print "^M"
+
+
+class stateVimLineInsertChar (object):
+
+    def __init__ (self, mainInst, char):
+        self.mainInst = mainInst
+        vim = self.mainInst.vimLine
+        vim["left"] = vim["left"] + char
+        print vim["left"] + "|" + vim["right"]
+
+    def onEnter (self):
+        self.mainInst.popState()
+
+
 exampleStates = {
     "START": stateSTART,
     "undo": stateUndo,
@@ -123,7 +230,11 @@ exampleStates = {
     "move": stateMove,
     "pickXYZ": statePickXYZ,
     "select": stateSelect,
-    "selectMesh": stateSelectMesh
+    "selectMesh": stateSelectMesh,
+    "vimLine": stateVimLine,
+    "vimLineNormalMode": stateVimLineNormalMode,
+    "vimLineInsertMode": stateVimLineInsertMode,
+    "vimLineInsertChar": stateVimLineInsertChar,
 }
 
 def instantiate ():
