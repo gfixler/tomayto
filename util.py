@@ -1,4 +1,7 @@
 import maya.cmds as cmds
+import maya.mel as mel
+
+import os
 
 
 # for use in naming nameCommands (they can't have punctuation in their names)
@@ -127,6 +130,49 @@ def createTomaytoKeymap (callbackName="tomaytoCB", nameCommandPrefix="tomayto", 
                             , ctrlModifier = c
                             )
                 print "created", nameCommandName, " press/release hotkey"
+
+
+# Store doDelete (MEL command) script path globally, for later Backspace restoration,
+# because if we hack Backspace, we'll no longer be able to ask doDelete for the path.
+print ("----- Begin doDelete script path discovery")
+doDeleteScriptPath = str(cmds.optionVar(query="doDeleteScriptPath"))
+print "doDeleteScriptPath", doDeleteScriptPath
+if not os.path.exists(doDeleteScriptPath):
+    print "...does not exist."
+    doDeleteScriptPathMsg = mel.eval("whatIs doDelete;")
+    print "doDeleteScriptPathMsg", doDeleteScriptPathMsg
+    melProcedureFoundInHeading = "Mel procedure found in: " # hack, but pretty stable across Maya versions
+    print "melProcedureFoundInHeading", melProcedureFoundInHeading
+    doDeleteScriptPath = doDeleteScriptPathMsg[len(melProcedureFoundInHeading):]
+    print "doDeleteScriptPath", doDeleteScriptPath
+    if os.path.exists(doDeleteScriptPath):
+        print "path exists"
+        cmds.optionVar(stringValue=("doDeleteScriptPath", doDeleteScriptPath))
+        print "optionVarSet"
+    else:
+        print "path does not exist still"
+print ("----- End doDelete script path discovery")
+
+def hackBackspace (callbackName="tomaytoCB", nameCommandPrefix="tomayto"):
+    """
+    Maya doesn't allow using Backspace as a hotkey, but we can override the MEL
+    function it calls. We won't have access to modifiers along with Backspace,
+    and we can only override the press action, not release, but it's something.
+    """
+    print "Setting up doDelete override:"
+    print('global proc doDelete () { python("' + callbackName + '(\\"Backspace\\", False, False, True)"); };')
+    mel.eval('global proc doDelete () { python("' + callbackName + '(\\"Backspace\\", False, False, True)"); };')
+
+def restoreBackspace ():
+    """
+    Source doDelete.mel, the file that builds the doDelete MEL procedure
+    pointed to by Backspace. This should restore Backspace functionality.
+    """
+    if os.path.exists(doDeleteScriptPath):
+        print("restoring backspace handling (sourcing: " +  doDeleteScriptPath + ")")
+        mel.eval('source "' + doDeleteScriptPath + '";')
+    else:
+        print("unable to locate MEL script for Backspace handling restore, but it should fix itself on restarting Maya.")
 
 
 def removeTomaytoKeymap (nameCommandPrefix="tomayto", **kwargs):
