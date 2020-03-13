@@ -5,6 +5,7 @@ import core
 
 wspos = lambda tf: cmds.xform(tf, query=True, worldSpace=True, translation=True)
 
+
 class stateSTART (object):
 
     def __init__ (self, mainInst):
@@ -15,6 +16,7 @@ class stateSTART (object):
             ('r', False, True, True): ("PUSH", "redo"),
             ('s', False, False, True): ("PUSH", "select"),
             ('v', False, False, True): ("PUSH", "vimLine"),
+            ('V', False, False, True): ("PUSH", "vimLineTestWin"),
         }
 
 
@@ -120,12 +122,17 @@ class stateSelectMesh (object):
 
 class stateVimLine (object):
 
-    def __init__ (self, mainInst):
+    def __init__ (self, mainInst, onChange=lambda _: None):
         self.mainInst = mainInst
         try:
             self.mainInst.vimLine
         except:
-            self.mainInst.vimLine = {"left": "", "right": ""}
+            # TODO: better handling of VimLine state, e.g. per 'client'
+            self.mainInst.vimLine = { "left": ""
+                                    , "right": ""
+                                    , "onChange": onChange
+                                    , "mode": "START"
+                                    }
         self.vim = self.mainInst.vimLine
         self.keymap = { }
 
@@ -133,15 +140,88 @@ class stateVimLine (object):
         print "entering VimLine"
         self.mainInst.pushState("vimLineNormalMode")
 
-    def onPopTo (self, value):
+    def onPopTo (self):
         print "exiting VimLine"
         self.mainInst.popState()
+
+
+class stateVimLineTestWin (object):
+
+    def __init__ (self, mainInst):
+        self.mainInst = mainInst
+        try:
+            self.mainInst.vimLineTestWin
+        except:
+            self.mainInst.vimLineTestWin = {}
+
+        self.keymap = { }
+
+        self.win = cmds.window()
+        cmds.showWindow()
+        self.fl = cmds.formLayout()
+        self.ltext = cmds.text(label="")
+        self.itext = cmds.text(label="")
+        self.rtext = cmds.text(label="")
+        self.atext = cmds.text(label="")
+        cmds.formLayout(self.fl, edit=True, attachControl=[ (self.itext, "left", 0, self.ltext)
+                                                          , (self.rtext, "left", 0, self.itext)
+                                                          , (self.atext, "left", 0, self.rtext)
+                                                          ])
+
+        self.mainInst.vimLineTestWin = { "win": self.win
+                                       , "ltext": self.ltext
+                                       , "itext": self.itext
+                                       , "rtext": self.rtext
+                                       , "atext": self.atext
+                                       }
+
+    def testWinOnChange (self, vimState):
+        vim = self.mainInst.vimLine
+        vimtw = self.mainInst.vimLineTestWin
+
+        lt = self.ltext
+        foc = self.itext
+        rt = self.rtext
+
+        if vim["mode"] == "INSERT":
+            cmds.text(vimtw["itext"], edit=True, backgroundColor=(0.3, 0.3, 0.3))
+        elif vim["mode"] == "NORMAL":
+            cmds.text(vimtw["itext"], edit=True, backgroundColor=(0.6, 0.6, 0.6))
+
+        if vim["right"]:
+            cmds.text(vimtw["rtext"], edit=True, label=vim["right"])
+        else:
+            cmds.text(vimtw["rtext"], edit=True, label="")
+
+        if vim["left"]:
+            cmds.text(vimtw["itext"], edit=True, label=vim["left"][-1])
+        else:
+            cmds.text(vimtw["itext"], edit=True, label="")
+
+        if vim["left"]:
+            cmds.text(vimtw["ltext"], edit=True, label=vim["left"][:-1])
+        else:
+            cmds.text(vimtw["ltext"], edit=True, label="")
+
+
+    def onEnter (self):
+        self.mainInst.pushState(("vimLine", [self.testWinOnChange]))
+
+    def onPopTo (self):
+        cmds.deleteUI(self.mainInst.vimLineTestWin["win"])
+        self.mainInst.popState()
+
 
 
 class stateVimLineNormalMode (object):
 
     def __init__ (self, mainInst):
         self.mainInst = mainInst
+        vim = self.mainInst.vimLine
+        self.mainInst.vimLine["mode"] = "NORMAL"
+        if "onChange" in vim:
+            if callable(vim["onChange"]):
+                vim["onChange"](vim)
         self.keymap = {
             ("i", False, False, True): ("PUSH", ("vimLineInsertMode", ["insert"])),
             ("I", False, False, True): ("PUSH", ("vimLineInsertMode", ["INSERT"])),
@@ -149,63 +229,91 @@ class stateVimLineNormalMode (object):
             ("A", False, False, True): ("PUSH", ("vimLineInsertMode", ["APPEND"])),
             ("h", False, False, True): ("RUN", self.cursorLeft),
             ("l", False, False, True): ("RUN", self.cursorRight),
-            ("[", False, True, True): ("POP", self.handleEscape)
+            ("[", False, True, True): ("POP", self.handleEscape),
         }
+
+    def onEnter (self):
+        print "Entering vimLine Normal Mode"
+
+    def onPopTo (self, _):
+        print "pop to normal"
+        vim = self.mainInst.vimLine
+        self.mainInst.vimLine["mode"] = "NORMAL"
+        if "onChange" in vim:
+            if callable(vim["onChange"]):
+                vim["onChange"](vim)
 
     def handleEscape (self):
         # TODO: remove visible cursor from text(?)
-        print "^["
+        # print "^["
+        pass
 
     def cursorLeft (self):
         vim = self.mainInst.vimLine
         if vim["left"]:
             vim["right"] = vim["left"][-1] + vim["right"]
             vim["left"] = vim["left"][:-1]
-            print vim["left"] + "|" + vim["right"]
+        if "onChange" in vim:
+            if callable(vim["onChange"]):
+                vim["onChange"](vim)
 
     def cursorRight (self):
         vim = self.mainInst.vimLine
         if vim["right"]:
             vim["left"] = vim["left"] + vim["right"][0]
             vim["right"] = vim["right"][1:]
-            print vim["left"] + "|" + vim["right"]
+        if "onChange" in vim:
+            if callable(vim["onChange"]):
+                vim["onChange"](vim)
 
 
 class stateVimLineInsertMode (object):
 
     def __init__ (self, mainInst, entryMode):
         self.mainInst = mainInst
+        self.mainInst.vimLine["mode"] = "INSERT"
         self.vim = self.mainInst.vimLine
+        # TODO: handle cursor position based on entry mode
         print "entered via", entryMode
         self.keymap = {
             ("h", False, True, True): ("RUN", self.handleBackspace),
-            ("[", False, True, True): ("POP", self.handleEscape),
             ("a", False, True, True): ("RUN", self.emacsHome),
             ("e", False, True, True): ("RUN", self.emacsEnd),
             ("Return", False, False, True): ("RUN", self.handleReturn),
             ("Backspace", False, False, True): ("RUN", self.handleBackspace),
+            ("[", False, True, True): ("POP", self.handleEscape),
         }
         for k in util.keyChars:
             self.keymap[(k, False, False, True)] = ("PUSH", ("vimLineInsertChar", [k]))
 
     def handleBackspace (self):
-        print "^h"
-        if self.vim["left"]:
-            self.vim["left"] = self.vim["left"][:-1]
-        print self.vim["left"] + "|" + self.vim["right"]
+        # print "^h"
+        vim = self.vim
+        if vim["left"]:
+            vim["left"] = vim["left"][:-1]
+        if "onChange" in vim:
+            if callable(vim["onChange"]):
+                vim["onChange"](vim)
 
     def handleEscape (self):
-        print "^["
+        # print "^["
+        print "popping back from insert mode"
 
     def emacsHome (self):
-        self.vim["right"] = self.vim["left"] + self.vim["right"]
-        self.vim["left"] = ""
-        print self.vim["left"] + "|" + self.vim["right"]
+        vim = self.vim
+        vim["right"] = vim["left"] + vim["right"]
+        vim["left"] = ""
+        if "onChange" in vim:
+            if callable(vim["onChange"]):
+                vim["onChange"](vim)
 
     def emacsEnd (self):
-        self.vim["left"] = self.vim["left"] + self.vim["right"]
-        self.vim["right"] = ""
-        print self.vim["left"] + "|" + self.vim["right"]
+        vim = self.vim
+        vim["left"] = vim["left"] + vim["right"]
+        vim["right"] = ""
+        if "onChange" in vim:
+            if callable(vim["onChange"]):
+                vim["onChange"](vim)
 
     def handleReturn (self):
         print "^M"
@@ -217,7 +325,9 @@ class stateVimLineInsertChar (object):
         self.mainInst = mainInst
         vim = self.mainInst.vimLine
         vim["left"] = vim["left"] + char
-        print vim["left"] + "|" + vim["right"]
+        if "onChange" in vim:
+            if callable(vim["onChange"]):
+                vim["onChange"](vim)
 
     def onEnter (self):
         self.mainInst.popState()
@@ -235,6 +345,7 @@ exampleStates = {
     "vimLineNormalMode": stateVimLineNormalMode,
     "vimLineInsertMode": stateVimLineInsertMode,
     "vimLineInsertChar": stateVimLineInsertChar,
+    "vimLineTestWin": stateVimLineTestWin,
 }
 
 def instantiate ():
