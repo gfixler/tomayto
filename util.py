@@ -135,19 +135,27 @@ def createTomaytoKeymap (callbackName="tomaytoCB", nameCommandPrefix="tomayto", 
 # Store doDelete (MEL command) script path globally, for later Backspace restoration,
 # because if we hack Backspace, we'll no longer be able to ask doDelete for the path.
 print ("----- Begin doDelete script path discovery")
-doDeleteScriptPath = str(cmds.optionVar(query="doDeleteScriptPath"))
-print "doDeleteScriptPath", doDeleteScriptPath
-if not os.path.exists(doDeleteScriptPath):
+scriptPath_doDelete = str(cmds.optionVar(query="scriptPath_doDelete"))
+print "scriptPath_doDelete", scriptPath_doDelete
+if not os.path.exists(scriptPath_doDelete):
     print "...does not exist."
-    doDeleteScriptPathMsg = mel.eval("whatIs doDelete;")
-    print "doDeleteScriptPathMsg", doDeleteScriptPathMsg
-    melProcedureFoundInHeading = "Mel procedure found in: " # hack, but pretty stable across Maya versions
-    print "melProcedureFoundInHeading", melProcedureFoundInHeading
-    doDeleteScriptPath = doDeleteScriptPathMsg[len(melProcedureFoundInHeading):]
-    print "doDeleteScriptPath", doDeleteScriptPath
-    if os.path.exists(doDeleteScriptPath):
+    scriptPathMsg_doDelete = mel.eval("whatIs doDelete;")
+    print "scriptPathMsg_doDelete", scriptPathMsg_doDelete
+    heading_melProcedureFoundIn = "Mel procedure found in: " # home, Linux, Maya 2017
+    heading_scriptFoundIn = "Script found in: " # work, Windows, Mayas 2016 and 2018
+    if scriptPathMsg_doDelete.startswith(heading_melProcedureFoundIn):
+        print "found prefix: heading_melProcedureFoundIn", heading_melProcedureFoundIn
+        scriptPath_doDelete = scriptPathMsg_doDelete[len(heading_melProcedureFoundIn):]
+    elif scriptPathMsg_doDelete.startswith(heading_scriptFoundIn):
+        print "found prefix: heading_scriptFoundIn", heading_scriptFoundIn
+        scriptPath_doDelete = scriptPathMsg_doDelete[len(heading_scriptFoundIn):]
+    else:
+        print "could not find doDelete MEL script path in whatIs result:"
+        print "scriptPathMsg_doDelete", scriptPathMsg_doDelete
+    if os.path.exists(scriptPath_doDelete):
         print "path exists"
-        cmds.optionVar(stringValue=("doDeleteScriptPath", doDeleteScriptPath))
+        print "scriptPath_doDelete", scriptPath_doDelete
+        cmds.optionVar(stringValue=("scriptPath_doDelete", scriptPath_doDelete))
         print "optionVarSet"
     else:
         print "path does not exist still"
