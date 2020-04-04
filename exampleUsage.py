@@ -223,10 +223,10 @@ class stateVimLineNormalMode (object):
             if callable(vim["onChange"]):
                 vim["onChange"](vim)
         self.keymap = {
-            ("i", False, False, True): ("PUSH", ("vimLineInsertMode", ["insert"])),
-            ("I", False, False, True): ("PUSH", ("vimLineInsertMode", ["INSERT"])),
-            ("a", False, False, True): ("PUSH", ("vimLineInsertMode", ["append"])),
-            ("A", False, False, True): ("PUSH", ("vimLineInsertMode", ["APPEND"])),
+            ("i", False, False, True): ("PUSH", ("vimLineEnterInsertMode", ["insert"])),
+            ("I", False, False, True): ("PUSH", ("vimLineEnterInsertMode", ["INSERT"])),
+            ("a", False, False, True): ("PUSH", ("vimLineEnterInsertMode", ["append"])),
+            ("A", False, False, True): ("PUSH", ("vimLineEnterInsertMode", ["APPEND"])),
             ("h", False, False, True): ("RUN", self.cursorLeft),
             ("l", False, False, True): ("RUN", self.cursorRight),
             ("[", False, True, True): ("POP", self.handleEscape),
@@ -267,7 +267,7 @@ class stateVimLineNormalMode (object):
                 vim["onChange"](vim)
 
 
-class stateVimLineInsertMode (object):
+class stateVimLineEnterInsertMode (object):
 
     def __init__ (self, mainInst, entryMode):
         self.mainInst = mainInst
@@ -284,7 +284,7 @@ class stateVimLineInsertMode (object):
             ("[", False, True, True): ("POP", self.handleEscape),
         }
         for k in util.keyChars:
-            self.keymap[(k, False, False, True)] = ("PUSH", ("vimLineInsertChar", [k]))
+            self.keymap[(k, False, False, True)] = ("PUSH", ("vimLineInsertMode", [k]))
 
     def handleBackspace (self):
         # print "^h"
@@ -319,7 +319,7 @@ class stateVimLineInsertMode (object):
         print "^M"
 
 
-class stateVimLineInsertChar (object):
+class stateVimLineInsertMode (object):
 
     def __init__ (self, mainInst, char):
         self.mainInst = mainInst
@@ -343,8 +343,8 @@ exampleStates = {
     "selectMesh": stateSelectMesh,
     "vimLine": stateVimLine,
     "vimLineNormalMode": stateVimLineNormalMode,
+    "vimLineEnterInsertMode": stateVimLineEnterInsertMode,
     "vimLineInsertMode": stateVimLineInsertMode,
-    "vimLineInsertChar": stateVimLineInsertChar,
     "vimLineTestWin": stateVimLineTestWin,
 }
 
