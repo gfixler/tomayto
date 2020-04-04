@@ -3,6 +3,8 @@ import maya.cmds as cmds
 import core
 
 wspos = lambda tf: cmds.xform(tf, query=True, worldSpace=True, translation=True)
+minTime = lambda: cmds.playbackOptions(query=True, minTime=True)
+maxTime = lambda: cmds.playbackOptions(query=True, maxTime=True)
 
 class stateSTART (object):
 
@@ -12,7 +14,16 @@ class stateSTART (object):
             ('m', False, False, True): ("PUSH", "move"),
             ('u', False, False, True): ("PUSH", "undo"),
             ('r', False, True, True): ("PUSH", "redo"),
-            ('s', False, False, True): ("PUSH", "select")
+            ('s', False, False, True): ("PUSH", "select"),
+            ('v', False, False, True): ("PUSH", "vimLine"),
+            ('V', False, False, True): ("PUSH", "vimLineTestWin"),
+            ('h', False, False, True): ("RUN", lambda: cmds.play(state=True, forward=False)),
+            ('h', False, False, False): ("RUN", lambda: cmds.play(state=False, forward=False)),
+            ('l', False, False, True): ("RUN", lambda: cmds.play(state=True)),
+            ('l', False, False, False): ("RUN", lambda: cmds.play(state=False)),
+            ('H', False, False, True): ("RUN", lambda: cmds.currentTime(minTime())),
+            ('L', False, False, True): ("RUN", lambda: cmds.currentTime(maxTime())),
+            ('M', False, False, True): ("RUN", lambda: cmds.currentTime(round((minTime() + maxTime()) / 2))),
         }
 
 
