@@ -140,7 +140,7 @@ class stateVimLine (object):
         print "entering VimLine"
         self.mainInst.pushState("vimLineNormalMode")
 
-    def onPopTo (self):
+    def onPopTo (self, _):
         print "exiting VimLine"
         self.mainInst.popState()
 
