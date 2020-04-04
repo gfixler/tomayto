@@ -24,8 +24,11 @@ class stateSTART (object):
             ('H', False, False, True): ("RUN", lambda: cmds.currentTime(minTime())),
             ('L', False, False, True): ("RUN", lambda: cmds.currentTime(maxTime())),
             ('M', False, False, True): ("RUN", lambda: cmds.currentTime(round((minTime() + maxTime()) / 2))),
+            ('M', True, True, True): ("RUN", self.switchToMayaHotkeys),
         }
 
+    def switchToMayaHotkeys (self):
+        cmds.hotkeySet("Maya_Default", edit=True, current=True)
 
 class stateUndo (object):
 
