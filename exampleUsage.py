@@ -342,7 +342,7 @@ class stateVimLineInsertMode (object):
     def __init__ (self, mainInst, char):
         self.mainInst = mainInst
         vim = self.mainInst.vimLine
-        vim["left"] = vim["left"] + char
+        vim["left"] += char
         if "onChange" in vim:
             if callable(vim["onChange"]):
                 vim["onChange"](vim)
