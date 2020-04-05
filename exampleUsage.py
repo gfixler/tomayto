@@ -223,11 +223,8 @@ class stateVimLineNormalMode (object):
 
     def __init__ (self, mainInst):
         self.mainInst = mainInst
-        vim = self.mainInst.vimLine
         self.mainInst.vimLine["mode"] = "NORMAL"
-        if "onChange" in vim:
-            if callable(vim["onChange"]):
-                vim["onChange"](vim)
+        self.handleChange()
         self.keymap = {
             ("i", False, False, True): ("PUSH", ("vimLineEnterInsertMode", ["insert"])),
             ("I", False, False, True): ("PUSH", ("vimLineEnterInsertMode", ["INSERT"])),
@@ -242,9 +239,11 @@ class stateVimLineNormalMode (object):
         print "Entering vimLine Normal Mode"
 
     def onPopTo (self, _):
-        print "pop to normal"
-        vim = self.mainInst.vimLine
         self.mainInst.vimLine["mode"] = "NORMAL"
+        self.handleChange()
+
+    def handleChange (self):
+        vim = self.mainInst.vimLine
         if "onChange" in vim:
             if callable(vim["onChange"]):
                 vim["onChange"](vim)
@@ -259,18 +258,14 @@ class stateVimLineNormalMode (object):
         if vim["left"]:
             vim["right"] = vim["left"][-1] + vim["right"]
             vim["left"] = vim["left"][:-1]
-        if "onChange" in vim:
-            if callable(vim["onChange"]):
-                vim["onChange"](vim)
+        self.handleChange()
 
     def cursorRight (self):
         vim = self.mainInst.vimLine
         if vim["right"]:
             vim["left"] = vim["left"] + vim["right"][0]
             vim["right"] = vim["right"][1:]
-        if "onChange" in vim:
-            if callable(vim["onChange"]):
-                vim["onChange"](vim)
+        self.handleChange()
 
 
 class stateVimLineEnterInsertMode (object):
@@ -292,14 +287,21 @@ class stateVimLineEnterInsertMode (object):
         for k in util.keyChars:
             self.keymap[(k, False, False, True)] = ("PUSH", ("vimLineInsertMode", [k]))
 
+    def onEnter (self):
+        self.handleChange()
+
+    def handleChange (self):
+        self.vim = self.mainInst.vimLine
+        if "onChange" in self.vim:
+            if callable(self.vim["onChange"]):
+                self.vim["onChange"](self.vim)
+
     def handleBackspace (self):
         # print "^h"
         vim = self.vim
         if vim["left"]:
             vim["left"] = vim["left"][:-1]
-        if "onChange" in vim:
-            if callable(vim["onChange"]):
-                vim["onChange"](vim)
+        self.handleChange()
 
     def handleEscape (self):
         # print "^["
@@ -309,17 +311,13 @@ class stateVimLineEnterInsertMode (object):
         vim = self.vim
         vim["right"] = vim["left"] + vim["right"]
         vim["left"] = ""
-        if "onChange" in vim:
-            if callable(vim["onChange"]):
-                vim["onChange"](vim)
+        self.handleChange()
 
     def emacsEnd (self):
         vim = self.vim
         vim["left"] = vim["left"] + vim["right"]
         vim["right"] = ""
-        if "onChange" in vim:
-            if callable(vim["onChange"]):
-                vim["onChange"](vim)
+        self.handleChange()
 
     def handleReturn (self):
         print "^M"
