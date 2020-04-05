@@ -185,7 +185,7 @@ class stateVimLineTestWin (object):
         vim = self.mainInst.vimLine
         vimtw = self.mainInst.vimLineTestWin
 
-        if vim["mode"] == "INSERT":
+        if vim["mode"] in ["insert", "INSERT", "append", "APPEND"]:
             cmds.text(vimtw["itext"], edit=True, backgroundColor=(0.3, 0.3, 0.3))
         elif vim["mode"] == "NORMAL":
             cmds.text(vimtw["itext"], edit=True, backgroundColor=(0.6, 0.6, 0.6))
@@ -269,10 +269,27 @@ class stateVimLineEnterInsertMode (object):
 
     def __init__ (self, mainInst, entryMode):
         self.mainInst = mainInst
-        self.mainInst.vimLine["mode"] = "INSERT"
         self.vim = self.mainInst.vimLine
         # TODO: handle cursor position based on entry mode
         print "entered via", entryMode
+        if entryMode == "insert":
+            self.mainInst.vimLine["mode"] = "insert"
+        elif entryMode == "INSERT":
+            self.mainInst.vimLine["mode"] = "INSERT"
+            self.vim["right"] = self.vim["left"] + self.vim["right"]
+            self.vim["left"] = ""
+            self.handleChange()
+        elif entryMode == "append":
+            self.mainInst.vimLine["mode"] = "append"
+            if self.vim["right"]:
+                self.vim["left"] += self.vim["right"][0]
+                self.vim["right"] = self.vim["right"][1:]
+        elif entryMode == "APPEND":
+            self.mainInst.vimLine["mode"] = "APPEND"
+            self.vim["left"] = self.vim["left"] + self.vim["right"]
+            self.vim["right"] = ""
+        else:
+            raise keyError, 'insert mode entry mode "' + entryMode + '" unknown'
         self.keymap = {
             ("h", False, True, True): ("RUN", self.handleBackspace),
             ("a", False, True, True): ("RUN", self.emacsHome),
