@@ -110,7 +110,8 @@ class stateSelectMesh (object):
         tfs = map(lambda x: cmds.listRelatives(x, parent=True)[0], meshes)
         self.anns = []
         sel = cmds.ls(selection=True, flatten=True)
-        for alpha, name in zip("abcdefghijklmnopqrstuvwxyz0123456789", tfs):
+        for alpha, name in zip("abcdefghijklmnopqrstuvwxyz0123456789", sorted(list(set(tfs)))):
+            print alpha, name
             ann = cmds.annotate(name, tx=alpha, point=wspos(name))
             cmds.color(ann, rgbColor=(1, 1, 1))
             self.anns.append(ann)
