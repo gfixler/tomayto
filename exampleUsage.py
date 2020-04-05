@@ -154,25 +154,31 @@ class stateVimLineTestWin (object):
         except:
             self.mainInst.vimLineTestWin = {}
 
-        self.keymap = { }
-
         self.win = cmds.window()
         cmds.showWindow()
         self.fl = cmds.formLayout()
-        self.ltext = cmds.text(label="")
-        self.itext = cmds.text(label="")
-        self.rtext = cmds.text(label="")
-        self.atext = cmds.text(label="")
-        cmds.formLayout(self.fl, edit=True, attachControl=[ (self.itext, "left", 0, self.ltext)
+        # NO DIAGNOSE COLORS MODE
+        self.ltext = cmds.text(label=" ", font="fixedWidthFont")
+        self.itext = cmds.text(label=" ", font="fixedWidthFont")
+        self.rtext = cmds.text(label=" ", font="fixedWidthFont")
+        # DIAGNOSE COLORS MODE
+        # self.ltext = cmds.text(label=" ", font="fixedWidthFont", backgroundColor=(1.0, 0.0, 0.0))
+        # self.itext = cmds.text(label=" ", font="fixedWidthFont", backgroundColor=(0.0, 1.0, 0.0))
+        # self.rtext = cmds.text(label=" ", font="fixedWidthFont", backgroundColor=(0.0, 0.0, 1.0))
+        # HACK: must create text with " ", then edit to "" to shrink to 0 width
+        cmds.text(self.ltext, edit=True, label="")
+        cmds.text(self.itext, edit=True, label="")
+        cmds.text(self.rtext, edit=True, label="")
+        cmds.formLayout(self.fl, edit=True, attachForm=[ (self.ltext, "left", 0)
+                                                       ],
+                                            attachControl=[ (self.itext, "left", 0, self.ltext)
                                                           , (self.rtext, "left", 0, self.itext)
-                                                          , (self.atext, "left", 0, self.rtext)
                                                           ])
 
         self.mainInst.vimLineTestWin = { "win": self.win
                                        , "ltext": self.ltext
                                        , "itext": self.itext
                                        , "rtext": self.rtext
-                                       , "atext": self.atext
                                        }
 
     def testWinOnChange (self, vimState):
