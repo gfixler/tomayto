@@ -229,6 +229,8 @@ class stateVimLineNormalMode (object):
             ("A", False, False, True): ("PUSH", ("vimLineEnterInsertMode", ["APPEND"])),
             ("h", False, False, True): ("RUN", self.cursorLeft),
             ("l", False, False, True): ("RUN", self.cursorRight),
+            ("0", False, False, True): ("RUN", self.toFirstColumn),
+            ("$", False, False, True): ("RUN", self.toLastColumn), # TODO: $ should go to last non-whitespace column
             ("[", False, True, True): ("POP", self.handleEscape),
         }
 
@@ -262,6 +264,22 @@ class stateVimLineNormalMode (object):
         if vim["right"]:
             vim["left"] = vim["left"] + vim["right"][0]
             vim["right"] = vim["right"][1:]
+        self.handleChange()
+
+    def toFirstColumn (self):
+        vim = self.mainInst.vimLine
+        vim["right"] = vim["left"] + vim["right"]
+        vim["left"] = ""
+        self.handleChange()
+
+    def toLastColumn (self):
+        vim = self.mainInst.vimLine
+        if vim["right"]:
+            vim["left"] = vim["left"] + vim["right"][:-1]
+            vim["right"] = vim["right"][-1]
+        elif vim["left"]:
+            vim["right"] = vim["left"][-1]
+            vim["left"] = vim["left"][:-1]
         self.handleChange()
 
 
