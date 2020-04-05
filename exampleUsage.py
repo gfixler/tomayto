@@ -185,27 +185,24 @@ class stateVimLineTestWin (object):
         vim = self.mainInst.vimLine
         vimtw = self.mainInst.vimLineTestWin
 
-        lt = self.ltext
-        foc = self.itext
-        rt = self.rtext
-
         if vim["mode"] == "INSERT":
             cmds.text(vimtw["itext"], edit=True, backgroundColor=(0.3, 0.3, 0.3))
         elif vim["mode"] == "NORMAL":
             cmds.text(vimtw["itext"], edit=True, backgroundColor=(0.6, 0.6, 0.6))
+            if not vim["right"]:
+                if vim["left"]:
+                    vim["right"] = vim["left"][-1]
+                    vim["left"] = vim["left"][:-1]
 
         if vim["right"]:
-            cmds.text(vimtw["rtext"], edit=True, label=vim["right"])
+            cmds.text(vimtw["rtext"], edit=True, label=vim["right"][1:])
+            cmds.text(vimtw["itext"], edit=True, label=vim["right"][0])
         else:
             cmds.text(vimtw["rtext"], edit=True, label="")
+            cmds.text(vimtw["itext"], edit=True, label=" ")
 
         if vim["left"]:
-            cmds.text(vimtw["itext"], edit=True, label=vim["left"][-1])
-        else:
-            cmds.text(vimtw["itext"], edit=True, label="")
-
-        if vim["left"]:
-            cmds.text(vimtw["ltext"], edit=True, label=vim["left"][:-1])
+            cmds.text(vimtw["ltext"], edit=True, label=vim["left"])
         else:
             cmds.text(vimtw["ltext"], edit=True, label="")
 
