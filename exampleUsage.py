@@ -141,7 +141,12 @@ exampleStates = {
 }
 
 def instantiate ():
-    cmds.hotkeySet("Tomayto", edit=True, current=True)
+    if cmds.hotkeySet(query=True, current=True) != "Tomayto":
+        if "Tomayto" in cmds.hotkeySet(query=True, hotkeySetArray=True):
+            cmds.hotkeySet("Tomayto", edit=True, current=True)
+        else:
+            cmds.hotkeySet("Tomayto", current=True)
+            util.createTomaytoKeymap()
     tom = core.Tomayto(exampleStates, "START")
     return tom
 
