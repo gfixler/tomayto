@@ -319,6 +319,8 @@ class stateVimLineEnterInsertMode (object):
 
     def handleEscape (self):
         # print "^["
+        self.mainInst.vimLine["lastInsertMode"] = self.mainInst.vimLine["mode"]
+        self.mainInst.vimLine["mode"] = "NORMAL"
         print "popping back from insert mode"
 
     def emacsHome (self):
