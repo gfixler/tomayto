@@ -74,7 +74,10 @@ class Tomayto (object):
         stateName, state = self.currentState()
         print "HELP (" + stateName + ")"
         for k, v in state.keymap.items():
-            print k, v
+            print "\t", k, v
+        print "STATE STACK:"
+        for s in self.stateStack:
+            print "\t", s
 
     def tester (self, key, alt, ctrl, press):
         """

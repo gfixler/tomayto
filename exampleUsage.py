@@ -4,6 +4,8 @@ import util
 import core
 
 wspos = lambda tf: cmds.xform(tf, query=True, worldSpace=True, translation=True)
+minTime = lambda: cmds.playbackOptions(query=True, minTime=True)
+maxTime = lambda: cmds.playbackOptions(query=True, maxTime=True)
 
 
 class stateSTART (object):
@@ -15,10 +17,20 @@ class stateSTART (object):
             ('u', False, False, True): ("PUSH", "undo"),
             ('r', False, True, True): ("PUSH", "redo"),
             ('s', False, False, True): ("PUSH", "select"),
+            ('h', False, False, True): ("RUN", lambda: cmds.play(state=True, forward=False)),
+            ('h', False, False, False): ("RUN", lambda: cmds.play(state=False, forward=False)),
+            ('l', False, False, True): ("RUN", lambda: cmds.play(state=True)),
+            ('l', False, False, False): ("RUN", lambda: cmds.play(state=False)),
+            ('H', False, False, True): ("RUN", lambda: cmds.currentTime(minTime())),
+            ('L', False, False, True): ("RUN", lambda: cmds.currentTime(maxTime())),
+            ('M', False, False, True): ("RUN", lambda: cmds.currentTime(round((minTime() + maxTime()) / 2))),
             ('v', False, False, True): ("PUSH", "vimLine"),
             ('V', False, False, True): ("PUSH", "vimLineTestWin"),
+            ('M', True, True, True): ("RUN", self.switchToMayaHotkeys),
         }
 
+    def switchToMayaHotkeys (self):
+        cmds.hotkeySet("Maya_Default", edit=True, current=True)
 
 class stateUndo (object):
 
@@ -100,7 +112,8 @@ class stateSelectMesh (object):
         tfs = map(lambda x: cmds.listRelatives(x, parent=True)[0], meshes)
         self.anns = []
         sel = cmds.ls(selection=True, flatten=True)
-        for alpha, name in zip("abcdefghijklmnopqrstuvwxyz0123456789", tfs):
+        for alpha, name in zip("abcdefghijklmnopqrstuvwxyz0123456789", sorted(list(set(tfs)))):
+            print alpha, name
             ann = cmds.annotate(name, tx=alpha, point=wspos(name))
             cmds.color(ann, rgbColor=(1, 1, 1))
             self.anns.append(ann)
@@ -387,7 +400,12 @@ exampleStates = {
 }
 
 def instantiate ():
-    cmds.hotkeySet("Tomayto", edit=True, current=True)
+    if cmds.hotkeySet(query=True, current=True) != "Tomayto":
+        if "Tomayto" in cmds.hotkeySet(query=True, hotkeySetArray=True):
+            cmds.hotkeySet("Tomayto", edit=True, current=True)
+        else:
+            cmds.hotkeySet("Tomayto", current=True)
+            util.createTomaytoKeymap()
     tom = core.Tomayto(exampleStates, "START")
     return tom
 
