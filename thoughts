@@ -216,3 +216,84 @@ handled by a local method, like:
 the doMidPoint method, which would then call to the handlerClass.pop method
 with the computed midpoint. Just another thought.
 
+----------------------------
+
+Wed Apr 22 23:08:57 PDT 2020
+
+I've reached a point where I want to think about the organization of all of
+these [very pre-alpha] states I'm starting to build, both as core libraries, and
+as something - scripts? plugins? - that a user of the library can add. One thing
+that's very different about this, than, say, Vim (the inspiration for this whole
+project), is that Vim is a flat, global space  of keys per maybe a half-dozen
+modes, whereas this project is a huge tree you can walk all around in, with key
+mappings changing completely at every state change. The most 'state-machine' you
+get in Vim, beyond its base modes, is key sequences, like gUU to upper-case a
+line, before you get dumped right back into one of the few main states; it's
+always a text-editor, whereas what I'm builing here is whatever you want it to
+be in each state.
+
+With this project, I can (eventually, when it all works) be in the start state,
+hit a key, and then be in a window-making mode, then hit keys to create layouts
+and controls in the window design window, walk around the hierarchy of those,
+rearranging things, then choose to label a control, at which point I switch into
+a vim-like interface, live-typing the name right on the control, but with a
+bunch of Vim's powers (at least, on one line). Then I can kill out, decide to
+create a sphere, and then place it by selecting the midpoint of the origin and
+the position of an existing object. Then I can jump into myriad file browser
+like idea I've had. This graph-walking, pushing and popping states all the
+while, changes how hotkeys can be defined.
+
+Currenly, I'm thinking that core.py stays, and contains the main class, with the
+main handling routine, and related helpers. I'm thinking that every logical
+grouping of states, like all the Vimline stuff, or a host of object selection
+stuff, gets its own module, and I imagine dozens of these, perhaps, maybe
+gathered into a states folder(?), defining the batteries-included, core library
+abilities of the project. A point release and docs (if I ever bother) would
+serve to define which things a user could count on existing, like selection
+states for being able to grab items from the scene in various ways to work on.
+This is important, as such things will need to be hooked up to by string, or by
+direct reference to callables (which is one reason I'm thinking of python files,
+instead of, say, some JSON file, or parseable config file, because then I can
+just point to other things in Python space). I've already extracted the Vimline
+stuff from exampleUsage.py to vimline.py, though haven't committed anything, as
+there's so much to figure out about how it (and every other such module) gets
+reintegrated into the state tree.
+
+Much as I've always kind of hated public/private decisions in OOP, and the
+accidental complexity it breeds, I think having at least intentionally public
+states and events (keymaps), and presumably private ones might make sense here.
+Once you're in selection mode, there's a bunch of possible ping-ponging around
+in there to add and remove things from selection, before finally popping back
+out to whatever wanted you to select things in the first place. Same for the
+Vimline idea - presumably something wants you type something out, in the nice,
+convenient editor that Vimline [eventually, hopefully] provides, and there's a
+ton of bouncing around into and out of command, insert, and visual modes in
+there, all of which don't make sense external to working in Vimline. There is a
+thought, though, that something like selection mode could use filtering, and for
+the years this idea has been kicking around in my head, I've presumed you'd
+positively add the states you want, where you want them, e.g. I only want
+selection of meshes and locators for this operation, or just visible things,
+possibly bundling these choices up, and naming them for reuse. This feels like a
+breaking of OOP's Law of Demeter.
+
+I've run into that a lot while thinking about breaking up exampleUsage.py this
+past week, and realizing that, at least as I've had it in my head, I keep
+needing to reach into states, and keymaps, or deep into a stack of states, to
+insert handlers at that level. There's no global, flat terrain in which to
+unload all the event handlers you want; you have to wander out to some area of a
+tree, and say "at this point I'd also like to be able to do this," and insert
+event handlers into the keymap, with connections from there to who knows where
+else? I can imagine trying to pull the needs out to the surface, to provide APIs
+to accept keymap events and handlers that a particular module can insert in, or
+have the core system insert in, but that all feels really messy and complex,
+like I haven't really found the truth, the kernel of this idea yet. It feels
+like the kind of thing that works great, if you know a lot, and walk a fine line
+through the minefield of bad ways of structuring things. This isn't as big a
+deal when it's all in one huge file. Everything is a sibling, and of course all
+the flat states in one space can call to each other as needed, but when I pull
+them all into their own modules, and start to think of a module as having a
+purpose, but then realize that somewhere deep into a stack of states in one
+module, I may need to evoke selection, because at that point, I need to be able
+to select things, then it starts to get weird. Suddenly, every module needs to
+import every other module, and you run into a gross, circular imports.
+
