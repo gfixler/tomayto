@@ -26,7 +26,7 @@ class Tomayto (object):
     def eventHandler (self, key, alt, ctrl, press):
         stateName, state = self.currentState()
         event = (key, alt, ctrl, press)
-        if event == ('?', False, False, True):
+        if event == ('?', True, True, True):
             self.helpOnCurrentState()
             return
         elif event in state.keymap.keys():
