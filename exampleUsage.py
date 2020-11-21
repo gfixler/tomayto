@@ -141,7 +141,7 @@ exampleStates = {
     "selectMesh": stateSelectMesh
 }
 
-def instantiate ():
+def initialize ():
     if cmds.hotkeySet(query=True, current=True) != "Tomayto":
         if "Tomayto" in cmds.hotkeySet(query=True, hotkeySetArray=True):
             cmds.hotkeySet("Tomayto", edit=True, current=True)
