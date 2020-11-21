@@ -18,13 +18,13 @@ class Tomayto (object):
         self.startState = statesMap[startStateName](self) # init start state
         self.stateStack = [] # start state doesn't go on stack/can't be popped
 
-    def currentState (self):
+    def getCurrentState (self):
         if self.stateStack:
             return self.stateStack[-1]
         return (self.startStateName, self.startState)
 
     def eventHandler (self, key, alt, ctrl, press):
-        stateName, state = self.currentState()
+        stateName, state = self.getCurrentState()
         event = (key, alt, ctrl, press)
         if event == ('?', True, True, True):
             self.helpOnCurrentState()
@@ -41,33 +41,33 @@ class Tomayto (object):
     def pushState (self, stateName):
         if stateName in self.statesMap:
             stateClass = self.statesMap[stateName]
-            newState = stateClass(self)
-            self.stateStack.append((stateName, newState))
+            newStateInst = stateClass(self)
+            self.stateStack.append((stateName, newStateInst))
             try:
-                newState.onEnter() # may not exist
+                newStateInst.onEnter() # may not exist
             except:
                 pass
 
     def popState (self, valueAction=None):
         if self.stateStack:
-            popStateName, popState = self.stateStack.pop()
-            stateName, state = self.currentState()
+            popStateName, popStateInst = self.stateStack.pop()
+            stateName, stateInst = self.getCurrentState()
             try:
                 if valueAction:
                     value = valueAction()
-                    state.onPopTo(value)
+                    stateInst.onPopTo(value)
                 else:
-                    state.onPopTo()
+                    stateInst.onPopTo()
             except:
                 pass
 
-    def runMethod (self, methodName):
-        methodName()
+    def runMethod (self, method):
+        method()
 
     def helpOnCurrentState (self):
-        stateName, state = self.currentState()
+        stateName, stateInst = self.getCurrentState()
         print "HELP (" + stateName + ")"
-        for k, v in state.keymap.items():
+        for k, v in stateInst.keymap.items():
             print "\t", k, v
         print "STATE STACK:"
         for s in self.stateStack:
