@@ -147,7 +147,8 @@ def instantiate ():
             cmds.hotkeySet("Tomayto", edit=True, current=True)
         else:
             cmds.hotkeySet("Tomayto", current=True)
-            util.createTomaytoKeymap()
+    core.disable()
+    core.enable()
     tom = core.Tomayto(exampleStates, "START")
     return tom
 
