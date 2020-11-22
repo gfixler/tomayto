@@ -16,11 +16,15 @@ wspos = lambda tf: cmds.xform(tf, query=True, worldSpace=True, translation=True)
 minTime = lambda: cmds.playbackOptions(query=True, minTime=True)
 maxTime = lambda: cmds.playbackOptions(query=True, maxTime=True)
 
+
 class stateSTART (object):
 
     def __init__ (self, mainInst):
         self.mainInst = mainInst
         self.keymap = {
+            ('d', NOALT, NOCTRL, PRESS):   ("RUN", cmds.delete),
+            ('f', NOALT, NOCTRL, PRESS):   ("RUN", cmds.viewFit),
+            ('F', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.viewFit(allObjects=True)),
             ('m', NOALT, NOCTRL, PRESS):   ("PUSH", "move"),
             ('u', NOALT, NOCTRL, PRESS):   ("PUSH", "undo"),
             ('r', NOALT, CTRL,   PRESS):   ("PUSH", "redo"),
@@ -37,6 +41,7 @@ class stateSTART (object):
 
     def switchToMayaHotkeys (self):
         cmds.hotkeySet("Maya_Default", edit=True, current=True)
+
 
 class stateUndo (object):
 
