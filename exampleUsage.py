@@ -2,6 +2,16 @@ import maya.cmds as cmds
 
 import core
 
+
+PRESS = True
+RELEASE = False
+
+ALT = True
+NOALT = False
+
+CTRL = True
+NOCTRL = False
+
 wspos = lambda tf: cmds.xform(tf, query=True, worldSpace=True, translation=True)
 minTime = lambda: cmds.playbackOptions(query=True, minTime=True)
 maxTime = lambda: cmds.playbackOptions(query=True, maxTime=True)
@@ -11,18 +21,18 @@ class stateSTART (object):
     def __init__ (self, mainInst):
         self.mainInst = mainInst
         self.keymap = {
-            ('m', False, False, True): ("PUSH", "move"),
-            ('u', False, False, True): ("PUSH", "undo"),
-            ('r', False, True, True): ("PUSH", "redo"),
-            ('s', False, False, True): ("PUSH", "select"),
-            ('h', False, False, True): ("RUN", lambda: cmds.play(state=True, forward=False)),
-            ('h', False, False, False): ("RUN", lambda: cmds.play(state=False, forward=False)),
-            ('l', False, False, True): ("RUN", lambda: cmds.play(state=True)),
-            ('l', False, False, False): ("RUN", lambda: cmds.play(state=False)),
-            ('H', False, False, True): ("RUN", lambda: cmds.currentTime(minTime())),
-            ('L', False, False, True): ("RUN", lambda: cmds.currentTime(maxTime())),
-            ('M', False, False, True): ("RUN", lambda: cmds.currentTime(round((minTime() + maxTime()) / 2))),
-            ('M', True, True, True): ("RUN", self.switchToMayaHotkeys),
+            ('m', NOALT, NOCTRL, PRESS):   ("PUSH", "move"),
+            ('u', NOALT, NOCTRL, PRESS):   ("PUSH", "undo"),
+            ('r', NOALT, CTRL,   PRESS):   ("PUSH", "redo"),
+            ('s', NOALT, NOCTRL, PRESS):   ("PUSH", "select"),
+            ('h', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.play(state=True, forward=False)),
+            ('h', NOALT, NOCTRL, RELEASE): ("RUN", lambda: cmds.play(state=False, forward=False)),
+            ('l', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.play(state=True)),
+            ('l', NOALT, NOCTRL, RELEASE): ("RUN", lambda: cmds.play(state=False)),
+            ('H', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.currentTime(minTime())),
+            ('L', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.currentTime(maxTime())),
+            ('M', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.currentTime(round((minTime() + maxTime()) / 2))),
+            ('M', ALT, CTRL, PRESS):       ("RUN", self.switchToMayaHotkeys),
         }
 
     def switchToMayaHotkeys (self):
@@ -71,7 +81,7 @@ class statePickXYZ (object):
     def __init__ (self, mainInst):
         self.mainInst = mainInst
         self.keymap = {
-            ('O', False, False, True): ("POP", self.popOrigin)
+            ('O', NOALT, NOCTRL, PRESS): ("POP", self.popOrigin)
         }
 
     def popOrigin (self):
@@ -83,8 +93,8 @@ class stateSelect (object):
     def __init__ (self, mainInst):
         self.mainInst = mainInst
         self.keymap = {
-            ('m', False, False, True): ("PUSH", "selectMesh"),
-            ('n', False, False, True): ("RUN", self.selectNone)
+            ('m', NOALT, NOCTRL, PRESS): ("PUSH", "selectMesh"),
+            ('n', NOALT, NOCTRL, PRESS): ("RUN", self.selectNone)
         }
 
     def onPopTo (self, value):
@@ -100,7 +110,7 @@ class stateSelectMesh (object):
     def __init__ (self, mainInst):
         self.mainInst = mainInst
         self.keymap = {
-            ("Return", False, False, True): ("POP", self.popSelection)
+            ("Return", NOALT, NOCTRL, PRESS): ("POP", self.popSelection)
         }
 
     def onEnter (self):
