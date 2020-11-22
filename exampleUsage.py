@@ -26,8 +26,8 @@ class stateSTART (object):
             ('f', NOALT, NOCTRL, PRESS):   ("RUN", cmds.viewFit),
             ('F', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.viewFit(allObjects=True)),
             ('m', NOALT, NOCTRL, PRESS):   ("PUSH", "move"),
-            ('u', NOALT, NOCTRL, PRESS):   ("PUSH", "undo"),
-            ('r', NOALT, CTRL,   PRESS):   ("PUSH", "redo"),
+            ('u', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.evalDeferred(cmds.undo)),
+            ('r', NOALT, CTRL,   PRESS):   ("RUN", lambda: cmds.evalDeferred(cmds.redo)),
             ('s', NOALT, NOCTRL, PRESS):   ("PUSH", "select"),
             ('h', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.play(state=True, forward=False)),
             ('h', NOALT, NOCTRL, RELEASE): ("RUN", lambda: cmds.play(state=False, forward=False)),
@@ -41,28 +41,6 @@ class stateSTART (object):
 
     def switchToMayaHotkeys (self):
         cmds.hotkeySet("Maya_Default", edit=True, current=True)
-
-
-class stateUndo (object):
-
-    def __init__ (self, mainInst):
-        self.mainInst = mainInst
-        self.keymap = {}
-
-    def onEnter (self):
-        cmds.evalDeferred(cmds.undo)
-        self.mainInst.popState()
-
-
-class stateRedo (object):
-
-    def __init__ (self, mainInst):
-        self.mainInst = mainInst
-        self.keymap = {}
-
-    def onEnter (self):
-        cmds.evalDeferred(cmds.redo)
-        self.mainInst.popState()
 
 
 class stateMove (object):
@@ -146,8 +124,6 @@ class stateSelectMesh (object):
 
 exampleStates = {
     "START": stateSTART,
-    "undo": stateUndo,
-    "redo": stateRedo,
     "move": stateMove,
     "pickXYZ": statePickXYZ,
     "select": stateSelect,
