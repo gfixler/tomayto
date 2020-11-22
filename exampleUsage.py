@@ -1,4 +1,5 @@
 import maya.cmds as cmds
+import maya.mel as mel
 
 import core
 
@@ -37,6 +38,7 @@ class stateSTART (object):
             ('L', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.currentTime(maxTime())),
             ('M', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.currentTime(round((minTime() + maxTime()) / 2))),
             ('M', ALT, CTRL, PRESS):       ("RUN", self.switchToMayaHotkeys),
+            ('t', NOALT, NOCTRL, PRESS):   ("PUSH", "toolSelect"),
         }
 
     def switchToMayaHotkeys (self):
@@ -122,12 +124,47 @@ class stateSelectMesh (object):
         return sel
 
 
+class stateToolSelect (object):
+
+    def __init__ (self, mainInst):
+        self.mainInst = mainInst
+        self.keymap = {
+            ('q', NOALT, NOCTRL, PRESS): ("RUN", self.selectSelectTool),
+            ('m', NOALT, NOCTRL, PRESS): ("RUN", self.selectMoveTool),
+            ('r', NOALT, NOCTRL, PRESS): ("RUN", self.selectRotateTool),
+            ('s', NOALT, NOCTRL, PRESS): ("RUN", self.selectScaleTool),
+            ('M', NOALT, NOCTRL, PRESS): ("RUN", self.selectManipTool),
+            ('t', NOALT, NOCTRL, PRESS): ("POP", None)
+        }
+
+    def selectSelectTool (self):
+        cmds.setToolTo(mel.eval("$temp = $gSelect"))
+        self.mainInst.popState()
+
+    def selectMoveTool (self):
+        cmds.setToolTo(mel.eval("$temp = $gMove"))
+        self.mainInst.popState()
+
+    def selectRotateTool (self):
+        cmds.setToolTo(mel.eval("$temp = $gRotate"))
+        self.mainInst.popState()
+
+    def selectScaleTool (self):
+        cmds.setToolTo(mel.eval("$temp = $gScale"))
+        self.mainInst.popState()
+
+    def selectManipTool (self):
+        cmds.setToolTo(mel.eval("$temp = $gshowManip"))
+        self.mainInst.popState()
+
+
 exampleStates = {
     "START": stateSTART,
     "move": stateMove,
     "pickXYZ": statePickXYZ,
     "select": stateSelect,
-    "selectMesh": stateSelectMesh
+    "selectMesh": stateSelectMesh,
+    "toolSelect": stateToolSelect,
 }
 
 def initialize ():
