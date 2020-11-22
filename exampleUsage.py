@@ -15,8 +15,6 @@ class stateSTART (object):
             ('u', False, False, True): ("PUSH", "undo"),
             ('r', False, True, True): ("PUSH", "redo"),
             ('s', False, False, True): ("PUSH", "select"),
-            ('v', False, False, True): ("PUSH", "vimLine"),
-            ('V', False, False, True): ("PUSH", "vimLineTestWin"),
             ('h', False, False, True): ("RUN", lambda: cmds.play(state=True, forward=False)),
             ('h', False, False, False): ("RUN", lambda: cmds.play(state=False, forward=False)),
             ('l', False, False, True): ("RUN", lambda: cmds.play(state=True)),
