@@ -5,24 +5,24 @@ import util
 
 class Tomayto (object):
 
-    def __init__ (self, stateMap, startStateName):
+    def __init__ (self, startStateMap, startStateName):
         """
         Each state must be a class with an init that accepts a reference to the
         instance of this class that instantiates it. Each instance should store
         the ref for use in communicating with it later.
-        "stateMap" is a dict of name:state pairs of state class references.
-        "startStateName" is the string key of the starting state in stateMap.
+        "startStateMap" is a dict of name:state pairs of state class references.
+        "startStateName" is the string key of the starting state in startStateMap.
         """
-        self.stateMap = stateMap
+        self.startStateMap = startStateMap
         self.startStateName = startStateName
-        startStateClass = stateMap[startStateName]
+        startStateClass = startStateMap[startStateName]
         self.startStateInst = startStateClass(self)
         self.stateStack = [] # start state doesn't go on stack/can't be popped
 
     def getCurrentState (self):
         if self.stateStack:
             return self.stateStack[-1]
-        return (self.startStateName, self.stateMap, self.startStateInst)
+        return (self.startStateName, self.startStateMap, self.startStateInst)
 
     def eventHandler (self, key, alt, ctrl, press):
         stateName, stateMap, state = self.getCurrentState()
