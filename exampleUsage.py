@@ -99,6 +99,7 @@ class stateSelectMesh (object):
         }
 
     def onEnter (self):
+        cmds.undoInfo(openChunk=True)
         meshes = cmds.ls(type="mesh")
         tfs = map(lambda x: cmds.listRelatives(x, parent=True)[0], meshes)
         self.anns = []
@@ -120,6 +121,7 @@ class stateSelectMesh (object):
         for ann in self.anns:
             p = cmds.listRelatives(ann, parent=True)[0]
             cmds.delete(p)
+        cmds.undoInfo(closeChunk=True)
         sel = cmds.ls(selection=True, flatten=True)
         return sel
 
