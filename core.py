@@ -5,26 +5,27 @@ import util
 
 class Tomayto (object):
 
-    def __init__ (self, statesMap, startStateName):
+    def __init__ (self, startStateMap, startStateName):
         """
         Each state must be a class with an init that accepts a reference to the
         instance of this class that instantiates it. Each instance should store
         the ref for use in communicating with it later.
-        "statesMap" is a dict of name:state pairs of state class references.
-        "startStateName" is the string key of the starting state in statesMap.
+        "startStateMap" is a dict of name:state pairs of state class references.
+        "startStateName" is the string key of the starting state in startStateMap.
         """
-        self.statesMap = statesMap
+        self.startStateMap = startStateMap
         self.startStateName = startStateName
-        self.startState = statesMap[startStateName](self) # init start state
+        startStateClass = startStateMap[startStateName]
+        self.startStateInst = startStateClass(self)
         self.stateStack = [] # start state doesn't go on stack/can't be popped
 
     def getCurrentState (self):
         if self.stateStack:
             return self.stateStack[-1]
-        return (self.startStateName, self.startState)
+        return (self.startStateName, self.startStateMap, self.startStateInst)
 
     def eventHandler (self, key, alt, ctrl, press):
-        stateName, state = self.getCurrentState()
+        stateName, stateMap, state = self.getCurrentState()
         event = (key, alt, ctrl, press)
         if event == ('?', True, True, True):
             self.helpOnCurrentState()
@@ -38,20 +39,20 @@ class Tomayto (object):
             elif eventAction == "RUN":
                 self.runMethod(eventActionData)
 
-    def pushState (self, stateName):
-        if stateName in self.statesMap:
-            stateClass = self.statesMap[stateName]
+    def pushState (self, (stateMap, stateName)):
+        if stateName in stateMap:
+            stateClass = stateMap[stateName]
             newStateInst = stateClass(self)
-            self.stateStack.append((stateName, newStateInst))
+            self.stateStack.append((stateName, stateMap, newStateInst))
             try:
-                newStateInst.onEnter() # may not exist
+                newStateInst.onEnter()
             except:
                 pass
 
     def popState (self, valueAction=None):
         if self.stateStack:
-            popStateName, popStateInst = self.stateStack.pop()
-            stateName, stateInst = self.getCurrentState()
+            self.stateStack.pop()
+            stateName, stateMap, stateInst = self.getCurrentState()
             try:
                 if valueAction:
                     value = valueAction()
@@ -65,7 +66,7 @@ class Tomayto (object):
         method()
 
     def helpOnCurrentState (self):
-        stateName, stateInst = self.getCurrentState()
+        stateName, stateMap, stateInst = self.getCurrentState()
         print "HELP (" + stateName + ")"
         for k, v in stateInst.keymap.items():
             print "\t", k, v

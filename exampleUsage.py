@@ -26,10 +26,10 @@ class stateSTART (object):
             ('d', NOALT, NOCTRL, PRESS):   ("RUN", cmds.delete),
             ('f', NOALT, NOCTRL, PRESS):   ("RUN", cmds.viewFit),
             ('F', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.viewFit(allObjects=True)),
-            ('m', NOALT, NOCTRL, PRESS):   ("PUSH", "move"),
+            ('m', NOALT, NOCTRL, PRESS):   ("PUSH", (stateMap, "move")),
             ('u', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.evalDeferred(cmds.undo)),
             ('r', NOALT, CTRL,   PRESS):   ("RUN", lambda: cmds.evalDeferred(cmds.redo)),
-            ('s', NOALT, NOCTRL, PRESS):   ("PUSH", "select"),
+            ('s', NOALT, NOCTRL, PRESS):   ("PUSH", (stateMap, "select")),
             ('h', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.play(state=True, forward=False)),
             ('h', NOALT, NOCTRL, RELEASE): ("RUN", lambda: cmds.play(state=False, forward=False)),
             ('l', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.play(state=True)),
@@ -38,7 +38,7 @@ class stateSTART (object):
             ('L', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.currentTime(maxTime())),
             ('M', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.currentTime(round((minTime() + maxTime()) / 2))),
             ('M', ALT, CTRL, PRESS):       ("RUN", self.switchToMayaHotkeys),
-            ('t', NOALT, NOCTRL, PRESS):   ("PUSH", "toolSelect"),
+            ('t', NOALT, NOCTRL, PRESS):   ("PUSH", (stateMap, "toolSelect")),
         }
 
     def switchToMayaHotkeys (self):
@@ -52,7 +52,7 @@ class stateMove (object):
         self.keymap = {}
 
     def onEnter (self):
-        self.mainInst.pushState("pickXYZ")
+        self.mainInst.pushState((stateMap, "pickXYZ"))
 
     def onPopTo (self, value):
         x, y, z = value
@@ -78,7 +78,7 @@ class stateSelect (object):
     def __init__ (self, mainInst):
         self.mainInst = mainInst
         self.keymap = {
-            ('m', NOALT, NOCTRL, PRESS): ("PUSH", "selectMesh"),
+            ('m', NOALT, NOCTRL, PRESS): ("PUSH", (stateMap, "selectMesh")),
             ('n', NOALT, NOCTRL, PRESS): ("RUN", self.selectNone)
         }
 
@@ -160,7 +160,7 @@ class stateToolSelect (object):
         self.mainInst.popState()
 
 
-exampleStates = {
+stateMap = {
     "START": stateSTART,
     "move": stateMove,
     "pickXYZ": statePickXYZ,
@@ -177,6 +177,6 @@ def initialize ():
             cmds.hotkeySet("Tomayto", current=True)
     core.disable()
     core.enable()
-    tom = core.Tomayto(exampleStates, "START")
+    tom = core.Tomayto(stateMap, "START")
     return tom
 
