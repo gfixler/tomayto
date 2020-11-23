@@ -15,13 +15,14 @@ class Tomayto (object):
         """
         self.stateMap = stateMap
         self.startStateName = startStateName
-        self.startState = stateMap[startStateName](self) # init start state
+        startStateClass = stateMap[startStateName]
+        self.startStateInst = startStateClass(self)
         self.stateStack = [] # start state doesn't go on stack/can't be popped
 
     def getCurrentState (self):
         if self.stateStack:
             return self.stateStack[-1]
-        return (self.startStateName, self.startState)
+        return (self.startStateName, self.startStateInst)
 
     def eventHandler (self, key, alt, ctrl, press):
         stateName, state = self.getCurrentState()
