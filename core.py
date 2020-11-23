@@ -5,17 +5,17 @@ import util
 
 class Tomayto (object):
 
-    def __init__ (self, statesMap, startStateName):
+    def __init__ (self, stateMap, startStateName):
         """
         Each state must be a class with an init that accepts a reference to the
         instance of this class that instantiates it. Each instance should store
         the ref for use in communicating with it later.
-        "statesMap" is a dict of name:state pairs of state class references.
-        "startStateName" is the string key of the starting state in statesMap.
+        "stateMap" is a dict of name:state pairs of state class references.
+        "startStateName" is the string key of the starting state in stateMap.
         """
-        self.statesMap = statesMap
+        self.stateMap = stateMap
         self.startStateName = startStateName
-        self.startState = statesMap[startStateName](self) # init start state
+        self.startState = stateMap[startStateName](self) # init start state
         self.stateStack = [] # start state doesn't go on stack/can't be popped
 
     def getCurrentState (self):
@@ -39,8 +39,8 @@ class Tomayto (object):
                 self.runMethod(eventActionData)
 
     def pushState (self, stateName):
-        if stateName in self.statesMap:
-            stateClass = self.statesMap[stateName]
+        if stateName in self.stateMap:
+            stateClass = self.stateMap[stateName]
             newStateInst = stateClass(self)
             self.stateStack.append((stateName, newStateInst))
             try:
