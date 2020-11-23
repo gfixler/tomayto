@@ -3,6 +3,8 @@ import maya.mel as mel
 
 import core
 
+import vimline
+
 
 PRESS = True
 RELEASE = False
@@ -39,6 +41,8 @@ class stateSTART (object):
             ('M', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.currentTime(round((minTime() + maxTime()) / 2))),
             ('M', ALT, CTRL, PRESS):       ("RUN", self.switchToMayaHotkeys),
             ('t', NOALT, NOCTRL, PRESS):   ("PUSH", (stateMap, "toolSelect")),
+            ('v', NOALT, NOCTRL, PRESS):   ("PUSH", (vimline.stateMap, "vimline")),
+            ('V', NOALT, NOCTRL, PRESS):   ("PUSH", (vimline.stateMap, "vimlineTestWin")),
         }
 
     def switchToMayaHotkeys (self):
