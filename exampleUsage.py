@@ -158,7 +158,7 @@ class stateToolSelect (object):
         self.mainInst.popState()
 
 
-exampleStates = {
+stateMap = {
     "START": stateSTART,
     "move": stateMove,
     "pickXYZ": statePickXYZ,
@@ -175,6 +175,6 @@ def initialize ():
             cmds.hotkeySet("Tomayto", current=True)
     core.disable()
     core.enable()
-    tom = core.Tomayto(exampleStates, "START")
+    tom = core.Tomayto(stateMap, "START")
     return tom
 
