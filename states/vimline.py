@@ -1,6 +1,6 @@
 import maya.cmds as cmds
 
-import util
+from .. import util
 
 
 class State_Vimline (object):
