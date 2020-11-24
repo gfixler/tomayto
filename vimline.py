@@ -23,7 +23,7 @@ class State_Vimline (object):
         print "entering Vimline"
         self.mainInst.pushState((stateMap, "vimlineNormalMode"))
 
-    def onPopTo (self, _):
+    def onPopTo (self, *_):
         print "exiting Vimline"
         self.mainInst.popState()
 
@@ -94,7 +94,7 @@ class State_VimlineTestWin (object):
     def onEnter (self):
         self.mainInst.pushState((stateMap, ("vimline", [self.testWinOnChange])))
 
-    def onPopTo (self, _):
+    def onPopTo (self, *_):
         cmds.deleteUI(self.mainInst.vimlineTestWin["win"])
         self.mainInst.popState()
 
@@ -120,7 +120,7 @@ class State_VimlineNormalMode (object):
     def onEnter (self):
         print "Entering vimline Normal Mode"
 
-    def onPopTo (self, _):
+    def onPopTo (self, *_):
         self.mainInst.vimline["mode"] = "NORMAL"
         self.handleChange()
 
