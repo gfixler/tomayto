@@ -1,5 +1,6 @@
 import maya.cmds as cmds
 
+from .. core import ALT, NOALT, CTRL, NOCTRL, PRESS, RELEASE
 from .. import util
 
 
@@ -106,15 +107,15 @@ class State_VimlineNormalMode (object):
         self.mainInst.vimline["mode"] = "NORMAL"
         self.handleChange()
         self.keymap = {
-            ("i", False, False, True): ("PUSH", (stateMap, ("vimlineEnterInsertMode", ["insert"]))),
-            ("I", False, False, True): ("PUSH", (stateMap, ("vimlineEnterInsertMode", ["INSERT"]))),
-            ("a", False, False, True): ("PUSH", (stateMap, ("vimlineEnterInsertMode", ["append"]))),
-            ("A", False, False, True): ("PUSH", (stateMap, ("vimlineEnterInsertMode", ["APPEND"]))),
-            ("h", False, False, True): ("RUN", self.cursorLeft),
-            ("l", False, False, True): ("RUN", self.cursorRight),
-            ("0", False, False, True): ("RUN", self.toFirstColumn),
-            ("$", False, False, True): ("RUN", self.toLastColumn), # TODO: $ should go to last non-whitespace column
-            ("[", False, True, True): ("POP", self.handleEscape),
+            ("i", NOALT, NOCTRL, PRESS): ("PUSH", (stateMap, ("vimlineEnterInsertMode", ["insert"]))),
+            ("I", NOALT, NOCTRL, PRESS): ("PUSH", (stateMap, ("vimlineEnterInsertMode", ["INSERT"]))),
+            ("a", NOALT, NOCTRL, PRESS): ("PUSH", (stateMap, ("vimlineEnterInsertMode", ["append"]))),
+            ("A", NOALT, NOCTRL, PRESS): ("PUSH", (stateMap, ("vimlineEnterInsertMode", ["APPEND"]))),
+            ("h", NOALT, NOCTRL, PRESS): ("RUN", self.cursorLeft),
+            ("l", NOALT, NOCTRL, PRESS): ("RUN", self.cursorRight),
+            ("0", NOALT, NOCTRL, PRESS): ("RUN", self.toFirstColumn),
+            ("$", NOALT, NOCTRL, PRESS): ("RUN", self.toLastColumn), # TODO: $ should go to last non-whitespace column
+            ("[", NOALT, CTRL, RELEASE): ("POP", self.handleEscape),
         }
 
     def onEnter (self):
@@ -193,15 +194,15 @@ class State_VimlineEnterInsertMode (object):
         else:
             raise keyError, 'insert mode entry mode "' + entryMode + '" unknown'
         self.keymap = {
-            ("h", False, True, True): ("RUN", self.handleBackspace),
-            ("a", False, True, True): ("RUN", self.emacsHome),
-            ("e", False, True, True): ("RUN", self.emacsEnd),
-            ("Return", False, False, True): ("RUN", self.handleReturn),
-            ("Backspace", False, False, True): ("RUN", self.handleBackspace),
-            ("[", False, True, True): ("POP", self.handleEscape),
+            ("h", NOALT, CTRL, PRESS): ("RUN", self.handleBackspace),
+            ("a", NOALT, CTRL, PRESS): ("RUN", self.emacsHome),
+            ("e", NOALT, CTRL, PRESS): ("RUN", self.emacsEnd),
+            ("Return", NOALT, NOCTRL, PRESS): ("RUN", self.handleReturn),
+            ("Backspace", NOALT, NOCTRL, PRESS): ("RUN", self.handleBackspace),
+            ("[", NOALT, CTRL, PRESS): ("POP", self.handleEscape),
         }
         for k in util.keyChars:
-            self.keymap[(k, False, False, True)] = ("PUSH", (stateMap, ("vimlineInsertMode", [k])))
+            self.keymap[(k, NOALT, NOCTRL, PRESS)] = ("PUSH", (stateMap, ("vimlineInsertMode", [k])))
 
     def onEnter (self):
         self.handleChange()

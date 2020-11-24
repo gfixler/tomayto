@@ -3,6 +3,16 @@ import maya.cmds as cmds
 import util
 
 
+PRESS = True
+RELEASE = False
+
+ALT = True
+NOALT = False
+
+CTRL = True
+NOCTRL = False
+
+
 class Tomayto (object):
 
     def __init__ (self, startStateMap, startStateName):

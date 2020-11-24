@@ -1,18 +1,10 @@
 import maya.cmds as cmds
 import maya.mel as mel
 
+from .. core import ALT, NOALT, CTRL, NOCTRL, PRESS, RELEASE
+
 import selection
 import vimline
-
-
-PRESS = True
-RELEASE = False
-
-ALT = True
-NOALT = False
-
-CTRL = True
-NOCTRL = False
 
 
 minTime = lambda: cmds.playbackOptions(query=True, minTime=True)
