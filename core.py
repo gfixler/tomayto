@@ -39,10 +39,15 @@ class Tomayto (object):
             elif eventAction == "RUN":
                 self.runMethod(eventActionData)
 
-    def pushState (self, (stateMap, stateName)):
+    def pushState (self, (stateMap, stateData)):
+        try:
+            stateName, stateArgs = stateData
+        except:
+            stateArgs = []
+            stateName = stateData
         if stateName in stateMap:
             stateClass = stateMap[stateName]
-            newStateInst = stateClass(self)
+            newStateInst = stateClass(self, *stateArgs)
             self.stateStack.append((stateName, stateMap, newStateInst))
             try:
                 newStateInst.onEnter()

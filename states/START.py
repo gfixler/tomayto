@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 import maya.mel as mel
 
-import core
+import vimline
 
 
 PRESS = True
@@ -39,6 +39,8 @@ class stateSTART (object):
             ('M', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.currentTime(round((minTime() + maxTime()) / 2))),
             ('M', ALT, CTRL, PRESS):       ("RUN", self.switchToMayaHotkeys),
             ('t', NOALT, NOCTRL, PRESS):   ("PUSH", (stateMap, "toolSelect")),
+            ('v', NOALT, NOCTRL, PRESS):   ("PUSH", (vimline.stateMap, "vimline")),
+            ('V', NOALT, NOCTRL, PRESS):   ("PUSH", (vimline.stateMap, "vimlineTestWin")),
         }
 
     def switchToMayaHotkeys (self):
@@ -168,15 +170,4 @@ stateMap = {
     "selectMesh": stateSelectMesh,
     "toolSelect": stateToolSelect,
 }
-
-def initialize ():
-    if cmds.hotkeySet(query=True, current=True) != "Tomayto":
-        if "Tomayto" in cmds.hotkeySet(query=True, hotkeySetArray=True):
-            cmds.hotkeySet("Tomayto", edit=True, current=True)
-        else:
-            cmds.hotkeySet("Tomayto", current=True)
-    core.disable()
-    core.enable()
-    tom = core.Tomayto(stateMap, "START")
-    return tom
 
