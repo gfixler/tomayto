@@ -171,14 +171,3 @@ stateMap = {
     "toolSelect": stateToolSelect,
 }
 
-def initialize ():
-    if cmds.hotkeySet(query=True, current=True) != "Tomayto":
-        if "Tomayto" in cmds.hotkeySet(query=True, hotkeySetArray=True):
-            cmds.hotkeySet("Tomayto", edit=True, current=True)
-        else:
-            cmds.hotkeySet("Tomayto", current=True)
-    core.disable()
-    core.enable()
-    tom = core.Tomayto(stateMap, "START")
-    return tom
-
