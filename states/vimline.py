@@ -115,7 +115,8 @@ class State_VimlineNormalMode (object):
             ("l", NOALT, NOCTRL, PRESS): ("RUN", self.cursorRight),
             ("0", NOALT, NOCTRL, PRESS): ("RUN", self.toFirstColumn),
             ("$", NOALT, NOCTRL, PRESS): ("RUN", self.toLastColumn), # TODO: $ should go to last non-whitespace column
-            ("[", NOALT, CTRL, RELEASE): ("POP", self.handleEscape),
+            ("[", NOALT, CTRL, PRESS): ("POP", self.handleEscape),
+            ("Return", NOALT, NOCTRL, PRESS): ("POP", self.handleEscape),
         }
 
     def onEnter (self):
@@ -200,6 +201,7 @@ class State_VimlineEnterInsertMode (object):
             ("Return", NOALT, NOCTRL, PRESS): ("RUN", self.handleReturn),
             ("Backspace", NOALT, NOCTRL, PRESS): ("RUN", self.handleBackspace),
             ("[", NOALT, CTRL, PRESS): ("POP", self.handleEscape),
+            ("Return", NOALT, NOCTRL, PRESS): ("POP", self.handleEscape),
         }
         for k in util.keyChars:
             self.keymap[(k, NOALT, NOCTRL, PRESS)] = ("PUSH", (stateMap, ("vimlineInsertMode", [k])))
