@@ -36,8 +36,8 @@ class stateSTART (object):
 
             ('s', NOALT, NOCTRL, PRESS):   ("PUSH", selection.stateSelect),
 
-            ('v', NOALT, NOCTRL, PRESS):   ("PUSH", vimline.State_Vimline),
-            ('V', NOALT, NOCTRL, PRESS):   ("PUSH", vimline.State_VimlineTestWin),
+            ('v', NOALT, NOCTRL, PRESS):   ("PUSH", vimline.stateVimline),
+            ('V', NOALT, NOCTRL, PRESS):   ("PUSH", vimline.stateVimlineTestWin),
         }
 
     def switchToMayaHotkeys (self):
