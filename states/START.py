@@ -20,10 +20,8 @@ class stateSTART (object):
             ('d', NOALT, NOCTRL, PRESS):   ("RUN", cmds.delete),
             ('f', NOALT, NOCTRL, PRESS):   ("RUN", cmds.viewFit),
             ('F', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.viewFit(allObjects=True)),
-            ('m', NOALT, NOCTRL, PRESS):   ("PUSH", (transform.stateMap, "move")),
             ('u', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.evalDeferred(cmds.undo)),
             ('r', NOALT, CTRL,   PRESS):   ("RUN", lambda: cmds.evalDeferred(cmds.redo)),
-            ('s', NOALT, NOCTRL, PRESS):   ("PUSH", (selection.stateMap, "select")),
             ('h', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.play(state=True, forward=False)),
             ('h', NOALT, NOCTRL, RELEASE): ("RUN", lambda: cmds.play(state=False, forward=False)),
             ('l', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.play(state=True)),
@@ -33,6 +31,11 @@ class stateSTART (object):
             ('M', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.currentTime(round((minTime() + maxTime()) / 2))),
             ('M', ALT, CTRL, PRESS):       ("RUN", self.switchToMayaHotkeys),
             ('t', NOALT, NOCTRL, PRESS):   ("PUSH", (stateMap, "toolSelect")),
+
+            ('m', NOALT, NOCTRL, PRESS):   ("PUSH", (transform.stateMap, "move")),
+
+            ('s', NOALT, NOCTRL, PRESS):   ("PUSH", (selection.stateMap, "select")),
+
             ('v', NOALT, NOCTRL, PRESS):   ("PUSH", (vimline.stateMap, "vimline")),
             ('V', NOALT, NOCTRL, PRESS):   ("PUSH", (vimline.stateMap, "vimlineTestWin")),
         }
