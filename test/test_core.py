@@ -13,7 +13,8 @@ class stateExampleSTART (object):
 
     def __init__ (self, mainInst):
         self.keymap = {
-            ('x', True, False, True): ("RUN", self.makeBall)
+            ('x', True, False, True): ("RUN", self.makeBall),
+            ('p', False, False, True): ("PUSH", stateSecondState)
         }
 
     def makeBall (self):
@@ -55,6 +56,12 @@ class Test_Tomayto (unittest.TestCase):
         self.assertFalse(hasattr(self.tom.startStateInst, "ball"))
         self.tom.eventHandler('x', True, False, True)
         self.assertTrue(cmds.objExists(self.tom.startStateInst.ball))
+
+    def test_eventHandler_handlesPushEvent (self):
+        self.tom.eventHandler('p', False, False, True)
+        [(cls, inst)] = self.tom.stateStack
+        self.assertEquals(cls, stateSecondState)
+        self.assertTrue(isinstance(inst, stateSecondState))
 
     def test_pushState_secondStatePushedProperly (self):
         self.tom.pushState(stateSecondState)
