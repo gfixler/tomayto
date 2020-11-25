@@ -29,3 +29,7 @@ class Test_Tomayto (unittest.TestCase):
     def test__init__startStateInstIsCorrect (self):
         self.assertTrue(isinstance(self.tom.startStateInst, stateExampleSTART))
 
+    def test_getCurrentState_startStateIsCorrect (self):
+        result = self.tom.getCurrentState()
+        self.assertEquals(result, (self.tom.startState, self.tom.startStateInst))
+
