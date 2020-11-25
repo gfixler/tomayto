@@ -14,7 +14,8 @@ class stateExampleSTART (object):
     def __init__ (self, mainInst):
         self.keymap = {
             ('x', True, False, True): ("RUN", self.makeBall),
-            ('p', False, False, True): ("PUSH", stateSecondState)
+            ('p', False, False, True): ("PUSH", stateSecondState),
+            ('a', False, False, True): ("PUSH", (stateFromArgument, ["Alice"])),
         }
 
     def makeBall (self):
@@ -25,6 +26,12 @@ class stateSecondState (object):
 
     def __init__ (self, mainInst):
         pass
+
+
+class stateFromArgument (object):
+
+    def __init__ (self, mainInst, name):
+        cmds.spaceLocator(name=name)
 
 
 class Test_Tomayto (unittest.TestCase):
@@ -62,6 +69,11 @@ class Test_Tomayto (unittest.TestCase):
         [(cls, inst)] = self.tom.stateStack
         self.assertEquals(cls, stateSecondState)
         self.assertTrue(isinstance(inst, stateSecondState))
+
+    @attr("maya")
+    def test_eventHandler_handlesPushEventWithArgument (self):
+        self.tom.eventHandler('a', False, False, True)
+        self.assertTrue(cmds.objectType("Alice"), "locator")
 
     def test_pushState_secondStatePushedProperly (self):
         self.tom.pushState(stateSecondState)
