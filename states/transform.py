@@ -10,7 +10,6 @@ class stateMove (object):
 
     def __init__ (self, mainInst):
         self.mainInst = mainInst
-        self.keymap = {}
 
     def onEnter (self):
         self.mainInst.pushState(selection.statePickXYZ)

@@ -54,7 +54,6 @@ class stateVisibleSelectionOfType (object):
     def __init__ (self, mainInst, nodeType, transformIsParent=False):
         self.mainInst = mainInst
         self.transforms = getTransformsOfType(nodeType, transformIsParent)
-        self.keymap = { }
 
     def onEnter (self):
         self.mainInst.pushState((stateVisiblySelectTransform, [self.transforms]))
