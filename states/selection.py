@@ -1,14 +1,7 @@
 import maya.cmds as cmds
 
 
-PRESS = True
-RELEASE = False
-
-ALT = True
-NOALT = False
-
-CTRL = True
-NOCTRL = False
+from .. core import ALT, NOALT, CTRL, NOCTRL, PRESS, RELEASE
 
 
 wspos = lambda tf: cmds.xform(tf, query=True, worldSpace=True, translation=True)
