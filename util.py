@@ -1,4 +1,7 @@
-import maya.cmds as cmds
+try:
+    import maya.cmds as cmds
+except ImportError:
+    print 'WARNING (%s): failed to load maya.cmds module.' % __file__
 
 
 # for use in naming nameCommands (they can't have punctuation in their names)

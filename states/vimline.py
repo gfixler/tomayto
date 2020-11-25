@@ -1,4 +1,8 @@
-import maya.cmds as cmds
+try:
+    import maya.cmds as cmds
+except ImportError:
+    print 'WARNING (%s): failed to load maya.cmds module.' % __file__
+
 
 from .. core import ALT, NOALT, CTRL, NOCTRL, PRESS, RELEASE
 from .. import util
