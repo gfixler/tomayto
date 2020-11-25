@@ -15,6 +15,12 @@ class stateExampleSTART (object):
         pass
 
 
+class stateSecondState (object):
+
+    def __init__ (self, mainInst):
+        pass
+
+
 class Test_Tomayto (unittest.TestCase):
 
     def setUp (self):
@@ -38,4 +44,10 @@ class Test_Tomayto (unittest.TestCase):
             delattr(self.tom.startStateInst, 'keymap')
         assert not hasattr(self.tom.startStateInst, 'keymap')
         self.tom.eventHandler('q', False, False, True)
+
+    def test_pushState_secondStatePushedProperly (self):
+        self.tom.pushState(stateSecondState)
+        [(cls, inst)] = self.tom.stateStack
+        self.assertEquals(cls, stateSecondState)
+        self.assertTrue(isinstance(inst, stateSecondState))
 
