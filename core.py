@@ -16,11 +16,6 @@ NOCTRL = False
 class Tomayto (object):
 
     def __init__ (self, startState):
-        """
-        Each state must be a class with an init that accepts a reference to the
-        instance of this class that instantiates it. Each instance should store
-        the ref for use in communicating with it later.
-        """
         self.startState = startState
         self.startStateInst = startState(self)
         self.stateStack = [] # start state doesn't go on stack/can't be popped
@@ -103,7 +98,6 @@ def enable (hotkeySetName="Tomayto", **kwargs):
     except:
         cmds.hotkeySet(hotkeySetName, edit=True, current=True)
     util.createTomaytoKeymap(**kwargs)
-
 
 def disable (removeHotkeySet=False, hotkeySetName="Tomayto", **kwargs):
     util.removeTomaytoKeymap(**kwargs)
