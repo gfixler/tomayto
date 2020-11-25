@@ -31,33 +31,56 @@ class stateSelect (object):
     def __init__ (self, mainInst):
         self.mainInst = mainInst
         self.keymap = {
-            ('m', NOALT, NOCTRL, PRESS): ("PUSH", (stateMap, "selectMesh")),
+            ('m', NOALT, NOCTRL, PRESS): ("PUSH", (stateMap, ("visibleSelectionOfType", ["mesh", True]))),
+            ('l', NOALT, NOCTRL, PRESS): ("PUSH", (stateMap, ("visibleSelectionOfType", ["locator", True]))),
+            ('c', NOALT, NOCTRL, PRESS): ("PUSH", (stateMap, ("visibleSelectionOfType", ["camera", True]))),
             ('n', NOALT, NOCTRL, PRESS): ("RUN", self.selectNone)
         }
 
-    def onPopTo (self, value):
-        self.mainInst.popState(value)
+    def onPopTo (self, *value):
+        self.mainInst.popState(*value)
 
     def selectNone (self):
         cmds.select(None)
         self.mainInst.popState()
 
 
-class stateSelectMesh (object):
+def getTransformsOfType (nodeType, transformIsParent=False):
+    nodes = cmds.ls(type=nodeType)
+    if transformIsParent:
+        getParent = lambda n: cmds.listRelatives(n, parent=True)[0]
+        nodes = map(getParent, nodes)
+    return nodes
 
-    def __init__ (self, mainInst):
+
+class stateVisibleSelectionOfType (object):
+
+    def __init__ (self, mainInst, nodeType, transformIsParent=False):
         self.mainInst = mainInst
+        self.transforms = getTransformsOfType(nodeType, transformIsParent)
+        self.keymap = { }
+
+    def onEnter (self):
+        self.mainInst.pushState((stateMap, ("visiblySelectTransform", [self.transforms])))
+
+    def onPopTo (self, *_):
+        self.mainInst.popState()
+
+
+class stateVisiblySelectTransform (object):
+
+    def __init__ (self, mainInst, transforms):
+        self.mainInst = mainInst
+        self.transforms = transforms
         self.keymap = {
             ("Return", NOALT, NOCTRL, PRESS): ("POP", self.popSelection)
         }
 
     def onEnter (self):
         cmds.undoInfo(openChunk=True)
-        meshes = cmds.ls(type="mesh")
-        tfs = map(lambda x: cmds.listRelatives(x, parent=True)[0], meshes)
         self.anns = []
         sel = cmds.ls(selection=True, flatten=True)
-        for alpha, name in zip("abcdefghijklmnopqrstuvwxyz0123456789", sorted(list(set(tfs)))):
+        for alpha, name in zip("abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", self.transforms):
             print alpha, name
             ann = cmds.annotate(name, tx=alpha, point=wspos(name))
             cmds.color(ann, rgbColor=(1, 1, 1))
@@ -82,6 +105,7 @@ class stateSelectMesh (object):
 stateMap = {
     "pickXYZ": statePickXYZ,
     "select": stateSelect,
-    "selectMesh": stateSelectMesh,
+    "visibleSelectionOfType": stateVisibleSelectionOfType,
+    "visiblySelectTransform": stateVisiblySelectTransform,
 }
 

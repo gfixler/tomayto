@@ -4,6 +4,7 @@ import maya.mel as mel
 from .. core import ALT, NOALT, CTRL, NOCTRL, PRESS, RELEASE
 
 import selection
+import transform
 import vimline
 
 
@@ -19,7 +20,7 @@ class stateSTART (object):
             ('d', NOALT, NOCTRL, PRESS):   ("RUN", cmds.delete),
             ('f', NOALT, NOCTRL, PRESS):   ("RUN", cmds.viewFit),
             ('F', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.viewFit(allObjects=True)),
-            ('m', NOALT, NOCTRL, PRESS):   ("PUSH", (stateMap, "move")),
+            ('m', NOALT, NOCTRL, PRESS):   ("PUSH", (transform.stateMap, "move")),
             ('u', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.evalDeferred(cmds.undo)),
             ('r', NOALT, CTRL,   PRESS):   ("RUN", lambda: cmds.evalDeferred(cmds.redo)),
             ('s', NOALT, NOCTRL, PRESS):   ("PUSH", (selection.stateMap, "select")),
@@ -38,22 +39,6 @@ class stateSTART (object):
 
     def switchToMayaHotkeys (self):
         cmds.hotkeySet("Maya_Default", edit=True, current=True)
-
-
-class stateMove (object):
-
-    def __init__ (self, mainInst):
-        self.mainInst = mainInst
-        self.keymap = {}
-
-    def onEnter (self):
-        self.mainInst.pushState((selection.stateMap, "pickXYZ"))
-
-    def onPopTo (self, value):
-        x, y, z = value
-        selected = cmds.ls(selection=True)
-        map(lambda tf: cmds.move(x, y, z, tf), selected)
-        self.mainInst.popState()
 
 
 class stateToolSelect (object):
@@ -92,7 +77,6 @@ class stateToolSelect (object):
 
 stateMap = {
     "START": stateSTART,
-    "move": stateMove,
     "toolSelect": stateToolSelect,
 }
 
