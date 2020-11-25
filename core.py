@@ -35,14 +35,15 @@ class Tomayto (object):
         if event == ('?', True, True, True):
             self.helpOnCurrentState()
             return
-        elif event in stateInst.keymap.keys():
-            eventAction, eventActionData = stateInst.keymap[event]
-            if eventAction == "PUSH":
-                self.pushState(eventActionData)
-            elif eventAction == "POP":
-                self.popState(eventActionData)
-            elif eventAction == "RUN":
-                self.runMethod(eventActionData)
+        elif hasattr(stateInst, 'keymap'):
+            if event in stateInst.keymap.keys():
+                eventAction, eventActionData = stateInst.keymap[event]
+                if eventAction == "PUSH":
+                    self.pushState(eventActionData)
+                elif eventAction == "POP":
+                    self.popState(eventActionData)
+                elif eventAction == "RUN":
+                    self.runMethod(eventActionData)
 
     def pushState (self, stateData):
         try:

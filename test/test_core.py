@@ -33,3 +33,9 @@ class Test_Tomayto (unittest.TestCase):
         result = self.tom.getCurrentState()
         self.assertEquals(result, (self.tom.startState, self.tom.startStateInst))
 
+    def test_eventHandler_stateDoesNotRequireKeymap (self):
+        if hasattr(self.tom.startStateInst, 'keymap'):
+            delattr(self.tom.startStateInst, 'keymap')
+        assert not hasattr(self.tom.startStateInst, 'keymap')
+        self.tom.eventHandler('q', False, False, True)
+
