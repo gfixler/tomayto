@@ -12,7 +12,12 @@ except ImportError:
 class stateExampleSTART (object):
 
     def __init__ (self, mainInst):
-        pass
+        self.keymap = {
+            ('x', True, False, True): ("RUN", self.makeBall)
+        }
+
+    def makeBall (self):
+        self.ball = cmds.polySphere()[0]
 
 
 class stateSecondState (object):
@@ -44,6 +49,12 @@ class Test_Tomayto (unittest.TestCase):
             delattr(self.tom.startStateInst, 'keymap')
         assert not hasattr(self.tom.startStateInst, 'keymap')
         self.tom.eventHandler('q', False, False, True)
+
+    @attr("maya")
+    def test_eventHandler_handlesRunEvent (self):
+        self.assertFalse(hasattr(self.tom.startStateInst, "ball"))
+        self.tom.eventHandler('x', True, False, True)
+        self.assertTrue(cmds.objExists(self.tom.startStateInst.ball))
 
     def test_pushState_secondStatePushedProperly (self):
         self.tom.pushState(stateSecondState)
