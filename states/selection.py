@@ -31,9 +31,9 @@ class stateSelect (object):
     def __init__ (self, mainInst):
         self.mainInst = mainInst
         self.keymap = {
-            ('m', NOALT, NOCTRL, PRESS): ("PUSH", (stateMap, ("visibleSelectionOfType", ["mesh", True]))),
-            ('l', NOALT, NOCTRL, PRESS): ("PUSH", (stateMap, ("visibleSelectionOfType", ["locator", True]))),
-            ('c', NOALT, NOCTRL, PRESS): ("PUSH", (stateMap, ("visibleSelectionOfType", ["camera", True]))),
+            ('m', NOALT, NOCTRL, PRESS): ("PUSH", (stateVisibleSelectionOfType, ["mesh", True])),
+            ('l', NOALT, NOCTRL, PRESS): ("PUSH", (stateVisibleSelectionOfType, ["locator", True])),
+            ('c', NOALT, NOCTRL, PRESS): ("PUSH", (stateVisibleSelectionOfType, ["camera", True])),
             ('n', NOALT, NOCTRL, PRESS): ("RUN", self.selectNone)
         }
 
@@ -61,7 +61,7 @@ class stateVisibleSelectionOfType (object):
         self.keymap = { }
 
     def onEnter (self):
-        self.mainInst.pushState((stateMap, ("visiblySelectTransform", [self.transforms])))
+        self.mainInst.pushState((stateVisiblySelectTransform, [self.transforms]))
 
     def onPopTo (self, *_):
         self.mainInst.popState()
@@ -100,12 +100,4 @@ class stateVisiblySelectTransform (object):
         cmds.undoInfo(closeChunk=True)
         sel = cmds.ls(selection=True, flatten=True)
         return sel
-
-
-stateMap = {
-    "pickXYZ": statePickXYZ,
-    "select": stateSelect,
-    "visibleSelectionOfType": stateVisibleSelectionOfType,
-    "visiblySelectTransform": stateVisiblySelectTransform,
-}
 

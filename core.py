@@ -15,33 +15,29 @@ NOCTRL = False
 
 class Tomayto (object):
 
-    def __init__ (self, startStateMap, startStateName):
+    def __init__ (self, startState):
         """
         Each state must be a class with an init that accepts a reference to the
         instance of this class that instantiates it. Each instance should store
         the ref for use in communicating with it later.
-        "startStateMap" is a dict of name:state pairs of state class references.
-        "startStateName" is the string key of the starting state in startStateMap.
         """
-        self.startStateMap = startStateMap
-        self.startStateName = startStateName
-        startStateClass = startStateMap[startStateName]
-        self.startStateInst = startStateClass(self)
+        self.startState = startState
+        self.startStateInst = startState(self)
         self.stateStack = [] # start state doesn't go on stack/can't be popped
 
     def getCurrentState (self):
         if self.stateStack:
             return self.stateStack[-1]
-        return (self.startStateName, self.startStateMap, self.startStateInst)
+        return (self.startState, self.startStateInst)
 
     def eventHandler (self, key, alt, ctrl, press):
-        stateName, stateMap, state = self.getCurrentState()
+        state, stateInst = self.getCurrentState()
         event = (key, alt, ctrl, press)
         if event == ('?', True, True, True):
             self.helpOnCurrentState()
             return
-        elif event in state.keymap.keys():
-            eventAction, eventActionData = state.keymap[event]
+        elif event in stateInst.keymap.keys():
+            eventAction, eventActionData = stateInst.keymap[event]
             if eventAction == "PUSH":
                 self.pushState(eventActionData)
             elif eventAction == "POP":
@@ -49,25 +45,23 @@ class Tomayto (object):
             elif eventAction == "RUN":
                 self.runMethod(eventActionData)
 
-    def pushState (self, (stateMap, stateData)):
+    def pushState (self, stateData):
         try:
-            stateName, stateArgs = stateData
+            state, stateArgs = stateData
         except:
             stateArgs = []
-            stateName = stateData
-        if stateName in stateMap:
-            stateClass = stateMap[stateName]
-            newStateInst = stateClass(self, *stateArgs)
-            self.stateStack.append((stateName, stateMap, newStateInst))
-            try:
-                newStateInst.onEnter()
-            except:
-                pass
+            state = stateData
+        stateInst = state(self, *stateArgs)
+        self.stateStack.append((state, stateInst))
+        try:
+            stateInst.onEnter()
+        except:
+            pass
 
     def popState (self, valueAction=None):
         if self.stateStack:
             self.stateStack.pop()
-            stateName, stateMap, stateInst = self.getCurrentState()
+            state, stateInst = self.getCurrentState()
             try:
                 if valueAction:
                     value = valueAction()
@@ -81,13 +75,13 @@ class Tomayto (object):
         method()
 
     def helpOnCurrentState (self):
-        stateName, stateMap, stateInst = self.getCurrentState()
-        print "HELP (" + stateName + ")"
+        state, stateInst = self.getCurrentState()
+        print "HELP (" + state.__name__ + ")"
         for k, v in stateInst.keymap.items():
             print "\t", k, v
         print "STATE STACK:"
-        for s in self.stateStack:
-            print "\t", s
+        for c, i in self.stateStack:
+            print "\t", c.__name__, i
 
     def tester (self, key, alt, ctrl, press):
         """

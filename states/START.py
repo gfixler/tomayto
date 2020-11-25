@@ -30,14 +30,14 @@ class stateSTART (object):
             ('L', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.currentTime(maxTime())),
             ('M', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.currentTime(round((minTime() + maxTime()) / 2))),
             ('M', ALT, CTRL, PRESS):       ("RUN", self.switchToMayaHotkeys),
-            ('t', NOALT, NOCTRL, PRESS):   ("PUSH", (stateMap, "toolSelect")),
+            ('t', NOALT, NOCTRL, PRESS):   ("PUSH", stateToolSelect),
 
-            ('m', NOALT, NOCTRL, PRESS):   ("PUSH", (transform.stateMap, "move")),
+            ('m', NOALT, NOCTRL, PRESS):   ("PUSH", transform.stateMove),
 
-            ('s', NOALT, NOCTRL, PRESS):   ("PUSH", (selection.stateMap, "select")),
+            ('s', NOALT, NOCTRL, PRESS):   ("PUSH", selection.stateSelect),
 
-            ('v', NOALT, NOCTRL, PRESS):   ("PUSH", (vimline.stateMap, "vimline")),
-            ('V', NOALT, NOCTRL, PRESS):   ("PUSH", (vimline.stateMap, "vimlineTestWin")),
+            ('v', NOALT, NOCTRL, PRESS):   ("PUSH", vimline.State_Vimline),
+            ('V', NOALT, NOCTRL, PRESS):   ("PUSH", vimline.State_VimlineTestWin),
         }
 
     def switchToMayaHotkeys (self):
@@ -76,10 +76,4 @@ class stateToolSelect (object):
     def selectManipTool (self):
         cmds.setToolTo(mel.eval("$temp = $gshowManip"))
         self.mainInst.popState()
-
-
-stateMap = {
-    "START": stateSTART,
-    "toolSelect": stateToolSelect,
-}
 

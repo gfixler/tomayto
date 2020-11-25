@@ -12,6 +12,6 @@ def initialize ():
             cmds.hotkeySet("Tomayto", current=True)
     core.disable()
     core.enable()
-    tom = core.Tomayto(START.stateMap, "START")
+    tom = core.Tomayto(START.stateSTART)
     return tom
 

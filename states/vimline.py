@@ -22,7 +22,7 @@ class State_Vimline (object):
 
     def onEnter (self):
         print "entering Vimline"
-        self.mainInst.pushState((stateMap, "vimlineNormalMode"))
+        self.mainInst.pushState(State_VimlineNormalMode)
 
     def onPopTo (self, *_):
         print "exiting Vimline"
@@ -93,7 +93,7 @@ class State_VimlineTestWin (object):
 
 
     def onEnter (self):
-        self.mainInst.pushState((stateMap, ("vimline", [self.testWinOnChange])))
+        self.mainInst.pushState((State_Vimline, [self.testWinOnChange]))
 
     def onPopTo (self, *_):
         cmds.deleteUI(self.mainInst.vimlineTestWin["win"])
@@ -107,10 +107,10 @@ class State_VimlineNormalMode (object):
         self.mainInst.vimline["mode"] = "NORMAL"
         self.handleChange()
         self.keymap = {
-            ("i", NOALT, NOCTRL, PRESS): ("PUSH", (stateMap, ("vimlineEnterInsertMode", ["insert"]))),
-            ("I", NOALT, NOCTRL, PRESS): ("PUSH", (stateMap, ("vimlineEnterInsertMode", ["INSERT"]))),
-            ("a", NOALT, NOCTRL, PRESS): ("PUSH", (stateMap, ("vimlineEnterInsertMode", ["append"]))),
-            ("A", NOALT, NOCTRL, PRESS): ("PUSH", (stateMap, ("vimlineEnterInsertMode", ["APPEND"]))),
+            ("i", NOALT, NOCTRL, PRESS): ("PUSH", (State_VimlineEnterInsertMode, ["insert"])),
+            ("I", NOALT, NOCTRL, PRESS): ("PUSH", (State_VimlineEnterInsertMode, ["INSERT"])),
+            ("a", NOALT, NOCTRL, PRESS): ("PUSH", (State_VimlineEnterInsertMode, ["append"])),
+            ("A", NOALT, NOCTRL, PRESS): ("PUSH", (State_VimlineEnterInsertMode, ["APPEND"])),
             ("h", NOALT, NOCTRL, PRESS): ("RUN", self.cursorLeft),
             ("l", NOALT, NOCTRL, PRESS): ("RUN", self.cursorRight),
             ("0", NOALT, NOCTRL, PRESS): ("RUN", self.toFirstColumn),
@@ -204,7 +204,7 @@ class State_VimlineEnterInsertMode (object):
             ("Return", NOALT, NOCTRL, PRESS): ("POP", self.handleEscape),
         }
         for k in util.keyChars:
-            self.keymap[(k, NOALT, NOCTRL, PRESS)] = ("PUSH", (stateMap, ("vimlineInsertMode", [k])))
+            self.keymap[(k, NOALT, NOCTRL, PRESS)] = ("PUSH", (State_VimlineInsertMode, [k]))
 
     def onEnter (self):
         self.handleChange()
@@ -257,13 +257,4 @@ class State_VimlineInsertMode (object):
 
     def onEnter (self):
         self.mainInst.popState()
-
-
-stateMap = {
-    "vimline": State_Vimline,
-    "vimlineTestWin": State_VimlineTestWin,
-    "vimlineNormalMode": State_VimlineNormalMode,
-    "vimlineEnterInsertMode": State_VimlineEnterInsertMode,
-    "vimlineInsertMode": State_VimlineInsertMode,
-}
 
