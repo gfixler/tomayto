@@ -15,6 +15,7 @@ class stateExampleSTART (object):
         self.keymap = {
             ('x', True, False, True): ("RUN", self.makeBall),
             ('p', False, False, True): ("PUSH", stateSecondState),
+            ('o', False, False, True): ("PUSH", stateOnEnterWitness),
             ('a', False, False, True): ("PUSH", (stateFromArgument, ["Alice"])),
         }
 
@@ -32,6 +33,12 @@ class stateFromArgument (object):
 
     def __init__ (self, mainInst, name):
         cmds.spaceLocator(name=name)
+
+
+class stateOnEnterWitness (object):
+
+    def __init__ (self, mainInst):
+        cmds.spaceLocator(name="onEnterWitnessLocator")
 
 
 class Test_Tomayto (unittest.TestCase):
@@ -69,6 +76,12 @@ class Test_Tomayto (unittest.TestCase):
         [(cls, inst)] = self.tom.stateStack
         self.assertEquals(cls, stateSecondState)
         self.assertTrue(isinstance(inst, stateSecondState))
+
+    @attr("maya")
+    def test_eventHandler_handlesPushEventWithOnEnterCallback (self):
+        self.tom.eventHandler('o', False, False, True)
+        [(cls, inst)] = self.tom.stateStack
+        self.assertTrue(cmds.objExists("onEnterWitnessLocator"))
 
     @attr("maya")
     def test_eventHandler_handlesPushEventWithArgument (self):
