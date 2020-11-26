@@ -32,7 +32,7 @@ class stateExampleSTART (object):
     def __init__ (self, mainInst):
         self.keymap = {
             ('u', False, False, True): ("PUSH", stateSimple),
-            ('e', False, False, True): ("PUSH", stateWithOnEnterCallback),
+            ('e', False, False, True): ("PUSH", stateWithOnEnterCallbackForPushEvent),
             ('a', False, False, True): ("PUSH", (stateFromArgument, ["Alice"])),
             ('r', True, False, True): ("RUN", self.makeBall),
         }
@@ -59,13 +59,22 @@ class stateFromArgument (object):
         cmds.spaceLocator(name=name)
 
 
-class stateWithOnEnterCallback (object):
+class stateWithOnEnterCallbackForPushEvent (object):
 
     def __init__ (self, mainInst):
         pass
 
     def onEnter (self):
-        cmds.spaceLocator(name="onEnterWitnessLocator")
+        cmds.spaceLocator(name="onEnterFromPushEventWitnessLocator")
+
+
+class stateWithOnEnterCallbackForPush (object):
+
+    def __init__ (self, mainInst):
+        pass
+
+    def onEnter (self):
+        cmds.spaceLocator(name="onEnterFromPushWitnessLocator")
 
 
 class Test_Tomayto (unittest.TestCase):
@@ -100,9 +109,9 @@ class Test_Tomayto (unittest.TestCase):
 
     @attr("maya")
     def test_eventHandler_handlesPushEventWithOnEnterCallback (self):
-        self.assertFalse(cmds.objExists("onEnterWitnessLocator"))
+        self.assertFalse(cmds.objExists("onEnterFromPushEventWitnessLocator"))
         self.tom.eventHandler('e', False, False, True)
-        self.assertTrue(cmds.objExists("onEnterWitnessLocator"))
+        self.assertTrue(cmds.objExists("onEnterFromPushEventWitnessLocator"))
 
     @attr("maya")
     def test_eventHandler_handlesPushEventWithArgument (self):
@@ -116,11 +125,11 @@ class Test_Tomayto (unittest.TestCase):
         self.assertTrue(isinstance(inst, stateSecondState))
 
     @attr("maya")
-    def test_pushState_handlesPushEventWithOnEnterCallback (self):
-        self.assertFalse(cmds.objExists("onEnterWitnessLocator"))
-        self.tom.pushState(stateWithOnEnterCallback)
+    def test_pushState_handlesPushWithOnEnterCallback (self):
+        self.assertFalse(cmds.objExists("onEnterFromPushWitnessLocator"))
+        self.tom.pushState(stateWithOnEnterCallbackForPush)
         [(cls, inst)] = self.tom.stateStack
-        self.assertTrue(cmds.objExists("onEnterWitnessLocator"))
+        self.assertTrue(cmds.objExists("onEnterFromPushWitnessLocator"))
 
     @attr("maya")
     def test_pushState_handlesPushEventWithArgument (self):
