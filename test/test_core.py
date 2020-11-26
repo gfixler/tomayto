@@ -94,3 +94,14 @@ class Test_Tomayto (unittest.TestCase):
         self.assertEquals(cls, stateSecondState)
         self.assertTrue(isinstance(inst, stateSecondState))
 
+    @attr("maya")
+    def test_pushState_handlesPushEventWithOnEnterCallback (self):
+        self.tom.pushState(stateOnEnterWitness)
+        [(cls, inst)] = self.tom.stateStack
+        self.assertTrue(cmds.objExists("onEnterWitnessLocator"))
+
+    @attr("maya")
+    def test_pushState_handlesPushEventWithArgument (self):
+        self.tom.pushState((stateFromArgument, ["Alice"]))
+        self.assertTrue(cmds.objectType("Alice"), "locator")
+
