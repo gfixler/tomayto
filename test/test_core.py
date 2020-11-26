@@ -114,6 +114,12 @@ class Test_Tomayto (unittest.TestCase):
         self.tom.eventHandler('a', False, False, True)
         self.assertEquals(varFromArgument, "Alice")
 
+    def test_eventHandler_handlesRunEvent (self):
+        global varFromRunEvent
+        self.assertRaises(NameError, lambda: varFromRunEvent)
+        self.tom.eventHandler('r', True, False, True)
+        self.assertTrue(varFromRunEvent)
+
     def test_pushState_stateIsPushedProperly (self):
         self.tom.pushState(stateSimple)
         [(cls, inst)] = self.tom.stateStack
@@ -134,10 +140,4 @@ class Test_Tomayto (unittest.TestCase):
             self.assertRaises(NameError, lambda: varFromArgument)
         self.tom.pushState((stateThatAcceptsAnArgument, ["Bob"]))
         self.assertEquals(varFromArgument, "Bob")
-
-    def test_eventHandler_handlesRunEvent (self):
-        global varFromRunEvent
-        self.assertRaises(NameError, lambda: varFromRunEvent)
-        self.tom.eventHandler('r', True, False, True)
-        self.assertTrue(varFromRunEvent)
 
