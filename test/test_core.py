@@ -3,11 +3,6 @@ from nose.plugins.attrib import attr
 
 from .. import core
 
-try:
-    import maya.cmds as cmds
-except ImportError:
-    print 'WARNING (%s): failed to load maya.cmds module.' % __file__
-
 
 """
 NOTE: SOME RULES I'M FOLLOWING IN TESTING STATE STUFF:
@@ -33,12 +28,13 @@ class stateExampleSTART (object):
         self.keymap = {
             ('u', False, False, True): ("PUSH", stateSimple),
             ('e', False, False, True): ("PUSH", stateWithOnEnterCallbackForPushEvent),
-            ('a', False, False, True): ("PUSH", (stateFromPushWithArgument, ["Alice"])),
-            ('r', True, False, True): ("RUN", self.makeBall),
+            ('a', False, False, True): ("PUSH", (stateThatAcceptsAnArgument, ["Alice"])),
+            ('r', True, False, True): ("RUN", self.runFromEvent),
         }
 
-    def makeBall (self):
-        self.ball = cmds.polySphere()
+    def runFromEvent (self):
+        global varFromRunEvent
+        varFromRunEvent = True
 
 
 class stateSimple (object):
@@ -53,7 +49,8 @@ class stateWithOnEnterCallbackForPushEvent (object):
         pass
 
     def onEnter (self):
-        cmds.spaceLocator(name="onEnterFromPushEventWitnessLocator")
+        global varFromOnEnterFromPushEvent
+        varFromOnEnterFromPushEvent = True
 
 
 class stateWithOnEnterCallbackForPush (object):
@@ -62,13 +59,15 @@ class stateWithOnEnterCallbackForPush (object):
         pass
 
     def onEnter (self):
-        cmds.spaceLocator(name="onEnterFromPushWitnessLocator")
+        global varFromOnEnterFromPush
+        varFromOnEnterFromPush = True
 
 
-class stateFromPushWithArgument (object):
+class stateThatAcceptsAnArgument (object):
 
     def __init__ (self, mainInst, name):
-        cmds.spaceLocator(name=name)
+        global varFromArgument
+        varFromArgument = name
 
 
 class Test_Tomayto (unittest.TestCase):
@@ -101,41 +100,44 @@ class Test_Tomayto (unittest.TestCase):
         self.assertEquals(cls, stateSimple)
         self.assertTrue(isinstance(inst, stateSimple))
 
-    @attr("maya")
     def test_eventHandler_handlesPushEventWithOnEnterCallback (self):
-        self.assertFalse(cmds.objExists("onEnterFromPushEventWitnessLocator"))
+        self.assertRaises(NameError, lambda: varFromOnEnterFromPushEvent)
         self.tom.eventHandler('e', False, False, True)
-        self.assertTrue(cmds.objExists("onEnterFromPushEventWitnessLocator"))
+        self.assertTrue(varFromOnEnterFromPushEvent)
 
-    @attr("maya")
     def test_eventHandler_handlesPushEventWithArgument (self):
-        self.assertFalse(cmds.objExists("Alice"))
+        global varFromArgument
+        if "varFromArgument" in globals():
+            self.assertNotEquals(varFromArgument, "Alice")
+        else:
+            self.assertRaises(NameError, lambda: varFromArgument)
         self.tom.eventHandler('a', False, False, True)
-        self.assertTrue(cmds.objExists("Alice"))
+        self.assertEquals(varFromArgument, "Alice")
 
-    def test_pushState_secondStatePushedProperly (self):
+    def test_pushState_stateIsPushedProperly (self):
         self.tom.pushState(stateSimple)
         [(cls, inst)] = self.tom.stateStack
         self.assertEquals(cls, stateSimple)
         self.assertTrue(isinstance(inst, stateSimple))
 
-    @attr("maya")
     def test_pushState_handlesPushWithOnEnterCallback (self):
-        self.assertFalse(cmds.objExists("onEnterFromPushWitnessLocator"))
+        self.assertRaises(NameError, lambda: varFromOnEnterFromPush)
         self.tom.pushState(stateWithOnEnterCallbackForPush)
         [(cls, inst)] = self.tom.stateStack
-        self.assertTrue(cmds.objExists("onEnterFromPushWitnessLocator"))
+        self.assertTrue(varFromOnEnterFromPush)
 
-    @attr("maya")
     def test_pushState_handlesPushWithArgument (self):
-        self.assertFalse(cmds.objExists("Bob"))
-        self.tom.pushState((stateFromPushWithArgument, ["Bob"]))
-        self.assertTrue(cmds.objExists("Bob"))
+        global varFromArgument
+        if "varFromArgument" in globals():
+            self.assertNotEquals(varFromArgument, "Bob")
+        else:
+            self.assertRaises(NameError, lambda: varFromArgument)
+        self.tom.pushState((stateThatAcceptsAnArgument, ["Bob"]))
+        self.assertEquals(varFromArgument, "Bob")
 
-    @attr("maya")
     def test_eventHandler_handlesRunEvent (self):
-        self.assertFalse(hasattr(self.tom.startStateInst, "ball"))
+        global varFromRunEvent
+        self.assertRaises(NameError, lambda: varFromRunEvent)
         self.tom.eventHandler('r', True, False, True)
-        [transform, shape] = self.tom.startStateInst.ball
-        self.assertEquals(cmds.objectType(shape), "polySphere")
+        self.assertTrue(varFromRunEvent)
 
