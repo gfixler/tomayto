@@ -9,6 +9,24 @@ except ImportError:
     print 'WARNING (%s): failed to load maya.cmds module.' % __file__
 
 
+"""
+NOTE: SOME RULES I'M FOLLOWING IN TESTING STATE STUFF:
+
+    1. TRY TO ISOLATE PATHWAYS
+        Don't reuse test states for a bunch of things; let them all be unique,
+        so we don't end up testing, and thus debugging, their interactions.
+
+    2. KEEP EVENTS CONSISTENT
+        Don't mix around the ALT/CTRL/PRESS booleans just for the sake of it,
+        unless those are the things you're testing. Almost all of the events
+        should be like: (<letter>, False, False, True) - i.e. a letter, with no
+        mods, that matches/triggers on key press.
+
+    3. TRY TO MAKE EVENT LETTERS MEANINGFUL
+        It's a bit easier to follow, and find related bits, while testing the
+        run event handler, if the event key is 'r', not a randomly chosen key.
+"""
+
 class stateExampleSTART (object):
 
     def __init__ (self, mainInst):
