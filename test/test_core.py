@@ -14,13 +14,19 @@ class stateExampleSTART (object):
     def __init__ (self, mainInst):
         self.keymap = {
             ('x', True, False, True): ("RUN", self.makeBall),
-            ('p', False, False, True): ("PUSH", stateSecondState),
+            ('p', False, False, True): ("PUSH", stateSimple),
             ('o', False, False, True): ("PUSH", stateOnEnterWitness),
             ('a', False, False, True): ("PUSH", (stateFromArgument, ["Alice"])),
         }
 
     def makeBall (self):
         self.ball = cmds.polySphere()[0]
+
+
+class stateSimple (object):
+
+    def __init__ (self, mainInst):
+        pass
 
 
 class stateSecondState (object):
@@ -74,8 +80,8 @@ class Test_Tomayto (unittest.TestCase):
     def test_eventHandler_handlesPushEvent (self):
         self.tom.eventHandler('p', False, False, True)
         [(cls, inst)] = self.tom.stateStack
-        self.assertEquals(cls, stateSecondState)
-        self.assertTrue(isinstance(inst, stateSecondState))
+        self.assertEquals(cls, stateSimple)
+        self.assertTrue(isinstance(inst, stateSimple))
 
     @attr("maya")
     def test_eventHandler_handlesPushEventWithOnEnterCallback (self):
