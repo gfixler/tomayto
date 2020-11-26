@@ -33,7 +33,7 @@ class stateExampleSTART (object):
         self.keymap = {
             ('u', False, False, True): ("PUSH", stateSimple),
             ('e', False, False, True): ("PUSH", stateWithOnEnterCallbackForPushEvent),
-            ('a', False, False, True): ("PUSH", (stateFromArgument, ["Alice"])),
+            ('a', False, False, True): ("PUSH", (stateFromPushWithArgument, ["Alice"])),
             ('r', True, False, True): ("RUN", self.makeBall),
         }
 
@@ -53,7 +53,7 @@ class stateSecondState (object):
         pass
 
 
-class stateFromArgument (object):
+class stateFromPushWithArgument (object):
 
     def __init__ (self, mainInst, name):
         cmds.spaceLocator(name=name)
@@ -115,8 +115,9 @@ class Test_Tomayto (unittest.TestCase):
 
     @attr("maya")
     def test_eventHandler_handlesPushEventWithArgument (self):
+        self.assertFalse(cmds.objExists("Alice"))
         self.tom.eventHandler('a', False, False, True)
-        self.assertTrue(cmds.objectType("Alice"), "locator")
+        self.assertTrue(cmds.objExists("Alice"))
 
     def test_pushState_secondStatePushedProperly (self):
         self.tom.pushState(stateSecondState)
@@ -132,9 +133,10 @@ class Test_Tomayto (unittest.TestCase):
         self.assertTrue(cmds.objExists("onEnterFromPushWitnessLocator"))
 
     @attr("maya")
-    def test_pushState_handlesPushEventWithArgument (self):
-        self.tom.pushState((stateFromArgument, ["Alice"]))
-        self.assertTrue(cmds.objectType("Alice"), "locator")
+    def test_pushState_handlesPushWithArgument (self):
+        self.assertFalse(cmds.objExists("Bob"))
+        self.tom.pushState((stateFromPushWithArgument, ["Bob"]))
+        self.assertTrue(cmds.objExists("Bob"))
 
     @attr("maya")
     def test_eventHandler_handlesRunEvent (self):
