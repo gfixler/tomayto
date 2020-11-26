@@ -47,12 +47,6 @@ class stateSimple (object):
         pass
 
 
-class stateSecondState (object):
-
-    def __init__ (self, mainInst):
-        pass
-
-
 class stateFromPushWithArgument (object):
 
     def __init__ (self, mainInst, name):
@@ -120,10 +114,10 @@ class Test_Tomayto (unittest.TestCase):
         self.assertTrue(cmds.objExists("Alice"))
 
     def test_pushState_secondStatePushedProperly (self):
-        self.tom.pushState(stateSecondState)
+        self.tom.pushState(stateSimple)
         [(cls, inst)] = self.tom.stateStack
-        self.assertEquals(cls, stateSecondState)
-        self.assertTrue(isinstance(inst, stateSecondState))
+        self.assertEquals(cls, stateSimple)
+        self.assertTrue(isinstance(inst, stateSimple))
 
     @attr("maya")
     def test_pushState_handlesPushWithOnEnterCallback (self):
