@@ -31,10 +31,10 @@ class stateExampleSTART (object):
 
     def __init__ (self, mainInst):
         self.keymap = {
-            ('r', True, False, True): ("RUN", self.makeBall),
             ('u', False, False, True): ("PUSH", stateSimple),
             ('e', False, False, True): ("PUSH", stateOnEnterWitness),
             ('a', False, False, True): ("PUSH", (stateFromArgument, ["Alice"])),
+            ('r', True, False, True): ("RUN", self.makeBall),
         }
 
     def makeBall (self):
@@ -89,13 +89,6 @@ class Test_Tomayto (unittest.TestCase):
         assert not hasattr(self.tom.startStateInst, 'keymap')
         self.tom.eventHandler('k', False, False, True)
 
-    @attr("maya")
-    def test_eventHandler_handlesRunEvent (self):
-        self.assertFalse(hasattr(self.tom.startStateInst, "ball"))
-        self.tom.eventHandler('r', True, False, True)
-        [transform, shape] = self.tom.startStateInst.ball
-        self.assertEquals(cmds.objectType(shape), "polySphere")
-
     def test_eventHandler_handlesPushEvent (self):
         self.tom.eventHandler('u', False, False, True)
         [(cls, inst)] = self.tom.stateStack
@@ -129,4 +122,11 @@ class Test_Tomayto (unittest.TestCase):
     def test_pushState_handlesPushEventWithArgument (self):
         self.tom.pushState((stateFromArgument, ["Alice"]))
         self.assertTrue(cmds.objectType("Alice"), "locator")
+
+    @attr("maya")
+    def test_eventHandler_handlesRunEvent (self):
+        self.assertFalse(hasattr(self.tom.startStateInst, "ball"))
+        self.tom.eventHandler('r', True, False, True)
+        [transform, shape] = self.tom.startStateInst.ball
+        self.assertEquals(cmds.objectType(shape), "polySphere")
 
