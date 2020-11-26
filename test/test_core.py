@@ -47,12 +47,6 @@ class stateSimple (object):
         pass
 
 
-class stateFromPushWithArgument (object):
-
-    def __init__ (self, mainInst, name):
-        cmds.spaceLocator(name=name)
-
-
 class stateWithOnEnterCallbackForPushEvent (object):
 
     def __init__ (self, mainInst):
@@ -69,6 +63,12 @@ class stateWithOnEnterCallbackForPush (object):
 
     def onEnter (self):
         cmds.spaceLocator(name="onEnterFromPushWitnessLocator")
+
+
+class stateFromPushWithArgument (object):
+
+    def __init__ (self, mainInst, name):
+        cmds.spaceLocator(name=name)
 
 
 class Test_Tomayto (unittest.TestCase):
