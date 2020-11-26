@@ -38,7 +38,7 @@ class stateExampleSTART (object):
         }
 
     def makeBall (self):
-        self.ball = cmds.polySphere()[0]
+        self.ball = cmds.polySphere()
 
 
 class stateSimple (object):
@@ -93,7 +93,8 @@ class Test_Tomayto (unittest.TestCase):
     def test_eventHandler_handlesRunEvent (self):
         self.assertFalse(hasattr(self.tom.startStateInst, "ball"))
         self.tom.eventHandler('r', True, False, True)
-        self.assertTrue(cmds.objExists(self.tom.startStateInst.ball))
+        [transform, shape] = self.tom.startStateInst.ball
+        self.assertEquals(cmds.objectType(shape), "polySphere")
 
     def test_eventHandler_handlesPushEvent (self):
         self.tom.eventHandler('u', False, False, True)
