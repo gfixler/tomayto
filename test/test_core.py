@@ -70,6 +70,40 @@ class stateThatAcceptsAnArgument (object):
         varFromArgument = name
 
 
+class stateWithOnPopToCallback (object):
+
+    def __init__ (self, mainInst):
+        pass
+
+    def onPopTo (self):
+        global varFromOnPopTo
+        varFromOnPopTo = True
+
+
+class stateWithOnPopToCallbackWithArgument (object):
+
+    def __init__ (self, mainInst):
+        pass
+
+    def onPopTo (self, argument):
+        global varFromOnPopToWithArgument
+        varFromOnPopToWithArgument = argument
+
+
+class stateWithPopEvents (object):
+
+    def __init__ (self, mainInst):
+        self.keymap = {
+            ('p', False, False, True): ("POP", None),
+            ('P', False, False, True): ("POP", self.popCallback),
+        }
+
+    def popCallback (self):
+        global varFromPopCallback
+        varFromPopCallback = True
+        return "popCallbackReturnValue"
+
+
 class Test_Tomayto (unittest.TestCase):
 
     def setUp (self):
@@ -114,6 +148,19 @@ class Test_Tomayto (unittest.TestCase):
         self.tom.eventHandler('a', False, False, True)
         self.assertEquals(varFromArgument, "Alice")
 
+    def test_eventHandler_handlesPopEvent (self):
+        self.tom.pushState(stateWithPopEvents)
+        [(cls, inst)] = self.tom.stateStack
+        self.assertEquals(cls, stateWithPopEvents)
+        self.tom.eventHandler('p', False, False, True)
+        self.assertEquals(self.tom.stateStack, [])
+
+    def test_eventHandler_handlesLocalPopCallback (self):
+        self.tom.pushState(stateWithPopEvents)
+        self.assertRaises(NameError, lambda: varFromPopCallback)
+        self.tom.eventHandler('P', False, False, True)
+        self.assertTrue(varFromPopCallback)
+
     def test_eventHandler_handlesRunEvent (self):
         global varFromRunEvent
         self.assertRaises(NameError, lambda: varFromRunEvent)
@@ -140,4 +187,28 @@ class Test_Tomayto (unittest.TestCase):
             self.assertRaises(NameError, lambda: varFromArgument)
         self.tom.pushState((stateThatAcceptsAnArgument, ["Bob"]))
         self.assertEquals(varFromArgument, "Bob")
+
+    def test_popState_stateIsPopped (self):
+        self.tom.pushState(stateSimple)
+        [(cls, inst)] = self.tom.stateStack
+        self.assertEquals(cls, stateSimple)
+        self.tom.popState()
+        self.assertEquals(self.tom.stateStack, [])
+
+    def test_popState_onPopToCallbackIsCalled (self):
+        self.tom.pushState(stateWithOnPopToCallback)
+        self.tom.pushState(stateWithPopEvents)
+        global varFromOnPopTo
+        self.assertRaises(NameError, lambda: varFromOnPopTo)
+        self.tom.popState()
+        self.assertTrue(varFromOnPopTo)
+
+    def test_popState_onPopToCallbackCanReceiveArgument (self):
+        self.tom.pushState(stateWithOnPopToCallbackWithArgument)
+        self.tom.pushState(stateWithPopEvents)
+        global varFromOnPopToWithArgument
+        self.assertRaises(NameError, lambda: varFromOnPopToWithArgument)
+        [_, (__, inst)] = self.tom.stateStack
+        self.tom.popState(inst.popCallback)
+        self.assertEquals(varFromOnPopToWithArgument, "popCallbackReturnValue")
 
