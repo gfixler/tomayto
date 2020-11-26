@@ -26,7 +26,7 @@ class stateExampleSTART (object):
 
     def __init__ (self, mainInst):
         self.keymap = {
-            ('u', False, False, True): ("PUSH", stateSimple),
+            ('p', False, False, True): ("PUSH", stateSimple),
             ('e', False, False, True): ("PUSH", stateWithOnEnterCallbackForPushEvent),
             ('a', False, False, True): ("PUSH", (stateThatAcceptsAnArgument, ["Alice"])),
             ('r', True, False, True): ("RUN", self.runFromEvent),
@@ -95,7 +95,7 @@ class Test_Tomayto (unittest.TestCase):
         self.tom.eventHandler('k', False, False, True)
 
     def test_eventHandler_handlesPushEvent (self):
-        self.tom.eventHandler('u', False, False, True)
+        self.tom.eventHandler('p', False, False, True)
         [(cls, inst)] = self.tom.stateStack
         self.assertEquals(cls, stateSimple)
         self.assertTrue(isinstance(inst, stateSimple))
