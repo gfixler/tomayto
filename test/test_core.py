@@ -13,9 +13,9 @@ class stateExampleSTART (object):
 
     def __init__ (self, mainInst):
         self.keymap = {
-            ('x', True, False, True): ("RUN", self.makeBall),
-            ('p', False, False, True): ("PUSH", stateSimple),
-            ('o', False, False, True): ("PUSH", stateOnEnterWitness),
+            ('r', True, False, True): ("RUN", self.makeBall),
+            ('u', False, False, True): ("PUSH", stateSimple),
+            ('e', False, False, True): ("PUSH", stateOnEnterWitness),
             ('a', False, False, True): ("PUSH", (stateFromArgument, ["Alice"])),
         }
 
@@ -69,23 +69,23 @@ class Test_Tomayto (unittest.TestCase):
         if hasattr(self.tom.startStateInst, 'keymap'):
             delattr(self.tom.startStateInst, 'keymap')
         assert not hasattr(self.tom.startStateInst, 'keymap')
-        self.tom.eventHandler('q', False, False, True)
+        self.tom.eventHandler('k', False, False, True)
 
     @attr("maya")
     def test_eventHandler_handlesRunEvent (self):
         self.assertFalse(hasattr(self.tom.startStateInst, "ball"))
-        self.tom.eventHandler('x', True, False, True)
+        self.tom.eventHandler('r', True, False, True)
         self.assertTrue(cmds.objExists(self.tom.startStateInst.ball))
 
     def test_eventHandler_handlesPushEvent (self):
-        self.tom.eventHandler('p', False, False, True)
+        self.tom.eventHandler('u', False, False, True)
         [(cls, inst)] = self.tom.stateStack
         self.assertEquals(cls, stateSimple)
         self.assertTrue(isinstance(inst, stateSimple))
 
     @attr("maya")
     def test_eventHandler_handlesPushEventWithOnEnterCallback (self):
-        self.tom.eventHandler('o', False, False, True)
+        self.tom.eventHandler('e', False, False, True)
         [(cls, inst)] = self.tom.stateStack
         self.assertTrue(cmds.objExists("onEnterWitnessLocator"))
 
