@@ -21,6 +21,16 @@ fst = lambda (x, _): x
 getName = lambda x: x.__name__
 
 
+def formatEventInfo (event):
+    key, alt, ctrl, action = event
+    eventStr = ("> " if action else "< ") \
+             + ("C-" if ctrl else "") \
+             + ("M-" if alt else "") \
+             + key
+    padToMaxEventLength = lambda x: (x + "    ")[:7] # longest e.g. "> C-M-x"
+    return padToMaxEventLength(eventStr)
+
+
 class Tomayto (object):
 
     def __init__ (self, startState):

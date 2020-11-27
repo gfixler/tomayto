@@ -110,6 +110,49 @@ class stateForTestingHelpOutput_noEvents (object):
         self.keymap = { }
 
 
+class Test_formatEventInfo (unittest.TestCase):
+
+    def test_simpleKeyPress (self):
+        result = core.formatEventInfo(('x', False, False, True))
+        expected = "> x    "
+        self.assertEquals(result, expected)
+
+    def test_simpleKeyRelease (self):
+        result = core.formatEventInfo(('q', False, False, False))
+        expected = "< q    "
+        self.assertEquals(result, expected)
+
+    def test_altKeyPress (self):
+        result = core.formatEventInfo(('j', True, False, True))
+        expected = "> M-j  "
+        self.assertEquals(result, expected)
+
+    def test_altKeyRelease (self):
+        result = core.formatEventInfo(('z', True, False, False))
+        expected = "< M-z  "
+        self.assertEquals(result, expected)
+
+    def test_ctrlKeyPress (self):
+        result = core.formatEventInfo(('p', False, True, True))
+        expected = "> C-p  "
+        self.assertEquals(result, expected)
+
+    def test_ctrlKeyRelease (self):
+        result = core.formatEventInfo(('v', False, True, False))
+        expected = "< C-v  "
+        self.assertEquals(result, expected)
+
+    def test_altCtrlKeyPress (self):
+        result = core.formatEventInfo(('w', True, True, True))
+        expected = "> C-M-w"
+        self.assertEquals(result, expected)
+
+    def test_altCtrlKeyRelease (self):
+        result = core.formatEventInfo(('k', True, True, False))
+        expected = "< C-M-k"
+        self.assertEquals(result, expected)
+
+
 class Test_Tomayto (unittest.TestCase):
 
     def setUp (self):
