@@ -104,6 +104,12 @@ class stateWithPopEvents (object):
         return "popCallbackReturnValue"
 
 
+class stateForTestingHelpOutput_noEvents (object):
+
+    def __init__ (self, mainInst):
+        self.keymap = { }
+
+
 class Test_Tomayto (unittest.TestCase):
 
     def setUp (self):
@@ -211,4 +217,14 @@ class Test_Tomayto (unittest.TestCase):
         [_, (__, inst)] = self.tom.stateStack
         self.tom.popState(inst.popCallback)
         self.assertEquals(varFromOnPopToWithArgument, "popCallbackReturnValue")
+
+    def test_getCurrentStateInfo_noEvents (self):
+        self.tom.pushState(stateSimple)
+        result = self.tom.getCurrentStateInfo()
+        expected = \
+"""State stack:
+    stateSimple
+    stateExampleSTART
+"""
+        self.assertEquals(result, expected)
 

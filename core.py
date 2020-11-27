@@ -17,6 +17,10 @@ CTRL = True
 NOCTRL = False
 
 
+fst = lambda (x, _): x
+getName = lambda x: x.__name__
+
+
 class Tomayto (object):
 
     def __init__ (self, startState):
@@ -73,6 +77,14 @@ class Tomayto (object):
 
     def runMethod (self, method):
         method()
+
+    def getCurrentStateInfo (self):
+        stackLine = "State stack:"
+        stackStates = [self.startState] + map(fst, self.stateStack)
+        stackStateNames = map(getName, stackStates)
+        stackStateLines = "\n    ".join(reversed(stackStateNames))
+        infoStr = stackLine + "\n    " + stackStateLines + "\n"
+        return infoStr
 
     def helpOnCurrentState (self):
         state, stateInst = self.getCurrentState()
