@@ -89,11 +89,29 @@ class Tomayto (object):
         method()
 
     def getCurrentStateInfo (self):
+        nltab = "\n    "
         stackLine = "State stack:"
         stackStates = [self.startState] + map(fst, self.stateStack)
         stackStateNames = map(getName, stackStates)
-        stackStateLines = "\n    ".join(reversed(stackStateNames))
-        infoStr = stackLine + "\n    " + stackStateLines + "\n"
+        stackStateLines = nltab + nltab.join(reversed(stackStateNames))
+        infoStr = stackLine + stackStateLines + "\n"
+        _, inst = self.getCurrentState()
+        try:
+            eventInfoStr = ""
+            for k, v in inst.keymap.items():
+                eventStr = "    " + formatEventInfo(k)
+                try:
+                    action, data = v
+                    name = None
+                except:
+                    action, name, data = v
+                actionStr = (action + " ")[:4]
+                nameStr = (name if name else str(data))
+                eventInfoStr += " - ".join([eventStr, actionStr, nameStr])
+            if eventInfoStr:
+                infoStr += "\nCurrent state events:\n" + eventInfoStr + "\n"
+        except:
+            pass
         return infoStr
 
     def helpOnCurrentState (self):
