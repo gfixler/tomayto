@@ -104,6 +104,90 @@ class stateWithPopEvents (object):
         return "popCallbackReturnValue"
 
 
+class stateForTestingInfoOutput_noEvents (object):
+
+    def __init__ (self, mainInst):
+        self.keymap = { }
+
+
+class stateForTestingInfoOutput_namedPushEvent (object):
+
+    def __init__ (self, mainInst):
+        self.keymap = {
+            ('p', False, False, True): ("PUSH", "Simple State", stateSimple),
+        }
+
+
+class stateForTestingInfoOutput_namedPushEventWithArgumentForOnEnter (object):
+
+    def __init__ (self, mainInst):
+        self.keymap = {
+            ('p', False, False, True): ("PUSH", "State w/ Argument", (stateThatAcceptsAnArgument, [42])),
+        }
+
+
+class stateForTestingInfoOutput_namedPopEvent (object):
+
+    def __init__ (self, mainInst):
+        self.keymap = {
+            ('P', False, False, True): ("POP", "Pop State", None)
+        }
+
+
+class stateForTestingInfoOutput_namedRunEvent (object):
+
+    def __init__ (self, mainInst):
+        self.keymap = {
+            ('R', False, False, True): ("RUN", "Run State", self.runMethod)
+        }
+
+    def runMethod (self):
+        pass
+
+
+class Test_formatEventInfo (unittest.TestCase):
+
+    def test_simpleKeyPress (self):
+        result = core.formatEventInfo(('x', False, False, True))
+        expected = "> x    "
+        self.assertEquals(result, expected)
+
+    def test_simpleKeyRelease (self):
+        result = core.formatEventInfo(('q', False, False, False))
+        expected = "< q    "
+        self.assertEquals(result, expected)
+
+    def test_altKeyPress (self):
+        result = core.formatEventInfo(('j', True, False, True))
+        expected = "> M-j  "
+        self.assertEquals(result, expected)
+
+    def test_altKeyRelease (self):
+        result = core.formatEventInfo(('z', True, False, False))
+        expected = "< M-z  "
+        self.assertEquals(result, expected)
+
+    def test_ctrlKeyPress (self):
+        result = core.formatEventInfo(('p', False, True, True))
+        expected = "> C-p  "
+        self.assertEquals(result, expected)
+
+    def test_ctrlKeyRelease (self):
+        result = core.formatEventInfo(('v', False, True, False))
+        expected = "< C-v  "
+        self.assertEquals(result, expected)
+
+    def test_altCtrlKeyPress (self):
+        result = core.formatEventInfo(('w', True, True, True))
+        expected = "> C-M-w"
+        self.assertEquals(result, expected)
+
+    def test_altCtrlKeyRelease (self):
+        result = core.formatEventInfo(('k', True, True, False))
+        expected = "< C-M-k"
+        self.assertEquals(result, expected)
+
+
 class Test_Tomayto (unittest.TestCase):
 
     def setUp (self):
@@ -211,4 +295,66 @@ class Test_Tomayto (unittest.TestCase):
         [_, (__, inst)] = self.tom.stateStack
         self.tom.popState(inst.popCallback)
         self.assertEquals(varFromOnPopToWithArgument, "popCallbackReturnValue")
+
+    def test_getCurrentStateInfo_noEvents (self):
+        self.tom.pushState(stateSimple)
+        result = self.tom.getCurrentStateInfo()
+        expected = \
+"""State stack:
+    stateSimple
+    stateExampleSTART
+"""
+        self.assertEquals(result, expected)
+
+    def test_getCurrentStateInfo_namedPushEvent (self):
+        self.tom.pushState(stateForTestingInfoOutput_namedPushEvent)
+        result = self.tom.getCurrentStateInfo()
+        expected = \
+"""State stack:
+    stateForTestingInfoOutput_namedPushEvent
+    stateExampleSTART
+
+Current state events:
+    > p     - PUSH - Simple State
+"""
+        self.assertEquals(result, expected)
+
+    def test_getCurrentStateInfo_namedPushEventWithArgumentForOnEnter (self):
+        self.tom.pushState(stateForTestingInfoOutput_namedPushEventWithArgumentForOnEnter)
+        result = self.tom.getCurrentStateInfo()
+        expected = \
+"""State stack:
+    stateForTestingInfoOutput_namedPushEventWithArgumentForOnEnter
+    stateExampleSTART
+
+Current state events:
+    > p     - PUSH - State w/ Argument
+"""
+        self.assertEquals(result, expected)
+
+    def test_getCurrentStateInfo_namedPopEvent (self):
+        self.tom.pushState(stateForTestingInfoOutput_namedPopEvent)
+        result = self.tom.getCurrentStateInfo()
+        expected = \
+"""State stack:
+    stateForTestingInfoOutput_namedPopEvent
+    stateExampleSTART
+
+Current state events:
+    > P     - POP  - Pop State
+"""
+        self.assertEquals(result, expected)
+
+    def test_getCurrentStateInfo_namedRunEvent (self):
+        self.tom.pushState(stateForTestingInfoOutput_namedRunEvent)
+        result = self.tom.getCurrentStateInfo()
+        expected = \
+"""State stack:
+    stateForTestingInfoOutput_namedRunEvent
+    stateExampleSTART
+
+Current state events:
+    > R     - RUN  - Run State
+"""
+        self.assertEquals(result, expected)
 
