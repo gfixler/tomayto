@@ -3,6 +3,8 @@ try:
 except ImportError:
     print 'WARNING (%s): failed to load maya.cmds module.' % __file__
 
+import math
+
 
 class SelectionList (object):
 
@@ -21,12 +23,26 @@ class SelectionList (object):
             self._entries.append((l, t))
         if self._entries:
             label, text = self._entries[0]
-            self.textHeight = cmds.text(text, query=True, height=True)
             for (tlab, top), (blab, bot) in zip(self._entries, self._entries[1:]):
                 cmds.formLayout(self._form, edit=True, attachControl=[(top, "top", 0, bot)])
                 cmds.formLayout(self._form, edit=True, attachControl=[(blab, "top", 0, tlab)])
             for label, text in self._entries:
                 cmds.formLayout(self._form, edit=True, attachControl=[(text, "left", 5, label)])
+        cmds.evalDeferred(self.extractTextHeight)
+
+    def extractTextHeight (self):
+        _, text = self._entries[0]
+        self.textHeight = cmds.text(text, query=True, height=True)
+
+    def scrollPage (self, direction="down"):
+        saHeight = cmds.scrollLayout(self._scroll, query=True, height=True)
+        pixels = saHeight / self.textHeight * self.textHeight
+        cmds.scrollLayout(self._scroll, edit=True, scrollByPixel=(direction, pixels))
+
+    def scrollHalfPage (self, direction="down"):
+        saHeight = cmds.scrollLayout(self._scroll, query=True, height=True)
+        pixels = saHeight / self.textHeight / 2 * self.textHeight
+        cmds.scrollLayout(self._scroll, edit=True, scrollByPixel=(direction, pixels))
 
     def createUI (self):
         self._scroll = cmds.scrollLayout()
