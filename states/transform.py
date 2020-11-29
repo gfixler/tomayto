@@ -1,4 +1,7 @@
-import maya.cmds as cmds
+try:
+    import maya.cmds as cmds
+except ImportError:
+    print 'WARNING (%s): failed to load maya.cmds module.' % __file__
 
 import selection
 
@@ -7,7 +10,6 @@ class stateMove (object):
 
     def __init__ (self, mainInst):
         self.mainInst = mainInst
-        self.keymap = {}
 
     def onEnter (self):
         self.mainInst.pushState(selection.statePickXYZ)

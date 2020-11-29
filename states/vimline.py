@@ -1,4 +1,8 @@
-import maya.cmds as cmds
+try:
+    import maya.cmds as cmds
+except ImportError:
+    print 'WARNING (%s): failed to load maya.cmds module.' % __file__
+
 
 from .. core import ALT, NOALT, CTRL, NOCTRL, PRESS, RELEASE
 from .. import util
@@ -18,7 +22,6 @@ class stateVimline (object):
                                     , "mode": "START"
                                     }
         self.vim = self.mainInst.vimline
-        self.keymap = { }
 
     def onEnter (self):
         print "entering Vimline"
@@ -37,7 +40,6 @@ class stateVimlineTestWin (object):
             self.mainInst.vimlineTestWin
         except:
             self.mainInst.vimlineTestWin = {}
-        self.keymap = { }
 
         self.win = cmds.window(widthHeight=(300,100), topLeftCorner=(332, 680))
         cmds.showWindow()
@@ -172,7 +174,6 @@ class stateVimlineEnterInsertMode (object):
 
     def __init__ (self, mainInst, entryMode):
         self.mainInst = mainInst
-        self.keymap = { }
         self.vim = self.mainInst.vimline
         # TODO: handle cursor position based on entry mode
         print "entered via", entryMode
@@ -248,7 +249,6 @@ class stateVimlineInsertMode (object):
 
     def __init__ (self, mainInst, char):
         self.mainInst = mainInst
-        self.keymap = { }
         vim = self.mainInst.vimline
         vim["left"] += char
         if "onChange" in vim:

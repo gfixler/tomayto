@@ -1,4 +1,8 @@
-import maya.cmds as cmds
+try:
+    import maya.cmds as cmds
+except ImportError:
+    print 'WARNING (%s): failed to load maya.cmds module.' % __file__
+
 
 import util
 
@@ -11,6 +15,20 @@ NOALT = False
 
 CTRL = True
 NOCTRL = False
+
+
+fst = lambda (x, _): x
+getName = lambda x: x.__name__
+
+
+def formatEventInfo (event):
+    key, alt, ctrl, action = event
+    eventStr = ("> " if action else "< ") \
+             + ("C-" if ctrl else "") \
+             + ("M-" if alt else "") \
+             + key
+    padToMaxEventLength = lambda x: (x + "    ")[:7] # longest e.g. "> C-M-x"
+    return padToMaxEventLength(eventStr)
 
 
 class Tomayto (object):
@@ -31,14 +49,15 @@ class Tomayto (object):
         if event == ('?', True, True, True):
             self.helpOnCurrentState()
             return
-        elif event in stateInst.keymap.keys():
-            eventAction, eventActionData = stateInst.keymap[event]
-            if eventAction == "PUSH":
-                self.pushState(eventActionData)
-            elif eventAction == "POP":
-                self.popState(eventActionData)
-            elif eventAction == "RUN":
-                self.runMethod(eventActionData)
+        elif hasattr(stateInst, 'keymap'):
+            if event in stateInst.keymap.keys():
+                eventAction, eventActionData = stateInst.keymap[event]
+                if eventAction == "PUSH":
+                    self.pushState(eventActionData)
+                elif eventAction == "POP":
+                    self.popState(eventActionData)
+                elif eventAction == "RUN":
+                    self.runMethod(eventActionData)
 
     def pushState (self, stateData):
         try:
@@ -68,6 +87,32 @@ class Tomayto (object):
 
     def runMethod (self, method):
         method()
+
+    def getCurrentStateInfo (self):
+        nltab = "\n    "
+        stackLine = "State stack:"
+        stackStates = [self.startState] + map(fst, self.stateStack)
+        stackStateNames = map(getName, stackStates)
+        stackStateLines = nltab + nltab.join(reversed(stackStateNames))
+        infoStr = stackLine + stackStateLines + "\n"
+        _, inst = self.getCurrentState()
+        try:
+            eventInfoStr = ""
+            for k, v in inst.keymap.items():
+                eventStr = "    " + formatEventInfo(k)
+                try:
+                    action, data = v
+                    name = None
+                except:
+                    action, name, data = v
+                actionStr = (action + " ")[:4]
+                nameStr = (name if name else str(data))
+                eventInfoStr += " - ".join([eventStr, actionStr, nameStr])
+            if eventInfoStr:
+                infoStr += "\nCurrent state events:\n" + eventInfoStr + "\n"
+        except:
+            pass
+        return infoStr
 
     def helpOnCurrentState (self):
         state, stateInst = self.getCurrentState()

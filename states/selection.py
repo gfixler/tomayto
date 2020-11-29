@@ -1,4 +1,7 @@
-import maya.cmds as cmds
+try:
+    import maya.cmds as cmds
+except ImportError:
+    print 'WARNING (%s): failed to load maya.cmds module.' % __file__
 
 
 from .. core import ALT, NOALT, CTRL, NOCTRL, PRESS, RELEASE
@@ -51,7 +54,6 @@ class stateVisibleSelectionOfType (object):
     def __init__ (self, mainInst, nodeType, transformIsParent=False):
         self.mainInst = mainInst
         self.transforms = getTransformsOfType(nodeType, transformIsParent)
-        self.keymap = { }
 
     def onEnter (self):
         self.mainInst.pushState((stateVisiblySelectTransform, [self.transforms]))
