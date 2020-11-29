@@ -27,9 +27,9 @@ class stateSelect (object):
     def __init__ (self, mainInst):
         self.mainInst = mainInst
         self.keymap = {
-            ('m', NOALT, NOCTRL, PRESS): ("PUSH", (stateVisibleSelectionOfType, ["mesh", True])),
-            ('l', NOALT, NOCTRL, PRESS): ("PUSH", (stateVisibleSelectionOfType, ["locator", True])),
-            ('c', NOALT, NOCTRL, PRESS): ("PUSH", (stateVisibleSelectionOfType, ["camera", True])),
+            ('m', NOALT, NOCTRL, PRESS): ("PUSH", (stateVisiblySelectTransform, ["mesh", True])),
+            ('l', NOALT, NOCTRL, PRESS): ("PUSH", (stateVisiblySelectTransform, ["locator", True])),
+            ('c', NOALT, NOCTRL, PRESS): ("PUSH", (stateVisiblySelectTransform, ["camera", True])),
             ('n', NOALT, NOCTRL, PRESS): ("RUN", self.selectNone)
         }
 
@@ -49,24 +49,11 @@ def getTransformsOfType (nodeType, transformIsParent=False):
     return nodes
 
 
-class stateVisibleSelectionOfType (object):
+class stateVisiblySelectTransform (object):
 
     def __init__ (self, mainInst, nodeType, transformIsParent=False):
         self.mainInst = mainInst
         self.transforms = getTransformsOfType(nodeType, transformIsParent)
-
-    def onEnter (self):
-        self.mainInst.pushState((stateVisiblySelectTransform, [self.transforms]))
-
-    def onPopTo (self, *_):
-        self.mainInst.popState()
-
-
-class stateVisiblySelectTransform (object):
-
-    def __init__ (self, mainInst, transforms):
-        self.mainInst = mainInst
-        self.transforms = transforms
         self.keymap = {
             ("Return", NOALT, NOCTRL, PRESS): ("POP", self.popSelection)
         }
@@ -82,6 +69,9 @@ class stateVisiblySelectTransform (object):
             self.anns.append(ann)
             self.keymap[(alpha, NOALT, NOCTRL, PRESS)] = ("RUN", self.toggleSelection(name))
         cmds.select(sel)
+
+    def onPopTo (self, *value):
+        self.mainInst.popState(*value)
 
     def toggleSelection (self, name):
         def toggler ():
