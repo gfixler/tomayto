@@ -329,3 +329,64 @@ be in your homespace, but you don't typically install Python scripts there. It
 would have to dynamically load them through the importlib module, which works
 (Maya loads a userSetup.py from your homespace), but feels bizarre.
 
+----------------------------
+
+Sat Nov 28 21:02:54 PST 2020
+
+Time for some more thoughts, after 6 months away. I'm now a Twitch streamer, as
+of about a week ago. My old pal, Ben, popped in days ago, and thought what I was
+building here looked ripe for stack based programming. We followed up that
+mention in the Twitch chat with a few hour Zoom session, going over various pros
+and cons. I still don't think I love it for how the entire system works, but now
+I'm pretty sure I want stacks I can spool up in the moment, to use them where
+they make sense to me. I'm open to the idea that a stack *is* the way to go; I
+just don't see it yet. I need more time, and to play with the idea first, a lot.
+
+I've thought more about the selection engine I want... Right now, I can choose
+transforms of a few types (mesh, locator, and camera), which labels them with
+letters, which then become keypress selection toggles. The obvious issues with
+this are things out of view, and labeling sets of transforms that outnumber the
+keys you use to toggle-select them, currently A-Z, a-z, and 0-9.
+
+I want a pop-up, filterable UI of nodes. Typing out a regular expression name
+(Vimline) filters down the list. The names visible in the scrollList each have
+letters; when pressed, they toggle selection, both in the list, and in Maya. I
+also want to filter in this way by node type, and maybe some other things - how
+to choose between these is TBD. Regardless, selected items can easily be added
+to new, or existing, named sets, and it should be fast to select, add to a set,
+clear selection, and do it again.
+
+In addition to creating selection sets, I want to see them in a pop-up list, and
+easily select, and do boolean operations on their members (more on that next),
+but I also want sets of sets, e.g. a set of sets of vertices from a character's
+face, another around the verts of a different character's face, another around
+different types of objects in the scene, etc.
+
+Quick example of the UI around set selections, and their boolean operations...
+
+Say we have the following, named, selection sets of vertices of a face:
+
+a face
+b left eyelid
+c right eyelid
+d lips
+e left ear
+f right ear
+g nose
+
+As I press the letters on the left, the selection (UI and Maya) changes to that
+set. If I hold shift when selecting, it adds the selection (both, again) to the
+existing one. So, I can hit e to replace the selection with the vertices of the
+left ear, then F to add those of the right ear. If I want to add an "ears" set,
+which is the combination of the two ear vert sets, I can hit e to select only
+the left ear, then F to add the selection of the right ear, then hit whatever to
+add the new set from selected, typing in "ear" (Vimline), adding the h entry.
+
+If shift+letter adds to the set, I'm thinking ctrl+letter removes from it, so I
+could press a to select the whole face of verts, then ctrl+b, to remove the left
+eyelid, then ctrl+c to remove the right eyelid, from the active selection. If I
+went through all the ctrl+ letters, from b to g, I'd remove everything from the
+face that isn't those things, and end up with, say, only the forehead, cheeks,
+and chin verts selected. I've written little scripts to do boolean operations on
+verts like this in the past, which was very helpful for weighting characters.
+
