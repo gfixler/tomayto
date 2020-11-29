@@ -7,11 +7,11 @@ from .. import ui
 class Test_SelectionList (unittest.TestCase):
 
     def test_canInstantiateWithNothing (self):
-        sl = ui.SelectionList()
-        self.assertEquals(sl.entries, [])
+        sl = ui.SelectionList(createUI=False)
+        self.assertEquals(sl._values, [])
 
     def test_canInstantiateWithList (self):
         testList = ["one", "two", "three", "four", "five"]
-        sl = ui.SelectionList(testList)
-        self.assertEquals(sl.entries, testList)
+        sl = ui.SelectionList(testList, createUI=False)
+        self.assertEquals(sl._values, testList)
 
