@@ -24,13 +24,14 @@ class statePickXYZ (object):
 
 class stateSelect (object):
 
-    def __init__ (self, mainInst):
+    def __init__ (self, mainInst, single=False):
         self.mainInst = mainInst
         self.keymap = {
-            ('m', NOALT, NOCTRL, PRESS): ("PUSH", (stateVisiblySelectTransform, ["mesh", True])),
-            ('l', NOALT, NOCTRL, PRESS): ("PUSH", (stateVisiblySelectTransform, ["locator", True])),
-            ('c', NOALT, NOCTRL, PRESS): ("PUSH", (stateVisiblySelectTransform, ["camera", True])),
-            ('n', NOALT, NOCTRL, PRESS): ("RUN", self.selectNone)
+            ('m', NOALT, NOCTRL, PRESS): ("PUSH", (stateVisiblySelectTransform, ["mesh", True, single])),
+            ('l', NOALT, NOCTRL, PRESS): ("PUSH", (stateVisiblySelectTransform, ["locator", True, single])),
+            ('c', NOALT, NOCTRL, PRESS): ("PUSH", (stateVisiblySelectTransform, ["camera", True, single])),
+            ('n', NOALT, NOCTRL, PRESS): ("RUN", self.selectNone),
+            ('t', NOALT, NOCTRL, PRESS): ("PUSH", (stateSelect, [True])),
         }
 
     def onPopTo (self, *value):
@@ -51,11 +52,15 @@ def getTransformsOfType (nodeType, transformIsParent=False):
 
 class stateVisiblySelectTransform (object):
 
-    def __init__ (self, mainInst, nodeType, transformIsParent=False):
+    def __init__ (self, mainInst, nodeType, transformIsParent=False, single=False):
         self.mainInst = mainInst
         self.transforms = getTransformsOfType(nodeType, transformIsParent)
         self.keymap = {
-            ("Return", NOALT, NOCTRL, PRESS): ("POP", self.popSelection)
+            ("l", NOALT, CTRL, PRESS): ("PUSH", (stateVisiblySelectTransform, ["locator", transformIsParent, single])),
+            ("m", NOALT, CTRL, PRESS): ("PUSH", (stateVisiblySelectTransform, ["mesh", transformIsParent, single])),
+            ("c", NOALT, CTRL, PRESS): ("PUSH", (stateVisiblySelectTransform, ["camera", transformIsParent, single])),
+            ("s", ALT, CTRL, PRESS): ("PUSH", (stateVisiblySelectTransform, [nodeType, transformIsParent, not single])),
+            ("Return", NOALT, NOCTRL, PRESS): ("POP", self.popSelection),
         }
 
     def onEnter (self):
@@ -75,7 +80,13 @@ class stateVisiblySelectTransform (object):
 
     def toggleSelection (self, name):
         def toggler ():
-            cmds.select(name, toggle=True)
+            if self.single:
+                if name in cmds.ls(selection=True):
+                    cmds.select(None)
+                else:
+                    cmds.select(name, replace=True)
+            else:
+                cmds.select(name, toggle=True)
         return toggler
 
     def popSelection (self):
