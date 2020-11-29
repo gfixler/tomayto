@@ -54,29 +54,44 @@ class stateVisiblySelectTransform (object):
 
     def __init__ (self, mainInst, nodeType, transformIsParent=False, single=False):
         self.mainInst = mainInst
-        self.transforms = getTransformsOfType(nodeType, transformIsParent)
+        self.nodeType = nodeType
+        self.transformIsParent = transformIsParent
+        self.single = single
+        self.annotations = []
         self.keymap = {
-            ("l", NOALT, CTRL, PRESS): ("PUSH", (stateVisiblySelectTransform, ["locator", transformIsParent, single])),
-            ("m", NOALT, CTRL, PRESS): ("PUSH", (stateVisiblySelectTransform, ["mesh", transformIsParent, single])),
-            ("c", NOALT, CTRL, PRESS): ("PUSH", (stateVisiblySelectTransform, ["camera", transformIsParent, single])),
-            ("s", ALT, CTRL, PRESS): ("PUSH", (stateVisiblySelectTransform, [nodeType, transformIsParent, not single])),
+            ("l", NOALT, CTRL, PRESS): ("RUN", lambda: self.updateArgs("locator", self.single)),
+            ("m", NOALT, CTRL, PRESS): ("RUN", lambda: self.updateArgs("mesh", self.single)),
+            ("c", NOALT, CTRL, PRESS): ("RUN", lambda: self.updateArgs("camera", self.single)),
+            ("s", ALT, CTRL, PRESS): ("RUN", lambda: self.updateArgs(self.nodeType, not self.single)),
             ("Return", NOALT, NOCTRL, PRESS): ("POP", self.popSelection),
         }
 
-    def onEnter (self):
-        cmds.undoInfo(openChunk=True)
-        self.anns = []
+    def clearAnnotations (self):
+        for ann in self.annotations:
+            p = cmds.listRelatives(ann, parent=True)[0]
+            cmds.delete(p)
+        self.annotations = []
+
+    def updateAnnotations (self):
+        self.clearAnnotations()
         sel = cmds.ls(selection=True, flatten=True)
-        for alpha, name in zip("abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", self.transforms):
-            print alpha, name
+        transforms = getTransformsOfType(self.nodeType, self.transformIsParent)
+        for alpha, name in zip("abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", transforms):
             ann = cmds.annotate(name, tx=alpha, point=wspos(name))
             cmds.color(ann, rgbColor=(1, 1, 1))
-            self.anns.append(ann)
+            self.annotations.append(ann)
             self.keymap[(alpha, NOALT, NOCTRL, PRESS)] = ("RUN", self.toggleSelection(name))
         cmds.select(sel)
 
-    def onPopTo (self, *value):
-        self.mainInst.popState(*value)
+    def updateArgs (self, nodeType, single):
+        if nodeType != self.nodeType:
+            self.nodeType = nodeType
+            self.updateAnnotations()
+        self.single = single
+
+    def onEnter (self):
+        cmds.undoInfo(openChunk=True)
+        self.updateAnnotations()
 
     def toggleSelection (self, name):
         def toggler ():
@@ -90,9 +105,7 @@ class stateVisiblySelectTransform (object):
         return toggler
 
     def popSelection (self):
-        for ann in self.anns:
-            p = cmds.listRelatives(ann, parent=True)[0]
-            cmds.delete(p)
+        self.clearAnnotations()
         cmds.undoInfo(closeChunk=True)
         sel = cmds.ls(selection=True, flatten=True)
         return sel
