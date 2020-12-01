@@ -47,7 +47,7 @@ class SelectionList (object):
             cmds.text(self._entries[n], edit=True, backgroundColor=(0.27, 0.27, 0.27))
 
     def createUI (self):
-        self._scroll = cmds.scrollLayout()
+        self._scroll = cmds.scrollLayout(backgroundColor=(0.27, 0.27, 0.27))
         self._form = cmds.formLayout()
         self.populateUI()
 
