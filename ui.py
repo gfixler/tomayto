@@ -5,12 +5,7 @@ except ImportError:
 
 import math
 
-
-MayaColorLayoutBG = (0.27, 0.27, 0.27)
-MayaColorControlBG = (0.17, 0.17, 0.17)
-MayaColorTextHL = (0.32, 0.52, 0.65)
-
-ColorTextHLBright = (0.52, 0.72, 0.85) # 0.20 brighter than MayaColorTextHL
+import color as col
 
 
 class SelectionList (object):
@@ -47,14 +42,14 @@ class SelectionList (object):
 
     def highlightIndex (self, n):
         if n >= 0 and n < len(self._entries):
-            cmds.text(self._entries[n], edit=True, backgroundColor=ColorTextHLBright)
+            cmds.text(self._entries[n], edit=True, backgroundColor=col.TextHLBright)
 
     def clearHighlightIndex (self, n):
         if n >= 0 and n < len(self._entries):
-            cmds.text(self._entries[n], edit=True, backgroundColor=MayaColorControlBG)
+            cmds.text(self._entries[n], edit=True, backgroundColor=col.MayaControlBG)
 
     def createUI (self):
-        self._scroll = cmds.scrollLayout(backgroundColor=MayaColorControlBG)
+        self._scroll = cmds.scrollLayout(backgroundColor=col.MayaControlBG)
         self._form = cmds.formLayout()
         self.populateUI()
 
