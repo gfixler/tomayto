@@ -16,22 +16,16 @@ class SelectionList (object):
 
     def populateUI (self):
         self._entries = []
-        labels = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890"
-        for label, value in zip(labels, self._values):
-            l = cmds.text(label=label, parent=self._form)
-            t = cmds.text(label=value, parent=self._form)
-            self._entries.append((l, t))
+        for value in self._values:
+            entry = cmds.text(label=value, parent=self._form)
+            self._entries.append(entry)
         if self._entries:
-            label, text = self._entries[0]
-            for (tlab, top), (blab, bot) in zip(self._entries, self._entries[1:]):
-                cmds.formLayout(self._form, edit=True, attachControl=[(top, "top", 0, bot)])
-                cmds.formLayout(self._form, edit=True, attachControl=[(blab, "top", 0, tlab)])
-            for label, text in self._entries:
-                cmds.formLayout(self._form, edit=True, attachControl=[(text, "left", 5, label)])
+            for top, bot in zip(self._entries, self._entries[1:]):
+                cmds.formLayout(self._form, edit=True, attachControl=[(bot, "top", 0, top)])
         cmds.evalDeferred(self.extractTextHeight)
 
     def extractTextHeight (self):
-        _, text = self._entries[0]
+        text = self._entries[0]
         self.textHeight = cmds.text(text, query=True, height=True)
 
     def scrollPage (self, direction="down"):
