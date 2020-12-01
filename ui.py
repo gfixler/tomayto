@@ -16,8 +16,13 @@ class SelectionList (object):
         if createUI:
             self.createUI()
 
-    def populateUI (self):
+    def clearUI (self):
+        for entry in self._entries:
+            cmds.deleteUI(entry)
         self._entries = []
+
+    def populateUI (self):
+        self.clearUI()
         for value in self._values:
             entry = cmds.text(label=value, parent=self._form)
             self._entries.append(entry)
