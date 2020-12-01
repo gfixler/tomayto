@@ -8,7 +8,7 @@ import math
 
 class SelectionList (object):
 
-    def __init__ (self, values=[], createUI=True):
+    def __init__ (self, values=[], createUI=True, font="fixedWidthFont"):
         self._values = values
         self._entries = []
         if createUI:
