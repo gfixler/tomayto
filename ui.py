@@ -38,6 +38,14 @@ class SelectionList (object):
         pixels = saHeight / self.textHeight / 2 * self.textHeight
         cmds.scrollLayout(self._scroll, edit=True, scrollByPixel=(direction, pixels))
 
+    def highlightIndex (self, n):
+        if n >= 0 and n < len(self._entries):
+            cmds.text(self._entries[n], edit=True, backgroundColor=(0.52, 0.72, 0.85))
+
+    def clearHighlightIndex (self, n):
+        if n >= 0 and n < len(self._entries):
+            cmds.text(self._entries[n], edit=True, backgroundColor=(0.27, 0.27, 0.27))
+
     def createUI (self):
         self._scroll = cmds.scrollLayout()
         self._form = cmds.formLayout()
