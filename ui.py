@@ -24,7 +24,7 @@ class SelectionList (object):
     def populateUI (self):
         self.clearUI()
         for value in self._values:
-            entry = cmds.text(label=value, parent=self._form)
+            entry = cmds.text(label=value, parent=self._form, align="left")
             self._entries.append(entry)
         if self._entries:
             for top, bot in zip(self._entries, self._entries[1:]):
