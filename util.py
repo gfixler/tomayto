@@ -4,6 +4,23 @@ except ImportError:
     print 'WARNING (%s): failed to load maya.cmds module.' % __file__
 
 
+def defaultSettings (defaults):
+    def classTaker (cls):
+        def classMaker (*args, **kwargs):
+            if "settings" in kwargs:
+                settings = kwargs["settings"]
+                defkeys = defaults.keys()
+                keys = settings.keys()
+                allkeys = list(set(defkeys) | set(keys))
+                d = dict([(key, settings[key] if key in settings else defaults[key]) for key in allkeys])
+                del kwargs["settings"]
+            else:
+                d = defaults
+            return cls(settings=d, *args, **kwargs)
+        return classMaker
+    return classTaker
+
+
 # for use in naming nameCommands (they can't have punctuation in their names)
 keyNames = { ';': "semicolon"
            , ':': "colon"

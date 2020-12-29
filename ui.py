@@ -3,16 +3,29 @@ try:
 except ImportError:
     print 'WARNING (%s): failed to load maya.cmds module.' % __file__
 
+
 import math
 
 import color as col
+from util import defaultSettings
 
 
+SelectionListDefaults = {
+    "font": "fixedWidthFont",
+    "textAlign": "left",
+    "bgCol": col.MayaControlBG,
+    "hlCol": col.TextHLBright,
+    "fullWidthSelection": False,
+}
+
+
+@defaultSettings(SelectionListDefaults)
 class SelectionList (object):
 
-    def __init__ (self, values=[], createUI=True, font="fixedWidthFont"):
+    def __init__ (self, values=[], createUI=True, settings={}):
         self._values = values
         self._entries = []
+        self._settings = settings
         if createUI:
             self.createUI()
 
@@ -24,7 +37,14 @@ class SelectionList (object):
     def populateUI (self):
         self.clearUI()
         for value in self._values:
-            entry = cmds.text(label=value, parent=self._form, align="left")
+            entry = cmds.text( label = value
+                             , parent = self._form
+                             , align = self._settings["textAlign"]
+                             , font = self._settings["font"]
+                             , backgroundColor = self._settings["bgCol"]
+                             )
+            if self._settings["fullWidthSelection"]:
+                cmds.formLayout(self._form, edit=True, attachForm=[(entry, "left", 0), (entry, "right", 0)])
             self._entries.append(entry)
         if self._entries:
             for top, bot in zip(self._entries, self._entries[1:]):
@@ -47,14 +67,16 @@ class SelectionList (object):
 
     def highlightIndex (self, n):
         if n >= 0 and n < len(self._entries):
-            cmds.text(self._entries[n], edit=True, backgroundColor=col.TextHLBright)
+            cmds.text(self._entries[n], edit=True, backgroundColor=self._settings["hlCol"])
 
     def clearHighlightIndex (self, n):
         if n >= 0 and n < len(self._entries):
-            cmds.text(self._entries[n], edit=True, backgroundColor=col.MayaControlBG)
+            cmds.text(self._entries[n], edit=True, backgroundColor=self._settings["bgCol"])
 
     def createUI (self):
-        self._scroll = cmds.scrollLayout(backgroundColor=col.MayaControlBG)
+        self._scroll = cmds.scrollLayout( childResizable = self._settings["fullWidthSelection"]
+                                        , backgroundColor = self._settings["bgCol"]
+                                        )
         self._form = cmds.formLayout()
         self.populateUI()
 
