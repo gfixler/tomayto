@@ -49,13 +49,16 @@ class SelectionList (object):
             keyEntry = cmds.text(label=key, font = self.settings["font"], parent=self.keyFlow)
             self.keyEntries.append(keyEntry)
         for value in self.values:
-            entry = cmds.text( label = value
-                             , parent = self.entryFlow
-                             , align = self.settings["textAlign"]
-                             , font = self.settings["font"]
-                             , backgroundColor = self.settings["bgCol"]
-                             )
-            self.entries[value]["ui"] = entry
+            ui = cmds.text( label = value
+                          , parent = self.entryFlow
+                          , align = self.settings["textAlign"]
+                          , font = self.settings["font"]
+                          , backgroundColor = self.settings["bgCol"]
+                          )
+            entry = self.entries[value]
+            entry["ui"] = ui
+            if entry["selected"]:
+                self.highlightEntry(entry)
         cmds.intSlider(self.slider, edit=True, minValue=1, maxValue=len(self.values), value=len(self.values))
 
     def scrollDown (self):
