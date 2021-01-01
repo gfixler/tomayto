@@ -390,3 +390,51 @@ face that isn't those things, and end up with, say, only the forehead, cheeks,
 and chin verts selected. I've written little scripts to do boolean operations on
 verts like this in the past, which was very helpful for weighting characters.
 
+----------------------------
+
+Fri Jan  1 07:21:07 PST 2021
+
+SelectionList thoughts today. I wanted a way to pop up a list of text values,
+quickly select from them by a letter to the left of each, in the first column,
+which toggles selection. I have that working now, and I have a [non-committed]
+demo state w/ keymap that lets me pop open a window, listing all items in the
+current Maya scene, with prefix letters that don't move. C-u and C-d move the
+list up and down by page (want to make that half-page later, and use C-b and C-f
+for page, as in Vim). Pressing the letter prefixes toggles selection of the
+items, which persists through refreshes, scrolling, etc. Hitting enter closes
+out the window, and pops back from the SelectionList state.
+
+I keep thinking of ideas, now that I can see it working, so I wanted to jot them
+down, as I'm going to forget them.
+
+- filtering of entries, for now only through regex of the text (/ to invoke)
+    - this can use Vimline, and put it through its paces
+- clearing selection, or selecting all, both globally, and just what's visible
+- what's visible can change not just through scrolling, but also filtering
+- various sorting modes
+- need to make the demo state work more generically, and take inputs
+- filter to only selected items, or only unselected
+- enter should pop the selected items back as a list (this is a state thing)
+- callback, so, e.g. changes can happen in Maya on selection toggles
+    - probably easier to deal with from state methods
+- eventually allow non-text items, and even wholly mismatched things
+    - variable height, complex UI entries, e.g. multi-line addresses
+    - not sure how searching and highlighting would work...
+- highlighting letters in words, instead of prefixing - easier to see quickly
+- automatic window resizing to fit contents well
+    - already doing this in the demo
+    - limit size so it doesn't get huge
+    - max values settable in settings(?)
+- keep the order of selections?
+    - could replace selected bool with increasing numbers
+        - no need to reuse - just sort by numbers and return, sans-numbers
+    - maybe return different things via different hotkeys?
+        - C-o = ordered selection
+        - C-u = unordered selection (alias for Enter?)
+        - C-A-o = ordered non-selected
+        - C-A-u = unordered non-selected
+
+TODO items:
+- ensure scrolling up and down is the same amount (currently off by 1)
+- don't allow keypresses off the bottom of the list to toggle selections
+
