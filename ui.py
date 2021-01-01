@@ -62,6 +62,17 @@ class SelectionList (object):
     #     pixels = saHeight / self.textHeight / 2 * self.textHeight
     #     cmds.scrollLayout(self._scroll, edit=True, scrollByPixel=(direction, pixels))
 
+    def scrollByMouse (self, value):
+        revValue = len(self.entries) - value
+        for e in self.entries[:revValue]:
+            cmds.control(e, edit=True, manage=False)
+        for e in self.entries[revValue:]:
+            cmds.control(e, edit=True, manage=True)
+        for e in self.keyEntries[:value]:
+            cmds.control(e, edit=True, manage=True)
+        for e in self.keyEntries[value:]:
+            cmds.control(e, edit=True, manage=False)
+
     def highlightIndex (self, n):
         if n >= 0 and n < len(self.entries):
             cmds.text(self.entries[n], edit=True, backgroundColor=self.settings["hlCol"])
@@ -80,7 +91,7 @@ class SelectionList (object):
                                         , backgroundColor = self.settings["bgCol"]
                                         )
         cmds.setParent("..")
-        self.slider = cmds.intSlider(horizontal=False)
+        self.slider = cmds.intSlider(horizontal=False, dragCommand=self.scrollByMouse)
         cmds.formLayout(self.form, edit=True, attachForm=[ (self.keyFlow, "top", 0)
                                                          , (self.keyFlow, "bottom", 0)
                                                          , (self.keyFlow, "left", self.settings["keyLeftPadding"])
