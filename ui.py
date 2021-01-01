@@ -27,6 +27,7 @@ class SelectionList (object):
     def __init__ (self, values=[], createUI=True, settings={}):
         self.values = values
         self.entries = []
+        self.keyEntries = []
         self.settings = settings
         if createUI:
             self.createUI()
@@ -39,7 +40,8 @@ class SelectionList (object):
     def populateUI (self):
         self.clearUI()
         for key in self.settings["selectionKeys"]:
-            cmds.text(label=key, font = self.settings["font"], parent=self.keyFlow)
+            keyEntry = cmds.text(label=key, font = self.settings["font"], parent=self.keyFlow)
+            self.keyEntries.append(keyEntry)
         for value in self.values:
             entry = cmds.text( label = value
                              , parent = self.entryFlow
