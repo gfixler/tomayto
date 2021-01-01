@@ -61,6 +61,20 @@ class SelectionList (object):
                 self.highlightEntry(entry)
         cmds.intSlider(self.slider, edit=True, minValue=1, maxValue=len(self.values), value=len(self.values))
 
+    def toggle (self, key):
+        sldIx = cmds.intSlider(self.slider, query=True, value=True)
+        entIx = len(self.values) - sldIx
+        visVals = self.values[entIx:]
+        keyPairs = zip(self.settings["selectionKeys"], visVals)
+        for k, v in keyPairs:
+            if k == key:
+                e = self.entries[v]
+                if e["selected"]:
+                    self.noHighlightEntry(e)
+                else:
+                    self.highlightEntry(e)
+                e["selected"] = not e["selected"]
+
     def scrollDown (self):
         viewHeight = cmds.flowLayout(self.entryFlow, query=True, height=True)
         sldIx = cmds.intSlider(self.slider, query=True, value=True)
