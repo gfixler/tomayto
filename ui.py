@@ -55,10 +55,19 @@ class SelectionList (object):
             self.entries.append(entry)
         cmds.intSlider(self.slider, edit=True, minValue=1, maxValue=len(self.entries), value=len(self.entries))
 
-    # def scrollPage (self, direction="down"):
-    #     saHeight = cmds.scrollLayout(self._scroll, query=True, height=True)
-    #     pixels = saHeight / self.textHeight * self.textHeight
-    #     cmds.scrollLayout(self._scroll, edit=True, scrollByPixel=(direction, pixels))
+    def scrollDown (self):
+        viewHeight = cmds.flowLayout(self.entryFlow, query=True, height=True)
+        sldIx = cmds.intSlider(self.slider, query=True, value=True)
+        entIx = len(self.entries) - sldIx
+        n = 0
+        heights = 0
+        for i in xrange(entIx, len(self.entries)):
+            h = cmds.text(self.entries[i], query=True, height=True)
+            if heights + h >= viewHeight:
+                break
+            heights += h
+            n += 1
+        self.scrollToIndex(sldIx - n + 1)
 
     # def scrollHalfPage (self, direction="down"):
     #     saHeight = cmds.scrollLayout(self._scroll, query=True, height=True)
