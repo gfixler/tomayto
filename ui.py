@@ -25,6 +25,8 @@ SelectionListDefaults = {
 class SelectionList (object):
 
     def __init__ (self, values=[], createUI=True, settings={}):
+        if len(values) != len(set(values)):
+            raise ValueError, "duplicate values to SelectionList not allowed"
         self.values = values
         self.entries = []
         self.keyEntries = []
