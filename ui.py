@@ -53,7 +53,7 @@ class SelectionList (object):
                              , backgroundColor = self.settings["bgCol"]
                              )
             self.entries.append(entry)
-        cmds.intSlider(self.slider, edit=True, maxValue=len(self.entries), value=len(self.entries))
+        cmds.intSlider(self.slider, edit=True, minValue=1, maxValue=len(self.entries), value=len(self.entries))
 
     # def scrollPage (self, direction="down"):
     #     saHeight = cmds.scrollLayout(self._scroll, query=True, height=True)
