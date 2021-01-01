@@ -15,6 +15,9 @@ SelectionListDefaults = {
     "textAlign": "left",
     "bgCol": col.MayaControlBG,
     "hlCol": col.TextHLBright,
+    "keyLeftPadding": 5,
+    "keyEntryPadding": 15,
+    "selectionKeys": "hfgkdurytielsowanvbpqz473857201cx",
 }
 
 
@@ -35,32 +38,26 @@ class SelectionList (object):
 
     def populateUI (self):
         self.clearUI()
+        for key in self.settings["selectionKeys"]:
+            cmds.text(label=key, font = self.settings["font"], parent=self.keyFlow)
         for value in self.values:
             entry = cmds.text( label = value
-                             , parent = self.form
+                             , parent = self.entryFlow
                              , align = self.settings["textAlign"]
                              , font = self.settings["font"]
                              , backgroundColor = self.settings["bgCol"]
                              )
             self.entries.append(entry)
-        if self.entries:
-            for top, bot in zip(self.entries, self.entries[1:]):
-                cmds.formLayout(self.form, edit=True, attachControl=[(bot, "top", 0, top)])
-        cmds.evalDeferred(self.extractTextHeight)
 
-    def extractTextHeight (self):
-        text = self.entries[0]
-        self.textHeight = cmds.text(text, query=True, height=True)
+    # def scrollPage (self, direction="down"):
+    #     saHeight = cmds.scrollLayout(self._scroll, query=True, height=True)
+    #     pixels = saHeight / self.textHeight * self.textHeight
+    #     cmds.scrollLayout(self._scroll, edit=True, scrollByPixel=(direction, pixels))
 
-    def scrollPage (self, direction="down"):
-        saHeight = cmds.scrollLayout(self.scroll, query=True, height=True)
-        pixels = saHeight / self.textHeight * self.textHeight
-        cmds.scrollLayout(self.scroll, edit=True, scrollByPixel=(direction, pixels))
-
-    def scrollHalfPage (self, direction="down"):
-        saHeight = cmds.scrollLayout(self.scroll, query=True, height=True)
-        pixels = saHeight / self.textHeight / 2 * self.textHeight
-        cmds.scrollLayout(self.scroll, edit=True, scrollByPixel=(direction, pixels))
+    # def scrollHalfPage (self, direction="down"):
+    #     saHeight = cmds.scrollLayout(self._scroll, query=True, height=True)
+    #     pixels = saHeight / self.textHeight / 2 * self.textHeight
+    #     cmds.scrollLayout(self._scroll, edit=True, scrollByPixel=(direction, pixels))
 
     def highlightIndex (self, n):
         if n >= 0 and n < len(self.entries):
@@ -71,9 +68,26 @@ class SelectionList (object):
             cmds.text(self.entries[n], edit=True, backgroundColor=self.settings["bgCol"])
 
     def createUI (self):
-        self.scroll = cmds.scrollLayout( childResizable = self.settings["fullWidthSelection"]
+        self.form = cmds.formLayout(backgroundColor = self.settings["bgCol"])
+        self.keyFlow = cmds.flowLayout( vertical = True
+                                      , backgroundColor = self.settings["bgCol"]
+                                      )
+        cmds.setParent("..")
+        self.entryFlow = cmds.flowLayout( vertical = True
                                         , backgroundColor = self.settings["bgCol"]
                                         )
-        self.form = cmds.formLayout()
+        cmds.setParent("..")
+        self.slider = cmds.intSlider(horizontal=False)
+        cmds.formLayout(self.form, edit=True, attachForm=[ (self.keyFlow, "top", 0)
+                                                         , (self.keyFlow, "bottom", 0)
+                                                         , (self.keyFlow, "left", self.settings["keyLeftPadding"])
+                                                         , (self.slider, "top", 0)
+                                                         , (self.slider, "bottom", 0)
+                                                         , (self.slider, "right", 0)
+                                                         , (self.entryFlow, "top", 0)
+                                                         , (self.entryFlow, "bottom", 0)
+                                                         ],
+                                              attachControl=[ (self.entryFlow, "left", self.settings["keyEntryPadding"], self.keyFlow)
+                                                            , (self.entryFlow, "right", 0, self.slider)] )
         self.populateUI()
 
