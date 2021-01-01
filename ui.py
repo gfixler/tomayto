@@ -15,7 +15,6 @@ SelectionListDefaults = {
     "textAlign": "left",
     "bgCol": col.MayaControlBG,
     "hlCol": col.TextHLBright,
-    "fullWidthSelection": False,
 }
 
 
@@ -43,8 +42,6 @@ class SelectionList (object):
                              , font = self.settings["font"]
                              , backgroundColor = self.settings["bgCol"]
                              )
-            if self.settings["fullWidthSelection"]:
-                cmds.formLayout(self.form, edit=True, attachForm=[(entry, "left", 0), (entry, "right", 0)])
             self.entries.append(entry)
         if self.entries:
             for top, bot in zip(self.entries, self.entries[1:]):
