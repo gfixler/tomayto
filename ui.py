@@ -33,7 +33,7 @@ class SelectionList (object):
             self.createUI()
 
     def clearUI (self):
-        for entry in self.entries:
+        for _, entry in self.entries:
             cmds.deleteUI(entry)
         self.entries = []
         for keyEntry in self.keyEntries:
@@ -52,7 +52,7 @@ class SelectionList (object):
                              , font = self.settings["font"]
                              , backgroundColor = self.settings["bgCol"]
                              )
-            self.entries.append(entry)
+            self.entries.append((False, entry))
         cmds.intSlider(self.slider, edit=True, minValue=1, maxValue=len(self.entries), value=len(self.entries))
 
     def scrollDown (self):
@@ -62,7 +62,8 @@ class SelectionList (object):
         n = 0
         heights = 0
         for i in xrange(entIx, len(self.entries)):
-            h = cmds.text(self.entries[i], query=True, height=True)
+            _, entry = self.entries[i]
+            h = cmds.text(entry, query=True, height=True)
             if heights + h >= viewHeight:
                 break
             heights += h
@@ -76,7 +77,8 @@ class SelectionList (object):
         n = 0
         heights = 0
         for i in reversed(xrange(0, entIx)):
-            h = cmds.text(self.entries[i], query=True, height=True)
+            _, entry = self.entries[i]
+            h = cmds.text(entry, query=True, height=True)
             heights += h
             n += 1
             if heights + h > viewHeight:
@@ -85,23 +87,25 @@ class SelectionList (object):
 
     def scrollToIndex (self, index):
         revValue = len(self.entries) - index
-        for e in self.entries[:revValue]:
+        for _, e in self.entries[:revValue]:
             cmds.control(e, edit=True, manage=False)
-        for e in self.entries[revValue:]:
+        for _, e in self.entries[revValue:]:
             cmds.control(e, edit=True, manage=True)
-        for e in self.keyEntries[:index]:
-            cmds.control(e, edit=True, manage=True)
-        for e in self.keyEntries[index:]:
-            cmds.control(e, edit=True, manage=False)
+        for k in self.keyEntries[:index]:
+            cmds.control(k, edit=True, manage=True)
+        for k in self.keyEntries[index:]:
+            cmds.control(k, edit=True, manage=False)
         cmds.intSlider(self.slider, edit=True, value=index)
 
-    def highlightIndex (self, n):
-        if n >= 0 and n < len(self.entries):
-            cmds.text(self.entries[n], edit=True, backgroundColor=self.settings["hlCol"])
+    def highlightIndex (self, i):
+        if i >= 0 and i < len(self.entries):
+            _, entry = self.entries[i]
+            cmds.text(entry, edit=True, backgroundColor=self.settings["hlCol"])
 
-    def clearHighlightIndex (self, n):
-        if n >= 0 and n < len(self.entries):
-            cmds.text(self.entries[n], edit=True, backgroundColor=self.settings["bgCol"])
+    def clearHighlightIndex (self, i):
+        if i >= 0 and i < len(self.entries):
+            _, entry = self.entries[i]
+            cmds.text(entry, edit=True, backgroundColor=self.settings["bgCol"])
 
     def createUI (self):
         self.form = cmds.formLayout(backgroundColor = self.settings["bgCol"])
