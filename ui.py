@@ -36,6 +36,9 @@ class SelectionList (object):
         for entry in self.entries:
             cmds.deleteUI(entry)
         self.entries = []
+        for keyEntry in self.keyEntries:
+            cmds.deleteUI(keyEntry)
+        self.keyEntries = []
 
     def populateUI (self):
         self.clearUI()
