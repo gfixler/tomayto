@@ -28,16 +28,17 @@ class SelectionList (object):
         if len(values) != len(set(values)):
             raise ValueError, "duplicate values to SelectionList not allowed"
         self.values = values
-        self.entries = []
+        self.entries = dict([(value, {"selected": False}) for value in values])
         self.keyEntries = []
         self.settings = settings
         if createUI:
             self.createUI()
 
     def clearUI (self):
-        for _, entry in self.entries:
-            cmds.deleteUI(entry)
-        self.entries = []
+        for entry in self.entries.values():
+            if "ui" in entry:
+                cmds.deleteUI(entry["ui"])
+                del entry["ui"]
         for keyEntry in self.keyEntries:
             cmds.deleteUI(keyEntry)
         self.keyEntries = []
@@ -54,18 +55,18 @@ class SelectionList (object):
                              , font = self.settings["font"]
                              , backgroundColor = self.settings["bgCol"]
                              )
-            self.entries.append((False, entry))
-        cmds.intSlider(self.slider, edit=True, minValue=1, maxValue=len(self.entries), value=len(self.entries))
+            self.entries[value]["ui"] = entry
+        cmds.intSlider(self.slider, edit=True, minValue=1, maxValue=len(self.values), value=len(self.values))
 
     def scrollDown (self):
         viewHeight = cmds.flowLayout(self.entryFlow, query=True, height=True)
         sldIx = cmds.intSlider(self.slider, query=True, value=True)
-        entIx = len(self.entries) - sldIx
+        entIx = len(self.values) - sldIx
         n = 0
         heights = 0
-        for i in xrange(entIx, len(self.entries)):
-            _, entry = self.entries[i]
-            h = cmds.text(entry, query=True, height=True)
+        for i in xrange(entIx, len(self.values)):
+            entry = self.entries[self.values[i]]
+            h = cmds.text(entry["ui"], query=True, height=True)
             if heights + h >= viewHeight:
                 break
             heights += h
@@ -75,12 +76,12 @@ class SelectionList (object):
     def scrollUp (self):
         viewHeight = cmds.flowLayout(self.entryFlow, query=True, height=True)
         sldIx = cmds.intSlider(self.slider, query=True, value=True)
-        entIx = len(self.entries) - sldIx
+        entIx = len(self.values) - sldIx
         n = 0
         heights = 0
         for i in reversed(xrange(0, entIx)):
-            _, entry = self.entries[i]
-            h = cmds.text(entry, query=True, height=True)
+            entry = self.entries[self.values[i]]
+            h = cmds.text(entry["ui"], query=True, height=True)
             heights += h
             n += 1
             if heights + h > viewHeight:
@@ -88,11 +89,11 @@ class SelectionList (object):
         self.scrollToIndex(sldIx + n)
 
     def scrollToIndex (self, index):
-        revValue = len(self.entries) - index
-        for _, e in self.entries[:revValue]:
-            cmds.control(e, edit=True, manage=False)
-        for _, e in self.entries[revValue:]:
-            cmds.control(e, edit=True, manage=True)
+        revValue = len(self.values) - index
+        for v in self.values[:revValue]:
+            cmds.control(self.entries[v]["ui"], edit=True, manage=False)
+        for v in self.values[revValue:]:
+            cmds.control(self.entries[v]["ui"], edit=True, manage=True)
         for k in self.keyEntries[:index]:
             cmds.control(k, edit=True, manage=True)
         for k in self.keyEntries[index:]:
@@ -100,14 +101,14 @@ class SelectionList (object):
         cmds.intSlider(self.slider, edit=True, value=index)
 
     def highlightIndex (self, i):
-        if i >= 0 and i < len(self.entries):
-            _, entry = self.entries[i]
-            cmds.text(entry, edit=True, backgroundColor=self.settings["hlCol"])
+        if i >= 0 and i < len(self.values):
+            entry = self.entries[self.values[i]]
+            cmds.text(entry["ui"], edit=True, backgroundColor=self.settings["hlCol"])
 
     def clearHighlightIndex (self, i):
-        if i >= 0 and i < len(self.entries):
-            _, entry = self.entries[i]
-            cmds.text(entry, edit=True, backgroundColor=self.settings["bgCol"])
+        if i >= 0 and i < len(self.values):
+            entry = self.entries[self.values[i]]
+            cmds.text(entry["ui"], edit=True, backgroundColor=self.settings["bgCol"])
 
     def createUI (self):
         self.form = cmds.formLayout(backgroundColor = self.settings["bgCol"])
