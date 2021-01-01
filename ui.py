@@ -100,15 +100,11 @@ class SelectionList (object):
             cmds.control(k, edit=True, manage=False)
         cmds.intSlider(self.slider, edit=True, value=index)
 
-    def highlightIndex (self, i):
-        if i >= 0 and i < len(self.values):
-            entry = self.entries[self.values[i]]
-            cmds.text(entry["ui"], edit=True, backgroundColor=self.settings["hlCol"])
+    def highlightEntry (self, entry):
+        cmds.text(entry["ui"], edit=True, backgroundColor=self.settings["hlCol"])
 
-    def clearHighlightIndex (self, i):
-        if i >= 0 and i < len(self.values):
-            entry = self.entries[self.values[i]]
-            cmds.text(entry["ui"], edit=True, backgroundColor=self.settings["bgCol"])
+    def noHighlightEntry (self, entry):
+        cmds.text(entry["ui"], edit=True, backgroundColor=self.settings["bgCol"])
 
     def createUI (self):
         self.form = cmds.formLayout(backgroundColor = self.settings["bgCol"])
