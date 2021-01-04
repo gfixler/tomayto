@@ -28,9 +28,10 @@ class SelectionList (object):
         if len(values) != len(set(values)):
             raise ValueError, "duplicate values to SelectionList not allowed"
         self.values = values
-        self.entries = dict([(value, {"selected": False}) for value in values])
+        self.entries = dict([(value, {"selected": 0}) for value in values])
         self.keyEntries = []
         self.settings = settings
+        self.selectionIx = 0
         if createUI:
             self.createUI()
 
@@ -57,7 +58,7 @@ class SelectionList (object):
                           )
             entry = self.entries[value]
             entry["ui"] = ui
-            if entry["selected"]:
+            if entry["selected"] > 0:
                 self.highlightEntry(entry)
         cmds.intSlider(self.slider, edit=True, minValue=1, maxValue=len(self.values), value=len(self.values))
 
@@ -69,11 +70,13 @@ class SelectionList (object):
         for k, v in keyPairs:
             if k == key:
                 e = self.entries[v]
-                if e["selected"]:
-                    self.noHighlightEntry(e)
-                else:
+                if e["selected"] == 0:
                     self.highlightEntry(e)
-                e["selected"] = not e["selected"]
+                    self.selectionIx += 1
+                    e["selected"] = self.selectionIx
+                else:
+                    self.noHighlightEntry(e)
+                    e["selected"] = 0
 
     def scrollDown (self):
         viewHeight = cmds.flowLayout(self.entryFlow, query=True, height=True)
