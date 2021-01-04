@@ -10,6 +10,9 @@ import color as col
 from util import defaultSettings
 
 
+ident = lambda x: x
+
+
 SelectionListDefaults = {
     "font": "fixedWidthFont",
     "textAlign": "left",
@@ -24,12 +27,14 @@ SelectionListDefaults = {
 @defaultSettings(SelectionListDefaults)
 class SelectionList (object):
 
-    def __init__ (self, values=[], createUI=True, settings={}):
+    def __init__ (self, values=[], createUI=True, filtF=ident, sortF=ident, settings={}):
         if len(values) != len(set(values)):
             raise ValueError, "duplicate values to SelectionList not allowed"
         self.values = values
         self.entries = dict([(value, {"selected": 0}) for value in values])
         self.keyEntries = []
+        self.filtF = filtF
+        self.sortF = sortF
         self.settings = settings
         self.selectionIx = 0
         if createUI:
@@ -46,26 +51,28 @@ class SelectionList (object):
 
     def populateUI (self):
         self.clearUI()
+        self.entryVals = sorted(filter(self.filtF, self.values), key=self.sortF)
         for key in self.settings["selectionKeys"]:
             keyEntry = cmds.text(label=key, font = self.settings["font"], parent=self.keyFlow)
             self.keyEntries.append(keyEntry)
-        for value in self.values:
-            ui = cmds.text( label = value
+        for entryVal in self.entryVals:
+            ui = cmds.text( label = entryVal
                           , parent = self.entryFlow
                           , align = self.settings["textAlign"]
                           , font = self.settings["font"]
                           , backgroundColor = self.settings["bgCol"]
                           )
-            entry = self.entries[value]
+            entry = self.entries[entryVal]
             entry["ui"] = ui
             if entry["selected"] > 0:
                 self.highlightEntry(entry)
-        cmds.intSlider(self.slider, edit=True, minValue=1, maxValue=len(self.values), value=len(self.values))
+        cmds.intSlider(self.slider, edit=True, minValue=1, maxValue=len(self.entryVals), value=len(self.entryVals))
+        self.scrollUp() # HACK to hide extra key letters
 
     def toggle (self, key):
         sldIx = cmds.intSlider(self.slider, query=True, value=True)
-        entIx = len(self.values) - sldIx
-        visVals = self.values[entIx:]
+        entIx = len(self.entryVals) - sldIx
+        visVals = self.entryVals[entIx:]
         keyPairs = zip(self.settings["selectionKeys"], visVals)
         for k, v in keyPairs:
             if k == key:
@@ -81,11 +88,11 @@ class SelectionList (object):
     def scrollDown (self):
         viewHeight = cmds.flowLayout(self.entryFlow, query=True, height=True)
         sldIx = cmds.intSlider(self.slider, query=True, value=True)
-        entIx = len(self.values) - sldIx
+        entIx = len(self.entryVals) - sldIx
         n = 0
         heights = 0
-        for i in xrange(entIx, len(self.values)):
-            entry = self.entries[self.values[i]]
+        for i in xrange(entIx, len(self.entryVals)):
+            entry = self.entries[self.entryVals[i]]
             h = cmds.text(entry["ui"], query=True, height=True)
             if heights + h >= viewHeight:
                 break
@@ -96,11 +103,11 @@ class SelectionList (object):
     def scrollUp (self):
         viewHeight = cmds.flowLayout(self.entryFlow, query=True, height=True)
         sldIx = cmds.intSlider(self.slider, query=True, value=True)
-        entIx = len(self.values) - sldIx
+        entIx = len(self.entryVals) - sldIx
         n = 0
         heights = 0
         for i in reversed(xrange(0, entIx)):
-            entry = self.entries[self.values[i]]
+            entry = self.entries[self.entryVals[i]]
             h = cmds.text(entry["ui"], query=True, height=True)
             heights += h
             n += 1
@@ -109,10 +116,10 @@ class SelectionList (object):
         self.scrollToIndex(sldIx + n)
 
     def scrollToIndex (self, index):
-        revValue = len(self.values) - index
-        for v in self.values[:revValue]:
+        revValue = len(self.entryVals) - index
+        for v in self.entryVals[:revValue]:
             cmds.control(self.entries[v]["ui"], edit=True, manage=False)
-        for v in self.values[revValue:]:
+        for v in self.entryVals[revValue:]:
             cmds.control(self.entries[v]["ui"], edit=True, manage=True)
         for k in self.keyEntries[:index]:
             cmds.control(k, edit=True, manage=True)
