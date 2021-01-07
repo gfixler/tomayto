@@ -67,7 +67,7 @@ class SelectionList (object):
             if entry["selected"] > 0:
                 self.highlightEntry(entry)
         cmds.intSlider(self.slider, edit=True, minValue=1, maxValue=len(self.entryVals), value=len(self.entryVals))
-        self.scrollUp() # HACK to hide extra key letters
+        self.scrollLineUp() # HACK to hide extra key letters
 
     def toggle (self, key):
         sldIx = cmds.intSlider(self.slider, query=True, value=True)
@@ -85,47 +85,51 @@ class SelectionList (object):
                     self.noHighlightEntry(e)
                     e["selected"] = 0
 
-    def scrollDown (self):
+    def getScrollIndex (self):
+        sliderValue = cmds.intSlider(self.slider, query=True, value=True)
+        return len(self.entryVals) - sliderValue
+
+    def scrollPageDown (self):
         viewHeight = cmds.flowLayout(self.entryFlow, query=True, height=True)
-        sldIx = cmds.intSlider(self.slider, query=True, value=True)
-        entIx = len(self.entryVals) - sldIx
+        ix = self.getScrollIndex()
         n = 0
         heights = 0
-        for i in xrange(entIx, len(self.entryVals)):
-            entry = self.entries[self.entryVals[i]]
+        for entryVal in self.entryVals[ix:]:
+            entry = self.entries[entryVal]
             h = cmds.text(entry["ui"], query=True, height=True)
-            if heights + h >= viewHeight:
+            if heights + h > viewHeight:
                 break
             heights += h
             n += 1
-        self.scrollToIndex(sldIx - n + 1)
+        self.scrollToIndex(ix + n)
 
-    def scrollUp (self):
+    def scrollPageUp (self):
         viewHeight = cmds.flowLayout(self.entryFlow, query=True, height=True)
-        sldIx = cmds.intSlider(self.slider, query=True, value=True)
-        entIx = len(self.entryVals) - sldIx
+        ix = self.getScrollIndex()
         n = 0
         heights = 0
-        for i in reversed(xrange(0, entIx)):
-            entry = self.entries[self.entryVals[i]]
+        for entryVal in reversed(self.entryVals[:ix]):
+            entry = self.entries[entryVal]
             h = cmds.text(entry["ui"], query=True, height=True)
             heights += h
             n += 1
             if heights + h > viewHeight:
                 break
-        self.scrollToIndex(sldIx + n)
+        self.scrollToIndex(ix - n)
 
     def scrollToIndex (self, index):
-        revValue = len(self.entryVals) - index
-        for v in self.entryVals[:revValue]:
+        n = cmds.intSlider(self.slider, query=True, maxValue=True)
+        index = max(0, min(index, n-1))
+        for v in self.entryVals[:index]:
             cmds.control(self.entries[v]["ui"], edit=True, manage=False)
-        for v in self.entryVals[revValue:]:
+        for v in self.entryVals[index:]:
             cmds.control(self.entries[v]["ui"], edit=True, manage=True)
-        for k in self.keyEntries[:index]:
+        revValue = len(self.entryVals) - index
+        for k in self.keyEntries[:revValue]:
             cmds.control(k, edit=True, manage=True)
-        for k in self.keyEntries[index:]:
+        for k in self.keyEntries[revValue:]:
             cmds.control(k, edit=True, manage=False)
-        cmds.intSlider(self.slider, edit=True, value=index)
+        cmds.intSlider(self.slider, edit=True, value=revValue)
 
     def highlightEntry (self, entry):
         cmds.text(entry["ui"], edit=True, backgroundColor=self.settings["hlCol"])
