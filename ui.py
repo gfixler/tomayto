@@ -89,6 +89,14 @@ class SelectionList (object):
         sliderValue = cmds.intSlider(self.slider, query=True, value=True)
         return len(self.entryVals) - sliderValue
 
+    def scrollLineDown (self):
+        ix = self.getScrollIndex()
+        self.scrollToIndex(ix + 1)
+
+    def scrollLineUp (self):
+        ix = self.getScrollIndex()
+        self.scrollToIndex(ix - 1)
+
     def scrollPageDown (self):
         viewHeight = cmds.flowLayout(self.entryFlow, query=True, height=True)
         ix = self.getScrollIndex()
@@ -98,6 +106,20 @@ class SelectionList (object):
             entry = self.entries[entryVal]
             h = cmds.text(entry["ui"], query=True, height=True)
             if heights + h > viewHeight:
+                break
+            heights += h
+            n += 1
+        self.scrollToIndex(ix + n)
+
+    def scrollHalfPageDown (self):
+        viewHeight = cmds.flowLayout(self.entryFlow, query=True, height=True)
+        ix = self.getScrollIndex()
+        n = 0
+        heights = 0
+        for entryVal in self.entryVals[ix:]:
+            entry = self.entries[entryVal]
+            h = cmds.text(entry["ui"], query=True, height=True)
+            if heights + h > (viewHeight / 2):
                 break
             heights += h
             n += 1
@@ -114,6 +136,20 @@ class SelectionList (object):
             heights += h
             n += 1
             if heights + h > viewHeight:
+                break
+        self.scrollToIndex(ix - n)
+
+    def scrollHalfPageUp (self):
+        viewHeight = cmds.flowLayout(self.entryFlow, query=True, height=True)
+        ix = self.getScrollIndex()
+        n = 0
+        heights = 0
+        for entryVal in reversed(self.entryVals[:ix]):
+            entry = self.entries[entryVal]
+            h = cmds.text(entry["ui"], query=True, height=True)
+            heights += h
+            n += 1
+            if heights + h > (viewHeight / 2):
                 break
         self.scrollToIndex(ix - n)
 
