@@ -69,31 +69,23 @@ class SelectionList (object):
         cmds.intSlider(self.slider, edit=True, minValue=1, maxValue=len(self.entryVals), value=len(self.entryVals))
         self.scrollLine(False) # HACK to hide extra key letters
 
-    def toggle (self, key):
-        viewHeight = cmds.flowLayout(self.entryFlow, query=True, height=True)
-        sldIx = cmds.intSlider(self.slider, query=True, value=True)
-        entIx = len(self.entryVals) - sldIx
-        visVals = self.entryVals[entIx:]
-        keyPairs = zip(self.settings["selectionKeys"], visVals)
-        heights = 0
-        for k, v in keyPairs:
-            entry = self.entries[v]
-            h = cmds.text(entry["ui"], query=True, height=True)
-            if heights + h > viewHeight:
-                break
-            heights = heights + h
-            if k == key:
-                if entry["selected"] == 0:
-                    self.highlightEntry(entry)
-                    self.selectionIx += 1
-                    entry["selected"] = self.selectionIx
-                else:
-                    self.noHighlightEntry(entry)
-                    entry["selected"] = 0
-
     def getScrollIndex (self):
         sliderValue = cmds.intSlider(self.slider, query=True, value=True)
         return len(self.entryVals) - sliderValue
+
+    def scrollToIndex (self, index):
+        n = cmds.intSlider(self.slider, query=True, maxValue=True)
+        index = max(0, min(index, n-1))
+        for v in self.entryVals[:index]:
+            cmds.control(self.entries[v]["ui"], edit=True, manage=False)
+        for v in self.entryVals[index:]:
+            cmds.control(self.entries[v]["ui"], edit=True, manage=True)
+        revValue = len(self.entryVals) - index
+        for k in self.keyEntries[:revValue]:
+            cmds.control(k, edit=True, manage=True)
+        for k in self.keyEntries[revValue:]:
+            cmds.control(k, edit=True, manage=False)
+        cmds.intSlider(self.slider, edit=True, value=revValue)
 
     def scrollLine (self, down=True):
         ix = self.getScrollIndex()
@@ -120,25 +112,33 @@ class SelectionList (object):
     def scrollToBottom (self):
         self.scrollToIndex(len(self.entryVals))
 
-    def scrollToIndex (self, index):
-        n = cmds.intSlider(self.slider, query=True, maxValue=True)
-        index = max(0, min(index, n-1))
-        for v in self.entryVals[:index]:
-            cmds.control(self.entries[v]["ui"], edit=True, manage=False)
-        for v in self.entryVals[index:]:
-            cmds.control(self.entries[v]["ui"], edit=True, manage=True)
-        revValue = len(self.entryVals) - index
-        for k in self.keyEntries[:revValue]:
-            cmds.control(k, edit=True, manage=True)
-        for k in self.keyEntries[revValue:]:
-            cmds.control(k, edit=True, manage=False)
-        cmds.intSlider(self.slider, edit=True, value=revValue)
-
     def highlightEntry (self, entry):
         cmds.text(entry["ui"], edit=True, backgroundColor=self.settings["hlCol"])
 
     def noHighlightEntry (self, entry):
         cmds.text(entry["ui"], edit=True, backgroundColor=self.settings["bgCol"])
+
+    def toggle (self, key):
+        viewHeight = cmds.flowLayout(self.entryFlow, query=True, height=True)
+        sldIx = cmds.intSlider(self.slider, query=True, value=True)
+        entIx = len(self.entryVals) - sldIx
+        visVals = self.entryVals[entIx:]
+        keyPairs = zip(self.settings["selectionKeys"], visVals)
+        heights = 0
+        for k, v in keyPairs:
+            entry = self.entries[v]
+            h = cmds.text(entry["ui"], query=True, height=True)
+            if heights + h > viewHeight:
+                break
+            heights = heights + h
+            if k == key:
+                if entry["selected"] == 0:
+                    self.highlightEntry(entry)
+                    self.selectionIx += 1
+                    entry["selected"] = self.selectionIx
+                else:
+                    self.noHighlightEntry(entry)
+                    entry["selected"] = 0
 
     def createUI (self):
         self.form = cmds.formLayout(backgroundColor = self.settings["bgCol"])
