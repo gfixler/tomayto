@@ -74,6 +74,7 @@ class stateSelectionListDemo (object):
             ('6', NOALT, CTRL, PRESS): ("RUN", self.sl.scrollToTop), # ^ - gg is no good
             ('4', NOALT, CTRL, PRESS): ("RUN", self.sl.scrollToBottom), # $ - G is no good
             ('o', NOALT, CTRL, PRESS): ("POP", self.returnOrderedSelected),
+            ('a', NOALT, CTRL, PRESS): ("RUN", self.sl.toggleVisible),
             ('Return', NOALT, CTRL, PRESS): ("POP", self.returnUnselected),
             ('Return', NOALT, NOCTRL, PRESS): ("RUN", self.returnUnorderedSelected),
         }
