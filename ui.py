@@ -161,6 +161,21 @@ class SelectionList (object):
                     self.noHighlightEntry(entry)
                     entry["selected"] = 0
 
+    def toggleVisible (self):
+        setToState = False
+        for _, _, e in self.getVisibleEntries():
+            if e["selected"] == 0:
+                setToState = True
+                break
+        if setToState:
+            for k, _, e in self.getVisibleEntries():
+                if not e["selected"]:
+                    self.toggle(k)
+        else:
+            for k, _, e in self.getVisibleEntries():
+                if e["selected"]:
+                    self.toggle(k)
+
     def createUI (self):
         self.form = cmds.formLayout(backgroundColor = self.settings["bgCol"])
         self.keyFlow = cmds.flowLayout( vertical = True
