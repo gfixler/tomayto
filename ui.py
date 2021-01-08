@@ -70,20 +70,26 @@ class SelectionList (object):
         self.scrollLine(False) # HACK to hide extra key letters
 
     def toggle (self, key):
+        viewHeight = cmds.flowLayout(self.entryFlow, query=True, height=True)
         sldIx = cmds.intSlider(self.slider, query=True, value=True)
         entIx = len(self.entryVals) - sldIx
         visVals = self.entryVals[entIx:]
         keyPairs = zip(self.settings["selectionKeys"], visVals)
+        heights = 0
         for k, v in keyPairs:
+            entry = self.entries[v]
+            h = cmds.text(entry["ui"], query=True, height=True)
+            if heights + h > viewHeight:
+                break
+            heights = heights + h
             if k == key:
-                e = self.entries[v]
-                if e["selected"] == 0:
-                    self.highlightEntry(e)
+                if entry["selected"] == 0:
+                    self.highlightEntry(entry)
                     self.selectionIx += 1
-                    e["selected"] = self.selectionIx
+                    entry["selected"] = self.selectionIx
                 else:
-                    self.noHighlightEntry(e)
-                    e["selected"] = 0
+                    self.noHighlightEntry(entry)
+                    entry["selected"] = 0
 
     def getScrollIndex (self):
         sliderValue = cmds.intSlider(self.slider, query=True, value=True)
