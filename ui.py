@@ -67,7 +67,7 @@ class SelectionList (object):
             if entry["selected"] > 0:
                 self.highlightEntry(entry)
         cmds.intSlider(self.slider, edit=True, minValue=1, maxValue=len(self.entryVals), value=len(self.entryVals))
-        self.scrollLineUp() # HACK to hide extra key letters
+        self.scrollLine(False) # HACK to hide extra key letters
 
     def toggle (self, key):
         sldIx = cmds.intSlider(self.slider, query=True, value=True)
@@ -89,69 +89,24 @@ class SelectionList (object):
         sliderValue = cmds.intSlider(self.slider, query=True, value=True)
         return len(self.entryVals) - sliderValue
 
-    def scrollLineDown (self):
+    def scrollLine (self, down=True):
         ix = self.getScrollIndex()
-        self.scrollToIndex(ix + 1)
+        self.scrollToIndex(ix + (1 if down else -1))
 
-    def scrollLineUp (self):
-        ix = self.getScrollIndex()
-        self.scrollToIndex(ix - 1)
-
-    def scrollPageDown (self):
+    def scrollPage (self, down=True, half=False):
         viewHeight = cmds.flowLayout(self.entryFlow, query=True, height=True)
         ix = self.getScrollIndex()
         n = 0
         heights = 0
-        for entryVal in self.entryVals[ix:]:
+        entryVals = self.entryVals[ix:] if down else reversed(self.entryVals[:ix])
+        for entryVal in entryVals:
             entry = self.entries[entryVal]
             h = cmds.text(entry["ui"], query=True, height=True)
-            if heights + h > viewHeight:
+            if heights + h > (viewHeight / 2 if half else viewHeight):
                 break
             heights += h
             n += 1
-        self.scrollToIndex(ix + n)
-
-    def scrollHalfPageDown (self):
-        viewHeight = cmds.flowLayout(self.entryFlow, query=True, height=True)
-        ix = self.getScrollIndex()
-        n = 0
-        heights = 0
-        for entryVal in self.entryVals[ix:]:
-            entry = self.entries[entryVal]
-            h = cmds.text(entry["ui"], query=True, height=True)
-            if heights + h > (viewHeight / 2):
-                break
-            heights += h
-            n += 1
-        self.scrollToIndex(ix + n)
-
-    def scrollPageUp (self):
-        viewHeight = cmds.flowLayout(self.entryFlow, query=True, height=True)
-        ix = self.getScrollIndex()
-        n = 0
-        heights = 0
-        for entryVal in reversed(self.entryVals[:ix]):
-            entry = self.entries[entryVal]
-            h = cmds.text(entry["ui"], query=True, height=True)
-            heights += h
-            n += 1
-            if heights + h > viewHeight:
-                break
-        self.scrollToIndex(ix - n)
-
-    def scrollHalfPageUp (self):
-        viewHeight = cmds.flowLayout(self.entryFlow, query=True, height=True)
-        ix = self.getScrollIndex()
-        n = 0
-        heights = 0
-        for entryVal in reversed(self.entryVals[:ix]):
-            entry = self.entries[entryVal]
-            h = cmds.text(entry["ui"], query=True, height=True)
-            heights += h
-            n += 1
-            if heights + h > (viewHeight / 2):
-                break
-        self.scrollToIndex(ix - n)
+        self.scrollToIndex(ix + (n if down else -n))
 
     def scrollToIndex (self, index):
         n = cmds.intSlider(self.slider, query=True, maxValue=True)
