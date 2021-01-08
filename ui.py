@@ -114,6 +114,12 @@ class SelectionList (object):
             n += 1
         self.scrollToIndex(ix + (n if down else -n))
 
+    def scrollToTop (self):
+        self.scrollToIndex(0)
+
+    def scrollToBottom (self):
+        self.scrollToIndex(len(self.entryVals))
+
     def scrollToIndex (self, index):
         n = cmds.intSlider(self.slider, query=True, maxValue=True)
         index = max(0, min(index, n-1))
