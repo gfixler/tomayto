@@ -73,6 +73,27 @@ class SelectionList (object):
         sliderValue = cmds.intSlider(self.slider, query=True, value=True)
         return len(self.entryVals) - sliderValue
 
+    def getVisibleEntries (self):
+        """
+        Returns (key, entry val, entry) triple.
+        """
+        viewHeight = cmds.flowLayout(self.entryFlow, query=True, height=True)
+        ix = self.getScrollIndex()
+        visVals = self.entryVals[ix:]
+        keyPairs = zip(self.settings["selectionKeys"], visVals)
+        heights = 0
+        n = 0
+        results = []
+        for k, v in keyPairs:
+            entry = self.entries[v]
+            h = cmds.text(entry["ui"], query=True, height=True)
+            if heights + h > viewHeight:
+                break
+            results.append((k, v, entry))
+            heights = heights + h
+            n += 1
+        return results
+
     def scrollToIndex (self, index):
         n = cmds.intSlider(self.slider, query=True, maxValue=True)
         index = max(0, min(index, n-1))
