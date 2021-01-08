@@ -71,6 +71,8 @@ class stateSelectionListDemo (object):
             ('u', NOALT, CTRL, PRESS): ("RUN", (self.sl.scrollPage, [False, True])),
             ('f', NOALT, CTRL, PRESS): ("RUN", self.sl.scrollPage),
             ('b', NOALT, CTRL, PRESS): ("RUN", (self.sl.scrollPage, [False, False])),
+            ('6', NOALT, CTRL, PRESS): ("RUN", self.sl.scrollToTop), # ^ - gg is no good
+            ('4', NOALT, CTRL, PRESS): ("RUN", self.sl.scrollToBottom), # $ - G is no good
             ('o', NOALT, CTRL, PRESS): ("POP", self.returnOrderedSelected),
             ('Return', NOALT, CTRL, PRESS): ("POP", self.returnUnselected),
             ('Return', NOALT, NOCTRL, PRESS): ("RUN", self.returnUnorderedSelected),
