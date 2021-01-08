@@ -8,12 +8,15 @@ try:
 except ImportError:
     print 'WARNING (%s): failed to load maya.cmds module.' % __file__
 
+from .. ui import SelectionList
 from .. core import ALT, NOALT, CTRL, NOCTRL, PRESS, RELEASE
 
 import selection
 import transform
 import vimline
 
+
+fst = lambda (x, _) :  x
 
 minTime = lambda: cmds.playbackOptions(query=True, minTime=True)
 maxTime = lambda: cmds.playbackOptions(query=True, maxTime=True)
@@ -24,6 +27,7 @@ class stateSTART (object):
     def __init__ (self, mainInst):
         self.mainInst = mainInst
         self.keymap = {
+            ('I', NOALT, NOCTRL, PRESS):   ("PUSH", stateSelectionListDemo),
             ('d', NOALT, NOCTRL, PRESS):   ("RUN", cmds.delete),
             ('f', NOALT, NOCTRL, PRESS):   ("RUN", cmds.viewFit),
             ('F', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.viewFit(allObjects=True)),
@@ -49,6 +53,69 @@ class stateSTART (object):
 
     def switchToMayaHotkeys (self):
         cmds.hotkeySet("Maya_Default", edit=True, current=True)
+
+
+class stateSelectionListDemo (object):
+
+    def __init__ (self, mainInst):
+        self.mainInst = mainInst
+        self.win = cmds.window(topLeftCorner=(400, 270))
+        values = cmds.ls(allPaths=True)
+        self.sl = SelectionList(values, filtF=lambda x: "Manager" not in x, sortF=lambda x: x[1])
+        cmds.showWindow(self.win)
+        cmds.evalDeferred(self.sizeWindow)
+        self.keymap = {
+            ('j', NOALT, CTRL, PRESS): ("RUN", self.sl.scrollLine),
+            ('k', NOALT, CTRL, PRESS): ("RUN", (self.sl.scrollLine, [False])),
+            ('d', NOALT, CTRL, PRESS): ("RUN", (self.sl.scrollPage, [True, True])),
+            ('u', NOALT, CTRL, PRESS): ("RUN", (self.sl.scrollPage, [False, True])),
+            ('f', NOALT, CTRL, PRESS): ("RUN", self.sl.scrollPage),
+            ('b', NOALT, CTRL, PRESS): ("RUN", (self.sl.scrollPage, [False, False])),
+            ('o', NOALT, CTRL, PRESS): ("POP", self.returnOrderedSelected),
+            ('Return', NOALT, CTRL, PRESS): ("POP", self.returnUnselected),
+            ('Return', NOALT, NOCTRL, PRESS): ("RUN", self.returnUnorderedSelected),
+        }
+        eventKeys = self.sl.settings["selectionKeys"]
+        for key in eventKeys:
+            keyMaker = lambda k: lambda: self.toggleSelection(k)
+            self.keymap[(key, NOALT, NOCTRL, PRESS)] = ("RUN", keyMaker(key))
+
+    def sizeWindow (self):
+        sfEntries = map(lambda v: self.sl.entries[v], self.sl.entryVals)
+        getUIWidth = lambda x: cmds.text(x["ui"], query=True, width=True)
+        w = max(map(getUIWidth, sfEntries)) * 1.3
+        h = min(350, w * 1.5)
+        cmds.window(self.win, edit=True, widthHeight=(w, h))
+
+    def toggleSelection (self, key):
+        self.sl.toggle(key)
+
+    def returnValues (self, selOrder, selected):
+        if selected:
+            seld = filter(lambda (_, v): v["selected"] > 0, self.sl.entries.items())
+            if selOrder:
+                vals = map(fst, sorted(seld, key=lambda (_, v): v["selected"]))
+            else:
+                vals = [v for v in self.sl.values if self.sl.entries[v]["selected"] > 0]
+        else:
+            vals = [v for v in self.sl.values if self.sl.entries[v]["selected"] == 0]
+        try:
+            cmds.deleteUI(self.win)
+        except:
+            pass
+        print
+        for val in vals:
+            print val
+        self.mainInst.popState(vals)
+
+    def returnOrderedSelected (self):
+        self.returnValues(True, True)
+
+    def returnUnorderedSelected (self):
+        self.returnValues(False, True)
+
+    def returnUnselected (self):
+        self.returnValues(False, False)
 
 
 class stateToolSelect (object):
