@@ -85,8 +85,13 @@ class Tomayto (object):
             except:
                 pass
 
-    def runMethod (self, method):
-        method()
+    def runMethod (self, methodData):
+        try:
+            method, methodArgs = methodData
+        except:
+            methodArgs = []
+            method = methodData
+        method(*methodArgs)
 
     def getCurrentStateInfo (self):
         nltab = "\n    "
