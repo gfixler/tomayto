@@ -8,6 +8,13 @@ from .. core import ALT, NOALT, CTRL, NOCTRL, PRESS, RELEASE
 from .. import util
 
 
+def getVimlineParts (state):
+    if state["right"]:
+        return (state["left"], state["right"][0], state["right"][1:])
+    else:
+        return (state["left"], " ", "")
+
+
 class stateVimline (object):
 
     def __init__ (self, mainInst, onChange=lambda _: None):
@@ -68,30 +75,18 @@ class stateVimlineTestWin (object):
                                        , "rtext": self.rtext
                                        }
 
-    def testWinOnChange (self, vimState):
-        vim = self.mainInst.vimline
+    def testWinOnChange (self, state):
         vimtw = self.mainInst.vimlineTestWin
 
-        if vim["mode"] in ["insert", "INSERT", "append", "APPEND"]:
+        if state["mode"] in ["insert", "INSERT", "append", "APPEND"]:
             cmds.text(vimtw["itext"], edit=True, backgroundColor=(0.3, 0.3, 0.3))
-        elif vim["mode"] == "NORMAL":
+        elif state["mode"] == "NORMAL":
             cmds.text(vimtw["itext"], edit=True, backgroundColor=(0.6, 0.6, 0.6))
-            if not vim["right"]:
-                if vim["left"]:
-                    vim["right"] = vim["left"][-1]
-                    vim["left"] = vim["left"][:-1]
 
-        if vim["right"]:
-            cmds.text(vimtw["rtext"], edit=True, label=vim["right"][1:])
-            cmds.text(vimtw["itext"], edit=True, label=vim["right"][0])
-        else:
-            cmds.text(vimtw["rtext"], edit=True, label="")
-            cmds.text(vimtw["itext"], edit=True, label=" ")
-
-        if vim["left"]:
-            cmds.text(vimtw["ltext"], edit=True, label=vim["left"])
-        else:
-            cmds.text(vimtw["ltext"], edit=True, label="")
+        l, c, r = getVimlineParts(state)
+        cmds.text(vimtw["ltext"], edit=True, label=l)
+        cmds.text(vimtw["itext"], edit=True, label=c)
+        cmds.text(vimtw["rtext"], edit=True, label=r)
 
 
     def onEnter (self):
@@ -130,6 +125,11 @@ class stateVimlineNormalMode (object):
 
     def handleChange (self):
         vim = self.mainInst.vimline
+        # don't allow cursor off right end in normal mode
+        if not vim["right"]:
+            if vim["left"]:
+                vim["right"] = vim["left"][-1]
+                vim["left"] = vim["left"][:-1]
         if "onChange" in vim:
             if callable(vim["onChange"]):
                 vim["onChange"](vim)
@@ -202,7 +202,6 @@ class stateVimlineEnterInsertMode (object):
             ("Return", NOALT, NOCTRL, PRESS): ("RUN", self.handleReturn),
             ("Backspace", NOALT, NOCTRL, PRESS): ("RUN", self.handleBackspace),
             ("[", NOALT, CTRL, PRESS): ("POP", self.handleEscape),
-            ("Return", NOALT, NOCTRL, PRESS): ("POP", self.handleEscape),
         }
         for k in util.keyChars:
             self.keymap[(k, NOALT, NOCTRL, PRESS)] = ("PUSH", (stateVimlineInsertMode, [k]))
@@ -243,6 +242,7 @@ class stateVimlineEnterInsertMode (object):
 
     def handleReturn (self):
         print "^M"
+        self.mainInst.popState(self.handleEscape)
 
 
 class stateVimlineInsertMode (object):
