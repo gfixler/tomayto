@@ -68,28 +68,27 @@ class stateVimlineTestWin (object):
                                        , "rtext": self.rtext
                                        }
 
-    def testWinOnChange (self, vimState):
-        vim = self.mainInst.vimline
+    def testWinOnChange (self, state):
         vimtw = self.mainInst.vimlineTestWin
 
-        if vim["mode"] in ["insert", "INSERT", "append", "APPEND"]:
+        if state["mode"] in ["insert", "INSERT", "append", "APPEND"]:
             cmds.text(vimtw["itext"], edit=True, backgroundColor=(0.3, 0.3, 0.3))
-        elif vim["mode"] == "NORMAL":
+        elif state["mode"] == "NORMAL":
             cmds.text(vimtw["itext"], edit=True, backgroundColor=(0.6, 0.6, 0.6))
-            if not vim["right"]:
-                if vim["left"]:
-                    vim["right"] = vim["left"][-1]
-                    vim["left"] = vim["left"][:-1]
+            if not state["right"]:
+                if state["left"]:
+                    state["right"] = state["left"][-1]
+                    state["left"] = state["left"][:-1]
 
-        if vim["right"]:
-            cmds.text(vimtw["rtext"], edit=True, label=vim["right"][1:])
-            cmds.text(vimtw["itext"], edit=True, label=vim["right"][0])
+        if state["right"]:
+            cmds.text(vimtw["rtext"], edit=True, label=state["right"][1:])
+            cmds.text(vimtw["itext"], edit=True, label=state["right"][0])
         else:
             cmds.text(vimtw["rtext"], edit=True, label="")
             cmds.text(vimtw["itext"], edit=True, label=" ")
 
-        if vim["left"]:
-            cmds.text(vimtw["ltext"], edit=True, label=vim["left"])
+        if state["left"]:
+            cmds.text(vimtw["ltext"], edit=True, label=state["left"])
         else:
             cmds.text(vimtw["ltext"], edit=True, label="")
 
