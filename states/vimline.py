@@ -75,22 +75,14 @@ class stateVimlineTestWin (object):
             cmds.text(vimtw["itext"], edit=True, backgroundColor=(0.3, 0.3, 0.3))
         elif state["mode"] == "NORMAL":
             cmds.text(vimtw["itext"], edit=True, backgroundColor=(0.6, 0.6, 0.6))
-            if not state["right"]:
-                if state["left"]:
-                    state["right"] = state["left"][-1]
-                    state["left"] = state["left"][:-1]
 
+        cmds.text(vimtw["ltext"], edit=True, label=state["left"])
         if state["right"]:
-            cmds.text(vimtw["rtext"], edit=True, label=state["right"][1:])
             cmds.text(vimtw["itext"], edit=True, label=state["right"][0])
+            cmds.text(vimtw["rtext"], edit=True, label=state["right"][1:])
         else:
-            cmds.text(vimtw["rtext"], edit=True, label="")
             cmds.text(vimtw["itext"], edit=True, label=" ")
-
-        if state["left"]:
-            cmds.text(vimtw["ltext"], edit=True, label=state["left"])
-        else:
-            cmds.text(vimtw["ltext"], edit=True, label="")
+            cmds.text(vimtw["rtext"], edit=True, label="")
 
 
     def onEnter (self):
@@ -129,6 +121,11 @@ class stateVimlineNormalMode (object):
 
     def handleChange (self):
         vim = self.mainInst.vimline
+        # don't allow cursor off right end in normal mode
+        if not vim["right"]:
+            if vim["left"]:
+                vim["right"] = vim["left"][-1]
+                vim["left"] = vim["left"][:-1]
         if "onChange" in vim:
             if callable(vim["onChange"]):
                 vim["onChange"](vim)
