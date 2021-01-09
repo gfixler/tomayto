@@ -83,13 +83,10 @@ class stateVimlineTestWin (object):
         elif state["mode"] == "NORMAL":
             cmds.text(vimtw["itext"], edit=True, backgroundColor=(0.6, 0.6, 0.6))
 
-        cmds.text(vimtw["ltext"], edit=True, label=state["left"])
-        if state["right"]:
-            cmds.text(vimtw["itext"], edit=True, label=state["right"][0])
-            cmds.text(vimtw["rtext"], edit=True, label=state["right"][1:])
-        else:
-            cmds.text(vimtw["itext"], edit=True, label=" ")
-            cmds.text(vimtw["rtext"], edit=True, label="")
+        l, c, r = getVimlineParts(state)
+        cmds.text(vimtw["ltext"], edit=True, label=l)
+        cmds.text(vimtw["itext"], edit=True, label=c)
+        cmds.text(vimtw["rtext"], edit=True, label=r)
 
 
     def onEnter (self):
