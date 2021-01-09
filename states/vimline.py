@@ -8,6 +8,13 @@ from .. core import ALT, NOALT, CTRL, NOCTRL, PRESS, RELEASE
 from .. import util
 
 
+def getVimlineParts (state):
+    if state["right"]:
+        return (state["left"], state["right"][0], state["right"][1:])
+    else:
+        return (state["left"], " ", "")
+
+
 class stateVimline (object):
 
     def __init__ (self, mainInst, onChange=lambda _: None):
