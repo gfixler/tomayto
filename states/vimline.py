@@ -201,7 +201,6 @@ class stateVimlineEnterInsertMode (object):
             ("Return", NOALT, NOCTRL, PRESS): ("RUN", self.handleReturn),
             ("Backspace", NOALT, NOCTRL, PRESS): ("RUN", self.handleBackspace),
             ("[", NOALT, CTRL, PRESS): ("POP", self.handleEscape),
-            ("Return", NOALT, NOCTRL, PRESS): ("POP", self.handleEscape),
         }
         for k in util.keyChars:
             self.keymap[(k, NOALT, NOCTRL, PRESS)] = ("PUSH", (stateVimlineInsertMode, [k]))
@@ -242,6 +241,7 @@ class stateVimlineEnterInsertMode (object):
 
     def handleReturn (self):
         print "^M"
+        self.mainInst.popState(self.handleEscape)
 
 
 class stateVimlineInsertMode (object):
