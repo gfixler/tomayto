@@ -49,10 +49,33 @@ class stateSTART (object):
 
             ('v', NOALT, NOCTRL, PRESS):   ("PUSH", vimline.stateVimline),
             ('V', NOALT, NOCTRL, PRESS):   ("PUSH", vimline.stateVimlineTestWin),
+            ('v', NOALT, CTRL, PRESS):     ("PUSH", stateRetitleWindowDemo),
         }
 
     def switchToMayaHotkeys (self):
         cmds.hotkeySet("Maya_Default", edit=True, current=True)
+
+
+class stateRetitleWindowDemo (object):
+
+    def __init__ (self, mainInst):
+        self.mainInst = mainInst
+        self.keymap = {
+            ("Return", NOALT, NOCTRL, PRESS):    ("POP", self.cleanup)
+        }
+        self._win = cmds.window()
+        cmds.showWindow(self._win)
+
+    def callback (self, state):
+        l, c, r = vimline.getVimlineParts(state)
+        cmds.window(self._win, edit=True, title=l + c + r)
+
+    def onEnter (self):
+        self.mainInst.pushState((vimline.stateVimline, [self.callback]))
+
+    def cleanup (self):
+        cmds.evalDeferred(lambda: cmds.deleteUI(self._win))
+        self.mainInst.popState()
 
 
 class stateSelectionListDemo (object):
