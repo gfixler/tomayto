@@ -176,8 +176,30 @@ class SelectionList (object):
                 if e["selected"]:
                     self.toggle(k)
 
+    def showTopPane (self):
+        cmds.paneLayout(self.topPane, edit=True, manage=True)
+
+    def hideTopPane (self):
+        cmds.paneLayout(self.topPane, edit=True, manage=False)
+
     def createUI (self):
         self.form = cmds.formLayout(backgroundColor = self.settings["bgCol"])
+        self.topPane = cmds.paneLayout()
+        self.vimline_form = cmds.formLayout()
+        self.vimline_ltxt = cmds.text(label="left")
+        self.vimline_ctxt = cmds.text(label="c")
+        self.vimline_rtxt = cmds.text(label="right")
+        cmds.setParent("..")
+        cmds.formLayout(self.vimline_form, edit=True, attachForm=[ (self.vimline_ltxt, "top", 5)
+                                                                 , (self.vimline_ltxt, "left", 5)
+                                                                 , (self.vimline_ctxt, "top", 5)
+                                                                 , (self.vimline_rtxt, "top", 5)
+                                                                 , (self.vimline_rtxt, "left", 5)
+                                                                 ],
+                                                      attachControl=[ (self.vimline_ctxt, "left", 0, self.vimline_ltxt)
+                                                                    , (self.vimline_rtxt, "left", 0, self.vimline_ctxt)
+                                                                    ] )
+        cmds.setParent("..")
         self.keyFlow = cmds.flowLayout( vertical = True
                                       , backgroundColor = self.settings["bgCol"]
                                       )
@@ -187,16 +209,28 @@ class SelectionList (object):
                                         )
         cmds.setParent("..")
         self.slider = cmds.intSlider(horizontal=False, dragCommand=self.scrollToIndex)
-        cmds.formLayout(self.form, edit=True, attachForm=[ (self.keyFlow, "top", 0)
-                                                         , (self.keyFlow, "bottom", 0)
+        cmds.formLayout(self.form, edit=True, attachForm=[ (self.keyFlow, "bottom", 0)
                                                          , (self.keyFlow, "left", self.settings["keyLeftPadding"])
-                                                         , (self.slider, "top", 0)
                                                          , (self.slider, "bottom", 0)
                                                          , (self.slider, "right", 0)
-                                                         , (self.entryFlow, "top", 0)
                                                          , (self.entryFlow, "bottom", 0)
+                                                         , (self.topPane, "top", 0)
+                                                         , (self.topPane, "left", 0)
+                                                         , (self.topPane, "right", 0)
                                                          ],
                                               attachControl=[ (self.entryFlow, "left", self.settings["keyEntryPadding"], self.keyFlow)
-                                                            , (self.entryFlow, "right", 0, self.slider)] )
+                                                            , (self.entryFlow, "right", 0, self.slider)
+                                                            , (self.keyFlow, "top", 5, self.topPane)
+                                                            , (self.entryFlow, "top", 5, self.topPane)
+                                                            , (self.slider, "top", 5, self.topPane)
+                                                            ] )
+                                                        # , (self.vimline_ltxt, "left", 5)
+                                                        # , (self.vimline_ltxt, "top", 5)
+                                                        # , (self.vimline_ctxt, "top", 5)
+                                                        # , (self.vimline_rtxt, "top", 5)
+                                                        # # , (self.vimline_rtxt, "right", 5) # decided not to attach right text to form
+                                                        # , (self.vimline_rtxt, "left", 0, self.vimline_ctxt)
+                                                        # , (self.vimline_ctxt, "left", 0, self.vimline_ltxt)
+        self.hideTopPane()
         self.populateUI()
 
