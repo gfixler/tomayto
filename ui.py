@@ -185,15 +185,18 @@ class SelectionList (object):
     def createUI (self):
         self.form = cmds.formLayout(backgroundColor = self.settings["bgCol"])
         self.topPane = cmds.paneLayout()
-        self.vimline_form = cmds.formLayout()
+        self.vimline_form = cmds.formLayout(backgroundColor=col.MayaLayoutBG)
         self.vimline_ltxt = cmds.text(label="left")
         self.vimline_ctxt = cmds.text(label="c")
         self.vimline_rtxt = cmds.text(label="right")
         cmds.setParent("..")
         cmds.formLayout(self.vimline_form, edit=True, attachForm=[ (self.vimline_ltxt, "top", 5)
+                                                                 , (self.vimline_ltxt, "bottom", 5)
                                                                  , (self.vimline_ltxt, "left", 5)
                                                                  , (self.vimline_ctxt, "top", 5)
+                                                                 , (self.vimline_ctxt, "bottom", 5)
                                                                  , (self.vimline_rtxt, "top", 5)
+                                                                 , (self.vimline_rtxt, "bottom", 5)
                                                                  , (self.vimline_rtxt, "left", 5)
                                                                  ],
                                                       attachControl=[ (self.vimline_ctxt, "left", 0, self.vimline_ltxt)
@@ -224,13 +227,6 @@ class SelectionList (object):
                                                             , (self.entryFlow, "top", 5, self.topPane)
                                                             , (self.slider, "top", 5, self.topPane)
                                                             ] )
-                                                        # , (self.vimline_ltxt, "left", 5)
-                                                        # , (self.vimline_ltxt, "top", 5)
-                                                        # , (self.vimline_ctxt, "top", 5)
-                                                        # , (self.vimline_rtxt, "top", 5)
-                                                        # # , (self.vimline_rtxt, "right", 5) # decided not to attach right text to form
-                                                        # , (self.vimline_rtxt, "left", 0, self.vimline_ctxt)
-                                                        # , (self.vimline_ctxt, "left", 0, self.vimline_ltxt)
         self.hideTopPane()
         self.populateUI()
 
