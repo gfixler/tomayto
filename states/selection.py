@@ -37,6 +37,7 @@ class stateSelect (object):
             ('c', NOALT, NOCTRL, PRESS): ("PUSH", (stateVisiblySelectTransform, ["camera", True, single])),
             ('n', NOALT, NOCTRL, PRESS): ("RUN", self.selectNone),
             ('t', NOALT, NOCTRL, PRESS):   ("PUSH", stateToolSelect),
+            ('w', NOALT, NOCTRL, PRESS): ("PUSH", stateSelectWindow),
         }
 
     def onPopTo (self, *value):
@@ -113,7 +114,7 @@ class stateVisiblySelectTransform (object):
         self.clearAnnotations()
         cmds.undoInfo(closeChunk=True)
         sel = cmds.ls(selection=True, flatten=True)
-        return sel
+        # return sel
 
 
 class stateToolSelect (object):
@@ -148,4 +149,47 @@ class stateToolSelect (object):
     def selectManipTool (self):
         cmds.setToolTo(mel.eval("$temp = $gshowManip"))
         self.mainInst.popState()
+
+
+class stateSelectWindow (object):
+
+    def __init__ (self, mainInst):
+        self.mainInst = mainInst
+        self.keymap = {
+            ('h', NOALT, NOCTRL, PRESS): ("RUN", self.prevWin),
+            ('l', NOALT, NOCTRL, PRESS): ("RUN", self.nextWin),
+            ("Return", NOALT, NOCTRL, PRESS): ("POP", self.cleanup),
+        }
+        self.wins = cmds.lsUI(type="window")
+        self.ix = 0
+        self.filterWins()
+        self.selectWin()
+
+    def filterWins (self):
+        winExists = lambda w: cmds.window(w, query=True, exists=True)
+        existingWins = filter(winExists, self.wins)
+        self.wins = filter(lambda x: x != "MayaWindow", existingWins)
+
+    def selectWin (self):
+        print self.wins[self.ix]
+        print cmds.window(self.wins[self.ix], query=True, topLeftCorner=True)
+        cmds.window(self.wins[self.ix], edit=True, visible=True)
+        cmds.setFocus(self.wins[self.ix])
+
+    def prevWin (self):
+        self.filterWins()
+        self.ix = self.ix - 1
+        if self.ix < 0:
+            self.ix = len(self.wins) - 1
+        self.selectWin()
+
+    def nextWin (self):
+        self.filterWins()
+        self.ix = self.ix + 1
+        if self.ix >= len(self.wins):
+            self.ix = 0
+        self.selectWin()
+
+    def cleanup (self):
+        cmds.setFocus("MayaWindow")
 
