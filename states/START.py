@@ -3,11 +3,6 @@ try:
 except ImportError:
     print 'WARNING (%s): failed to load maya.cmds module.' % __file__
 
-try:
-    import maya.mel as mel
-except ImportError:
-    print 'WARNING (%s): failed to load maya.cmds module.' % __file__
-
 from .. ui import SelectionList
 from .. core import ALT, NOALT, CTRL, NOCTRL, PRESS, RELEASE
 
@@ -41,7 +36,6 @@ class stateSTART (object):
             ('L', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.currentTime(maxTime())),
             ('M', NOALT, NOCTRL, PRESS):   ("RUN", lambda: cmds.currentTime(round((minTime() + maxTime()) / 2))),
             ('M', ALT, CTRL, PRESS):       ("RUN", self.switchToMayaHotkeys),
-            ('t', NOALT, NOCTRL, PRESS):   ("PUSH", stateToolSelect),
 
             ('m', NOALT, NOCTRL, PRESS):   ("PUSH", transform.stateMove),
 
@@ -143,37 +137,4 @@ class stateSelectionListDemo (object):
     def returnUnselected (self):
         self.returnValues(False, False)
 
-
-class stateToolSelect (object):
-
-    def __init__ (self, mainInst):
-        self.mainInst = mainInst
-        self.keymap = {
-            ('q', NOALT, NOCTRL, PRESS): ("RUN", self.selectSelectTool),
-            ('m', NOALT, NOCTRL, PRESS): ("RUN", self.selectMoveTool),
-            ('r', NOALT, NOCTRL, PRESS): ("RUN", self.selectRotateTool),
-            ('s', NOALT, NOCTRL, PRESS): ("RUN", self.selectScaleTool),
-            ('M', NOALT, NOCTRL, PRESS): ("RUN", self.selectManipTool),
-            ('t', NOALT, NOCTRL, PRESS): ("POP", None)
-        }
-
-    def selectSelectTool (self):
-        cmds.setToolTo(mel.eval("$temp = $gSelect"))
-        self.mainInst.popState()
-
-    def selectMoveTool (self):
-        cmds.setToolTo(mel.eval("$temp = $gMove"))
-        self.mainInst.popState()
-
-    def selectRotateTool (self):
-        cmds.setToolTo(mel.eval("$temp = $gRotate"))
-        self.mainInst.popState()
-
-    def selectScaleTool (self):
-        cmds.setToolTo(mel.eval("$temp = $gScale"))
-        self.mainInst.popState()
-
-    def selectManipTool (self):
-        cmds.setToolTo(mel.eval("$temp = $gshowManip"))
-        self.mainInst.popState()
 
