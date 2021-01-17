@@ -94,6 +94,7 @@ class stateSelectionListDemo (object):
             ('a', NOALT, CTRL, PRESS): ("RUN", self.sl.toggleVisible),
             ('Return', NOALT, CTRL, PRESS): ("POP", self.returnUnselected),
             ('Return', NOALT, NOCTRL, PRESS): ("RUN", self.returnUnorderedSelected),
+            ('/', NOALT, NOCTRL, PRESS): ("PUSH", (stateSelectionListSearch, [self]))
         }
         eventKeys = self.sl.settings["selectionKeys"]
         for key in eventKeys:
@@ -109,6 +110,12 @@ class stateSelectionListDemo (object):
 
     def toggleSelection (self, key):
         self.sl.toggle(key)
+
+    def beginSearch (self):
+        self.sl.showTopPane()
+
+    def endSearch (self):
+        self.sl.hideTopPane()
 
     def returnValues (self, selOrder, selected):
         if selected:
@@ -137,4 +144,19 @@ class stateSelectionListDemo (object):
     def returnUnselected (self):
         self.returnValues(False, False)
 
+
+class stateSelectionListSearch (object):
+
+    def __init__ (self, mainInst, slInst):
+        self.mainInst = mainInst
+        self.slInst = slInst
+        self.keymap = {
+            ("Return", NOALT, NOCTRL, PRESS):    ("POP", self.cleanup)
+        }
+
+    def onEnter (self):
+        self.slInst.beginSearch()
+
+    def cleanup (self):
+        self.slInst.endSearch()
 
