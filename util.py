@@ -3,6 +3,14 @@ try:
 except ImportError:
     print 'WARNING (%s): failed to load maya.cmds module.' % __file__
 
+try:
+    import maya.mel as mel
+except ImportError:
+    print 'WARNING (%s): failed to load maya.mel module.' % __file__
+
+
+import os
+
 
 def defaultSettings (defaults):
     def classTaker (cls):
@@ -165,4 +173,66 @@ def removeTomaytoKeymap (nameCommandPrefix="tomayto", **kwargs):
             print "deleted", keyString
         else:
             print "preserved", keyString
+
+
+def backupDoDeleteScriptPath ():
+    print "Begin doDelete script path discovery..."
+    opvar = "scriptPath_doDelete"
+    if cmds.optionVar(exists=opvar):
+        print "  Found option var:", opvar
+        storedPath = str(cmds.optionVar(query=opvar))
+        print "  Stored path:", storedPath
+        if os.path.exists(storedPath):
+            print "  Path exists."
+        else:
+            print "  Path does not exist."
+            print "  Querying location of doDelete..."
+            locMsg = mel.eval("whatIs doDelete;")
+            print "    Result: ", locMsg
+            melHeader = "Mel procedure found in: " # Linux, Maya 2017
+            scriptHeader = "Script found in: " # Windows, Mayas 2016 and 2018
+            scriptPath = ""
+            if locMsg.startswith(melHeader):
+                print "  Found prefix: ", melHeader
+                scriptPath = locMsg[len(melHeader):]
+            elif locMsg.startswith(scriptHeader):
+                print "  Found prefix: ", scriptHeader
+                scriptPath = locMsg[len(scriptHeader):]
+            else:
+                print "  Could not find doDelete path via whatIs."
+            if os.path.exists(scriptPath):
+                print "  Path found at:", scriptPath
+                cmds.optionVar(stringValue=(opvar, scriptPath))
+                print "  Stored in optionVar."
+            else:
+                print "  Found path does not exist."
+        print ("End doDelete script path discovery.")
+
+def hackDeleteKeys (callbackName="tomaytoCB", nameCommandPrefix="tomayto"):
+    """
+    Maya doesn't allow using Backspace or Delete as hotkeys, but we can
+    override the MEL function that they both call. Both keys will fire off the
+    same event(s), and we'll only have access to press, not release, and none
+    of the modifier keys will work with them, but it's something, at least.
+    """
+    backupDoDeleteScriptPath()
+    print "Overriding doDelete (this session only) with:"
+    override = 'global proc doDelete () { python("' + callbackName + '(\\"Backspace\\", False, False, True)"); };'
+    print(override)
+    mel.eval(override)
+
+def restoreDeleteKeys ():
+    """
+    Source doDelete.mel, the file that builds the doDelete MEL procedure
+    called by Backspace/Delete. This should restore Backspace functionality.
+    """
+    opvar = "scriptPath_doDelete"
+    scriptPath = str(cmds.optionVar(query=opvar))
+    if os.path.exists(scriptPath):
+        print "Restoring doDelete function"
+        print "Sourcing:", scriptPath
+        mel.eval('source "' + scriptPath + '";')
+    else:
+        print "Unable to locate original doDelete script path, but"
+        print "functionality should be restored on program restart."
 
