@@ -210,6 +210,9 @@ class stateVimlineEnterInsertMode (object):
     def onEnter (self):
         self.handleChange()
 
+    def onPopTo (self):
+        self.handleChange()
+
     def handleChange (self):
         vim = self.mainInst.vimline
         if "onChange" in vim:
