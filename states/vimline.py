@@ -211,10 +211,10 @@ class stateVimlineEnterInsertMode (object):
         self.handleChange()
 
     def handleChange (self):
-        self.vim = self.mainInst.vimline
-        if "onChange" in self.vim:
-            if callable(self.vim["onChange"]):
-                self.vim["onChange"](self.vim)
+        vim = self.mainInst.vimline
+        if "onChange" in vim:
+            if callable(vim["onChange"]):
+                vim["onChange"](vim)
 
     def handleBackspace (self):
         # print "^h"
