@@ -29,6 +29,7 @@ class stateVimline (object):
                                     , "mode": "START"
                                     }
         self.vim = self.mainInst.vimline
+        self.keymap = {}
 
     def onEnter (self):
         print "entering Vimline"
