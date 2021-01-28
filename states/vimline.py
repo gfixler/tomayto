@@ -105,10 +105,10 @@ class stateVimlineNormalMode (object):
         self.mainInst.vimline["mode"] = "NORMAL"
         self.handleChange()
         self.keymap = {
-            ("i", NOALT, NOCTRL, PRESS): ("PUSH", (stateVimlineEnterInsertMode, ["insert"])),
-            ("I", NOALT, NOCTRL, PRESS): ("PUSH", (stateVimlineEnterInsertMode, ["INSERT"])),
-            ("a", NOALT, NOCTRL, PRESS): ("PUSH", (stateVimlineEnterInsertMode, ["append"])),
-            ("A", NOALT, NOCTRL, PRESS): ("PUSH", (stateVimlineEnterInsertMode, ["APPEND"])),
+            ("i", NOALT, NOCTRL, PRESS): ("PUSH", (stateVimlineInsertMode, ["insert"])),
+            ("I", NOALT, NOCTRL, PRESS): ("PUSH", (stateVimlineInsertMode, ["INSERT"])),
+            ("a", NOALT, NOCTRL, PRESS): ("PUSH", (stateVimlineInsertMode, ["append"])),
+            ("A", NOALT, NOCTRL, PRESS): ("PUSH", (stateVimlineInsertMode, ["APPEND"])),
             ("h", NOALT, NOCTRL, PRESS): ("RUN", self.cursorLeft),
             ("l", NOALT, NOCTRL, PRESS): ("RUN", self.cursorRight),
             ("0", NOALT, NOCTRL, PRESS): ("RUN", self.toFirstColumn),
@@ -171,7 +171,7 @@ class stateVimlineNormalMode (object):
         self.handleChange()
 
 
-class stateVimlineEnterInsertMode (object):
+class stateVimlineInsertMode (object):
 
     def __init__ (self, mainInst, entryMode):
         self.mainInst = mainInst
@@ -205,7 +205,7 @@ class stateVimlineEnterInsertMode (object):
             ("[", NOALT, CTRL, PRESS): ("POP", self.handleEscape),
         }
         for k in util.keyChars:
-            self.keymap[(k, NOALT, NOCTRL, PRESS)] = ("PUSH", (stateVimlineInsertMode, [k]))
+            self.keymap[(k, NOALT, NOCTRL, PRESS)] = ("PUSH", (stateVimlineInsertChar, [k]))
 
     def onEnter (self):
         self.handleChange()
@@ -249,7 +249,7 @@ class stateVimlineEnterInsertMode (object):
         self.mainInst.popState(self.handleEscape)
 
 
-class stateVimlineInsertMode (object):
+class stateVimlineInsertChar (object):
 
     def __init__ (self, mainInst, char):
         self.mainInst = mainInst
