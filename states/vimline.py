@@ -113,6 +113,8 @@ class stateVimlineNormalMode (object):
             ("l", NOALT, NOCTRL, PRESS): ("RUN", self.cursorRight),
             ("0", NOALT, NOCTRL, PRESS): ("RUN", self.toFirstColumn),
             ("$", NOALT, NOCTRL, PRESS): ("RUN", self.toLastColumn), # TODO: $ should go to last non-whitespace column
+            ("D", NOALT, NOCTRL, PRESS): ("RUN", self.deleteToEOL),
+            ("C", NOALT, NOCTRL, PRESS): ("RUN", self.changeToEOL),
             ("[", NOALT, CTRL, PRESS): ("POP", self.handleEscape),
             ("Return", NOALT, NOCTRL, PRESS): ("POP", self.handleEscape),
         }
@@ -169,6 +171,15 @@ class stateVimlineNormalMode (object):
             vim["right"] = vim["left"][-1]
             vim["left"] = vim["left"][:-1]
         self.handleChange()
+
+    def deleteToEOL (self):
+        vim = self.mainInst.vimline
+        vim["right"] = ""
+        self.handleChange()
+
+    def changeToEOL (self):
+        self.deleteToEOL()
+        self.mainInst.pushState((stateVimlineInsertMode, ["APPEND"]))
 
 
 class stateVimlineInsertMode (object):
