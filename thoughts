@@ -438,3 +438,90 @@ TODO items:
 - ensure scrolling up and down is the same amount (currently off by 1)
 - don't allow keypresses off the bottom of the list to toggle selections
 
+----------------------------
+
+2021-11-24 01:34:06 PM
+
+I've been thinking about key sequences and chords this past week. I've also
+been thinking about how key events should work. I haven't been happy with how
+the library works so far, as it can be very tedious to build out states. I've
+wanted something compositional. My thoughts are very jumbled right now, so I'm
+using this file to start refining them (that's what this file is for, really).
+
+Currently, the keymap in each state is a dict, with "events" as keys, and a
+tuple of an action string (either "PUSH", "POP", or "RUN"), followed by some
+necessary bits, specific to the action type. One problem is that if I want to
+create a key sequence, I have to break it up over states, so I add the first
+key in an event to a particular state, and push another, new state, in which I
+put the next key, and repeat until I've finished the sequence. It's a lot of
+boilerplate, and a lot of places to keep track of, and for bugs to hide in.
+
+I'd like to simplify with composable events. Some thoughts:
+
+e = Events()        # actual name/how it works TBD
+e.c_x | e.c_f       # ctrl+x, then ctrl+f
+e.n & e.m & e.r     # n, m, and r keys, chorded (pressed together)
+e.ca_h              # ctrl+alt+h
+e.ac_h              # synonym for e.ca_h
+e.b_h               # possible expression of alt+ctrl (b for both)
+                    #   i.e. a = alt, c = ctrl, b = both?
+
+I wouldn't need to create all of the properties on the Events instance; this
+would be done by parsing the string sent to the instance's __getattr__ method.
+
+Maybe sequential keys could become a list of events:
+
+[("x", False, True, True), ("f", False, True, True)]
+
+Maybe chorded keys could become a list inside an event:
+
+(["n", "m", "r"], False, False, True)
+
+Alternatively, maybe I use classes:
+
+Seq(e.c_x, e.c_f)
+Crd(e.n, e.m, e.r)
+
+I don't love that, because I want an algebra of events, e.g., create some seqs
+or crds somewhere:
+
+complf = e.c_x | e.c_f      # file completion prefix sequence
+prag = e.l & e.a & e.n      # chord for haskell language pragmas
+
+Then use them in other seqs and crds:
+
+complf | e.p & e.y & e.t    # filter to just python files
+complf | e.h & e.a & e.s    # filter to just haskell files
+
+prag | e.g & e.n & e.d      # generalizedNewtypeDeriving
+prag | e.n & e.m & e.r      # noMonomorphismRestriction
+
+These | and & operators would be creating events, composing events
+into new events, immutably.
+
+As an aside, I need a way to express keys that can't exist in a property name,
+like % and F1, as e.c_^ (go to alternate file in Vim) isn't valid. I think it
+might be nice to allow dict lookup of strings, e.g. e["c_^"], but I also think
+I need to standardize around the best name for these things, i.e. the ^ is most
+standardly known as the caret, though people call it the exponent symbol, or
+even "hat". So, e.c_caret should work, as should e.f1. I'd also like to be able
+to ask the name of things, e.g. with e.getSymbolName("^") and have it retun
+"caret". There will be weird keys, like Tab and Backspace, which aren't
+assignable as hotkeys in Maya, but which I can get to by hacking into some
+existing callbacks. That's TBD.
+
+Composition of events means I also need to deal with prefix collisions, i.e. if
+you can press the keys ab in sequence to do something, and you can also press
+abc to do something else, then pressing ab means you're in a weird state, where
+the system doesn't know if you mean ab, or if you're about to type c. Vim gets
+around this by waiting 1 second to see if you continue on, and if not, it emits
+the event for the now fully-entered, smaller subsequence. I handle such
+sequences entirely manually at the moment, by linking a single keypress to
+another state. Composition means I can automate sequences, but I need a way to
+detect when sequences overlap, and a plan for handling such overlaps.
+
+Waiting a second when event subsequences overlap is tricky. I'll be in Maya, so
+I'll likely be using the evalDeferred tricks I've come up with elsewhere. I
+would like to allow that dependency to be injected, or set to something else,
+in case this library grows beyond Maya at some point.
+
