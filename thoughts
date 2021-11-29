@@ -525,3 +525,85 @@ I'll likely be using the evalDeferred tricks I've come up with elsewhere. I
 would like to allow that dependency to be injected, or set to something else,
 in case this library grows beyond Maya at some point.
 
+----------------------------
+
+2021-11-28 Sunday
+
+I thought of a counterpoint to how I was imagining a chorded key event algebra.
+
+    e.c_x & e.u & e.P
+
+That represents a chord of ctrl+x, u, and P, but a chord is supposed to be
+struck at [roughly] the same instant. This imagines that I can hit ctrl only
+for the duration of the x, and shift only for the duration of the P, when
+really I'd have to be holding shift and ctrl the entire time to have those keys
+register, but then the events that don't have those modifiers wouldn't fire.
+
+Several workarounds:
+
+1) don't allow modifiers in chords
+
+    I don't like this. I want modified chords
+
+2) promote everything, so all events share any given modifiers
+
+    Not a fan; I don't want to correct wrong data
+
+3) error out at runtime
+
+    Nah... I'd rather make illegal states unrepresentable
+
+4) move sequences into the parsed property descriptions
+
+    I'm leaning toward this.
+
+    So instead of:
+
+        e.c_u & e.c_p   # ctrl+u and ctrl+p together
+
+    I'd do this:
+
+        e.c_u_p
+
+    The problem with e.c_u_p is that it could parse as a ctrl-modified u and p
+    chord, or as a no-modifiers c, u, and p chord.
+
+    A possible workaround, though I'm not 100% sure how I'd implement:
+
+        e.c.u_p
+
+    Special keys would work this way:
+
+        e.c.caret_amp   # ctrl+^ and ctrl+& together
+
+    This brings up the problem of shift being baked into the ^ and & chars.
+    I.e. it wouldn't really be possible to do e.g_H, because you'd need to hold
+    shift for the H, and not hold it for the g. At some point, I think the
+    system just has to do its best, and the user has to not build broken
+    things, but it would be nice to figure this out cleanly.
+
+    I've been predicting I'll need some up-front parsing of _, because just
+    splitting on _ for e._ would yield ['', ''], and e.c__ is also weird.
+
+    So the above means we no longer need & for chorded key events, which means
+    we're less tied to | for sequential events, so we could use something else
+    for sequencing them, like:
+
+        e.h_p > e.n_m_r     # h and p chord, followed by n, m, and r chord
+
+    Though I quite like sequencing looking like using pipes in Linux:
+
+        e.h_p | e.n_m_r
+
+    Currently I need to figure out:
+
+        1. a key event format
+            - and write a parser (with tests)
+        2. a key event set format, which makes it easy to:
+            - explore the state space
+            - figure out where we are in a chord/sequence
+            - add and remove keys/chords/sequences live
+            - combine key event sets via simple composition
+        3. timeouts for chords and sequences
+            - via cmds.evalDeferred
+
