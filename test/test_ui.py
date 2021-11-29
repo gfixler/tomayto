@@ -8,10 +8,10 @@ class Test_SelectionList (unittest.TestCase):
 
     def test_canInstantiateWithNothing (self):
         sl = ui.SelectionList(createUI=False)
-        self.assertEquals(sl._values, [])
+        self.assertEquals(sl.values, [])
 
     def test_canInstantiateWithList (self):
         testList = ["one", "two", "three", "four", "five"]
         sl = ui.SelectionList(testList, createUI=False)
-        self.assertEquals(sl._values, testList)
+        self.assertEquals(sl.values, testList)
 
