@@ -36,7 +36,7 @@ class stateSelect (object):
             ('l', NOALT, NOCTRL, PRESS): ("PUSH", (stateVisiblySelectTransform, ["locator", True, single])),
             ('c', NOALT, NOCTRL, PRESS): ("PUSH", (stateVisiblySelectTransform, ["camera", True, single])),
             ('n', NOALT, NOCTRL, PRESS): ("RUN", self.selectNone),
-            ('t', NOALT, NOCTRL, PRESS):   ("PUSH", stateToolSelect),
+            ('t', NOALT, NOCTRL, PRESS): ("PUSH", stateToolSelect),
             ('w', NOALT, NOCTRL, PRESS): ("PUSH", stateSelectWindow),
         }
 
@@ -131,23 +131,23 @@ class stateToolSelect (object):
         }
 
     def selectSelectTool (self):
-        cmds.setToolTo(mel.eval("$temp = $gSelect"))
+        mel.eval("setToolTo $gSelect")
         self.mainInst.popState()
 
     def selectMoveTool (self):
-        cmds.setToolTo(mel.eval("$temp = $gMove"))
+        mel.eval("setToolTo $gMove")
         self.mainInst.popState()
 
     def selectRotateTool (self):
-        cmds.setToolTo(mel.eval("$temp = $gRotate"))
+        mel.eval("setToolTo $gRotate")
         self.mainInst.popState()
 
     def selectScaleTool (self):
-        cmds.setToolTo(mel.eval("$temp = $gScale"))
+        mel.eval("setToolTo $gScale")
         self.mainInst.popState()
 
     def selectManipTool (self):
-        cmds.setToolTo(mel.eval("$temp = $gshowManip"))
+        mel.eval("setToolTo $gshowManip")
         self.mainInst.popState()
 
 
