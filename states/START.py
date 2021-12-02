@@ -44,11 +44,26 @@ class stateSTART (object):
             ('v', NOALT, NOCTRL, PRESS):   ("PUSH", vimline.stateVimline),
             ('V', NOALT, NOCTRL, PRESS):   ("PUSH", vimline.stateVimlineTestWin),
             ('v', NOALT, CTRL, PRESS):     ("PUSH", stateRetitleWindowDemo),
+
+            ('H', NOALT, CTRL, PRESS):     ("RUN", self.hideWindows),
+            ('H', NOALT, CTRL, RELEASE):   ("RUN", self.showWindows),
         }
 
     def switchToMayaHotkeys (self):
         cmds.hotkeySet("Maya_Default", edit=True, current=True)
 
+    def hideWindows (self):
+        self.hiddenWindows = {}
+        for win in cmds.lsUI(type="window"):
+            if win != "MayaWindow":
+                visState = cmds.window(win, query=True, visible=True)
+                self.hiddenWindows[win] = visState
+                cmds.window(win, edit=True, visible=False)
+
+    def showWindows (self):
+        for win, visState in self.hiddenWindows.items():
+            cmds.window(win, edit=True, visible=visState)
+        del self.hiddenWindows
 
 class stateRetitleWindowDemo (object):
 
