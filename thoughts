@@ -607,3 +607,163 @@ Several workarounds:
         3. timeouts for chords and sequences
             - via cmds.evalDeferred
 
+----------------------------
+
+Tue Apr 26 16:10:13 PDT 2022
+
+Had a big upheaval last night, care of a discussion in the Plover (open source
+steno) Discord. I was not in the discussion, but it was about Forth. User
+"Charley stenomod.blogspot.com" is an old Forth guy, and was speaking of it
+lovingly. I recalled this project, and my friend, Ben Deane's strong push to
+have me switch from a state machine approach to a stack based one. I couldn't
+see it at all, but eventually came around to thinking it could be useful for
+some things, but certainly not the whole system.
+
+Meanwhile, that project stalled, because I couldn't find what I really wanted in
+terms of a core model. Everything was too thick. Anything I wanted to do
+required me to write yet another state, or 5, and it all got too cumbersome to
+be bothered with. My main problems with stacks are 1) they seem like they would
+get super messy as I use them, with everything I do putting a result on the
+stack, often in the way of things I was in the middle of, and 2) something I
+really clarified in my head last night, that all the operations would have to be
+out in the start state now, competing for simple keys, like s, because it's no
+longer about walking into states, each with their own key map, carrying ideas
+along with me, but rather, pushing things onto a stack, then doing things
+on/to/with the stack, always from the initial state.
+
+So on one hand, states are too deep and too separated, and on the other hand,
+stacks are too flat and too combined. Last night, it finally clicked for me how
+to combine the two, something I've thought might be possible since last year,
+but remained opaque to me ever since. It's quite simple; I just couldn't see it.
+
+Just as a point of reference, for comparison sake, let's say I want to move a
+sphere to the midpoint of 2 other midpoints, and the first midpoint is between a
+cube's 3rd vertex and a locator, and the other is between the origin and a point
+I specify by typing in an XYZ coordinate. This will be sloppy, but here's a take
+on what that might look like in my state based model (states in caps for
+clarity):
+
+Move works on selection, so we first need to select the sphere. I'm in the START
+state, and hit s for select, pushing SELECT onto the state stack (there is a
+stack in my states, but it's for the states themselves). I want the sphere, so I
+hit m, pushing MESH SELECT. The meshes are tagged with letters, and I press the
+letter of the sphere to toggle its selection, then press return to confirm,
+popping back to MESH SELECT, which in turn "onPop" pops back to SELECT, which
+"onPop" pops back to START. Time to move it to the midpoint of midpoints...
+
+I press m, pushing MOVE, which pushes POINT SELECT, then M, pushing MIDPOINT,
+which pushes POINT SELECT for the first point. I press M again, pushing another
+MIDPOINT, which pushes another POINT SELECT. I press v, pushing VERTEX SELECT,
+which pushes SINGLE MESH SELECT, and in there I do something to select the cube,
+and it pops back to VERTEX SELECT with that, and pushes VERTEX SELECT FOR GIVEN
+MESH with that target mesh. I use a number of tricks in there to pick the 3rd
+vertex. It pops back with that vertex to POINT SELECT, which pops back to
+MIDPOINT, which pushes POINT SELECT again for the second point. I press l,
+pushing LOCATOR SELECT, pick the locator, and it pops back 2x to MIDPOINT, which
+evals, popping back its midpoint to the outer MIDPOINT, which now wants its
+second point, and pushes POINT SELECT again. This is to be another midpoint, so
+I press M, pushing MIDPOINT, which pushes POINT SELECT. I press O, which pops
+back 2x with the origin to MIDPOINT, which pushes POINT SELECT for its second
+point. I push something to pop up a state-machine XYZ input box, type in the XYZ
+component values, confirm, and it pops back to MIDPOINT with that point. The
+midpoint evals, popping back to the outer MIDPOINT, which evals, popping back
+with the final midpoint of midpoints to MOVE, which finally moves the selected
+sphere to that point. *takes a breath* Along the way, any states that messed
+with the selection politely restored it as they were popped away from, so all
+the vert, mesh, locator selection in the middle didn't affect things.
+
+This is massively complex. I had to go back and edit things that I'd forgotten
+to type up several times (and struggled to explain it out loud to myself last
+night, and again today). I also realize that by point 3 (point 1 of the second
+inner midpoint), if I wanted to change point 1 of the first midpoint, it's a
+struggle. At best I could kill out of the second point by selecting none,
+leaving me in the outer midpoint, at which point I could hit something in that
+state to mean redo the first point, but the midpoint info from there is gone, so
+I'd have to redo it entirely. It has all the problems of hierarchies. It's
+cumbersome and complex, and hard to reason about.
+
+The problems with stacks I think I've overcome, with a night of thought. First,
+the problem with the stack becoming a mess; Charley from the Discord says Forth
+programmers obsess over a clean stack, which is good to know. I think the simple
+answer there is that nothing goes on the stack unless I put it there, and I only
+put things there because I'm doing something with them now. If I make a sphere,
+it doesn't go on the stack. Instead, I make a sphere, and it gets pushed to a
+last-made-object list, and maybe also a last obvious thing list, and I can push
+either onto the stack from there. There can be little lists for everything -
+last moved things, last made thing, last selected thing, last point moved to,
+last opened file etc. There can be a mode just for pushing things on the stack,
+full of keys I can use to push anything I've dealt with to the stack.
+
+Also, I want a clear stack button. I use space in Vim to clear selection and
+command line. That might work. Space to dump the stack, and start fresh. I also
+want to be able to undo, and put things back on the stack, so there will be
+another stack of things that have been popped off, coupled with actions taken in
+Maya to undo (this part seems tricky).
+
+So how might it look to do what I did above - midpoint stuff - with a stack AND
+states? Let's see:
+
+I press s to enter SELECT state - I still have my states. In there I press v for
+VERTEX SELECT, which pushes MESH SELECT mode, pick a mesh, then enter VERTEX
+SELECT FOR GIVEN MESH mode where I can use a number of options to get at a
+vertex. When I'm done, it pushes the vertex to the stack, and pops me back out
+to the START state. I'm free. I can decide at that point I'm done, and do
+nothing, and maybe clear the stack, or do things with that vertex, like scale
+it. I decide to push the next point, so I press s to enter SELECT state again,
+press l for LOCATOR, pick one, pushing it to the stack, and pop back to START. I
+press a midpoint thing, which pops the 2 points, and pushes the midpoint back
+on. I do this again for the origin and typed-in points. So now I midpoint the
+top 2 things on the stack again, and I have 2 midpoints on top now, so I do it
+again. Now I want to move a sphere - I can still use a select mode to pick a
+sphere, but then I can push it to the stack, and then push a thing to apply move
+to the top 2 things on the stack. Done. I didn't get trapped in a corridor of
+needs that the MOVE state was waiting for.
+
+I can have an arsenal of things ready to work on selection, using the stack. I
+get a point onto the stack, then select some things, then call the move selected
+functionality, which pops the point from the stack, and moves the selected
+things. It's so simple. It gives me so many options, too. I could push a point
+and then a transform, and then call move on the top 2 items, somehow, or push a
+point, select some things, then call move on selection using the point on the
+stack. The same move command could also move objects to objects, so I push
+sphere, then cube, then say move, using the top 2 items, and it moves the cube
+to the position of the sphere (ultimate to penultimate; last object is active
+object), popping both. I realize I mean the other way, so I undo, which moves
+the cube back, and puts the names back on the stack. I hit the swap button to
+swap the top 2 items, and redo the move, and the sphere moves to the cube now.
+The move function could also be smart, seeing that one of the top 2 items is a
+transform, and the other is an XYZ, and regardless of order, it just works, and
+that can become idiomatic in my mind, and quick to rely on.
+
+For things where order matters, and because it's likely I'll do a ton of things
+to the top 2 items, I could even make a whoops button that undoes, swaps the top
+2 items, and replays the last command, and that would work as a toggle! This is
+blowing my mind. This model really gives me that "late binding" I always
+(misuse) want. Say I have a "put object on top of other object" command. I push
+2 objects, intending to do that, then realize I really meant "put object beside
+other object," so I just hit that command instead. I really thought I wanted
+Vim's verb-then-object thing, but this is feeling so much more powerful and
+composable. It feels like states are inheritance/hierarchy, and stacks are
+composition. I know what I like. The blend of the two is wonderful. I have so
+much to explore now. I feel unblocked.
+
+One problem I had before, thinking I wouldn't have my states anymore, was how to
+push the origin onto the stack. Does that ability just sit out in the START
+state? No, it's still in the SELECT POINT state, but that state isn't something
+called from MOVE, or whatever needs it, it's just about picking a point to push
+onto the stack, and then you're done. Do whatever you want with it after that.
+
+So now I can imagine a number of stack commands, but have to decide if I just
+want them out in the world, or under some stack prefix. It feels like they're
+much more useful than the plethora of Maya things, since I'll be using them with
+all the Maya things, so they should dominate the START state.
+
+I also realized there will be times when things are buried a bit on the stack,
+and I thought of having another stack I could pop them over two. Say I push 4
+points and need to midpoint each pair, then midpoint the results. I could
+midpoint the top 2, then move the resulting point over, then midpoint again, and
+move the result back. Or I could move 2 over (taking a count even, like Vim),
+midpoint, move them back, midpoint, then midpoint. I think rotating the top n
+items is a normal stack thing, but it feels a little harder to keep right in my
+head. Maybe I'll just play until it's idiomatic.
+
