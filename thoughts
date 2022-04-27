@@ -224,7 +224,7 @@ I've reached a point where I want to think about the organization of all of
 these [very pre-alpha] states I'm starting to build, both as core libraries, and
 as something - scripts? plugins? - that a user of the library can add. One thing
 that's very different about this, than, say, Vim (the inspiration for this whole
-project), is that Vim is a flat, global space  of keys per maybe a half-dozen
+project), is that Vim is a flat, global space of keys per maybe a half-dozen
 modes, whereas this project is a huge tree you can walk all around in, with key
 mappings changing completely at every state change. The most 'state-machine' you
 get in Vim, beyond its base modes, is key sequences, like gUU to upper-case a
@@ -243,8 +243,8 @@ the position of an existing object. Then I can jump into myriad file browser
 like idea I've had. This graph-walking, pushing and popping states all the
 while, changes how hotkeys can be defined.
 
-Currenly, I'm thinking that core.py stays, and contains the main class, with the
-main handling routine, and related helpers. I'm thinking that every logical
+Currently, I'm thinking that core.py stays, and contains the main class, with
+the main handling routine, and related helpers. I'm thinking that every logical
 grouping of states, like all the Vimline stuff, or a host of object selection
 stuff, gets its own module, and I imagine dozens of these, perhaps, maybe
 gathered into a states folder(?), defining the batteries-included, core library
@@ -378,9 +378,8 @@ As I press the letters on the left, the selection (UI and Maya) changes to that
 set. If I hold shift when selecting, it adds the selection (both, again) to the
 existing one. So, I can hit e to replace the selection with the vertices of the
 left ear, then F to add those of the right ear. If I want to add an "ears" set,
-which is the combination of the two ear vert sets, I can hit e to select only
-the left ear, then F to add the selection of the right ear, then hit whatever to
-add the new set from selected, typing in "ear" (Vimline), adding the h entry.
+as the combination of the two ear vert sets, I can then hit whatever means
+create new set from selected, typing in "ears" (Vimline), adding an h entry.
 
 If shift+letter adds to the set, I'm thinking ctrl+letter removes from it, so I
 could press a to select the whole face of verts, then ctrl+b, to remove the left
@@ -399,8 +398,8 @@ quickly select from them by a letter to the left of each, in the first column,
 which toggles selection. I have that working now, and I have a [non-committed]
 demo state w/ keymap that lets me pop open a window, listing all items in the
 current Maya scene, with prefix letters that don't move. C-u and C-d move the
-list up and down by page (want to make that half-page later, and use C-b and C-f
-for page, as in Vim). Pressing the letter prefixes toggles selection of the
+list up and down by page (want to make that half-page later, and use C-b and
+C-f for page, as in Vim). Pressing the letter prefixes toggles selection of the
 items, which persists through refreshes, scrolling, etc. Hitting enter closes
 out the window, and pops back from the SelectionList state.
 
@@ -409,7 +408,8 @@ down, as I'm going to forget them.
 
 - filtering of entries, for now only through regex of the text (/ to invoke)
     - this can use Vimline, and put it through its paces
-- clearing selection, or selecting all, both globally, and just what's visible
+- clearing selection
+- selecting all, both globally, and just what's visible
 - what's visible can change not just through scrolling, but also filtering
 - various sorting modes
 - need to make the demo state work more generically, and take inputs
