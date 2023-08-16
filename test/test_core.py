@@ -1,7 +1,6 @@
 import unittest
-from nose.plugins.attrib import attr
 
-from .. import core
+import core
 
 
 """
@@ -150,42 +149,42 @@ class Test_formatEventInfo (unittest.TestCase):
     def test_simpleKeyPress (self):
         result = core.formatEventInfo(('x', False, False, True))
         expected = "> x    "
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
     def test_simpleKeyRelease (self):
         result = core.formatEventInfo(('q', False, False, False))
         expected = "< q    "
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
     def test_altKeyPress (self):
         result = core.formatEventInfo(('j', True, False, True))
         expected = "> M-j  "
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
     def test_altKeyRelease (self):
         result = core.formatEventInfo(('z', True, False, False))
         expected = "< M-z  "
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
     def test_ctrlKeyPress (self):
         result = core.formatEventInfo(('p', False, True, True))
         expected = "> C-p  "
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
     def test_ctrlKeyRelease (self):
         result = core.formatEventInfo(('v', False, True, False))
         expected = "< C-v  "
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
     def test_altCtrlKeyPress (self):
         result = core.formatEventInfo(('w', True, True, True))
         expected = "> C-M-w"
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
     def test_altCtrlKeyRelease (self):
         result = core.formatEventInfo(('k', True, True, False))
         expected = "< C-M-k"
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
 
 class Test_Tomayto (unittest.TestCase):
@@ -194,17 +193,17 @@ class Test_Tomayto (unittest.TestCase):
         self.tom = core.Tomayto(stateExampleSTART)
 
     def test__init__stackStartsOutEmpty (self):
-        self.assertEquals(self.tom.stateStack, [])
+        self.assertEqual(self.tom.stateStack, [])
 
     def test__init__startStateIsCorrect (self):
-        self.assertEquals(self.tom.startState, stateExampleSTART)
+        self.assertEqual(self.tom.startState, stateExampleSTART)
 
     def test__init__startStateInstIsCorrect (self):
         self.assertTrue(isinstance(self.tom.startStateInst, stateExampleSTART))
 
     def test_getCurrentState_startStateIsCorrect (self):
         result = self.tom.getCurrentState()
-        self.assertEquals(result, (self.tom.startState, self.tom.startStateInst))
+        self.assertEqual(result, (self.tom.startState, self.tom.startStateInst))
 
     def test_eventHandler_stateDoesNotRequireKeymap (self):
         if hasattr(self.tom.startStateInst, 'keymap'):
@@ -215,7 +214,7 @@ class Test_Tomayto (unittest.TestCase):
     def test_eventHandler_handlesPushEvent (self):
         self.tom.eventHandler('p', False, False, True)
         [(cls, inst)] = self.tom.stateStack
-        self.assertEquals(cls, stateSimple)
+        self.assertEqual(cls, stateSimple)
         self.assertTrue(isinstance(inst, stateSimple))
 
     def test_eventHandler_handlesPushEventWithOnEnterCallback (self):
@@ -226,18 +225,18 @@ class Test_Tomayto (unittest.TestCase):
     def test_eventHandler_handlesPushEventWithArgument (self):
         global varFromArgument
         if "varFromArgument" in globals():
-            self.assertNotEquals(varFromArgument, "Alice")
+            self.assertNotEqual(varFromArgument, "Alice")
         else:
             self.assertRaises(NameError, lambda: varFromArgument)
         self.tom.eventHandler('a', False, False, True)
-        self.assertEquals(varFromArgument, "Alice")
+        self.assertEqual(varFromArgument, "Alice")
 
     def test_eventHandler_handlesPopEvent (self):
         self.tom.pushState(stateWithPopEvents)
         [(cls, inst)] = self.tom.stateStack
-        self.assertEquals(cls, stateWithPopEvents)
+        self.assertEqual(cls, stateWithPopEvents)
         self.tom.eventHandler('p', False, False, True)
-        self.assertEquals(self.tom.stateStack, [])
+        self.assertEqual(self.tom.stateStack, [])
 
     def test_eventHandler_handlesLocalPopCallback (self):
         self.tom.pushState(stateWithPopEvents)
@@ -254,7 +253,7 @@ class Test_Tomayto (unittest.TestCase):
     def test_pushState_stateIsPushedProperly (self):
         self.tom.pushState(stateSimple)
         [(cls, inst)] = self.tom.stateStack
-        self.assertEquals(cls, stateSimple)
+        self.assertEqual(cls, stateSimple)
         self.assertTrue(isinstance(inst, stateSimple))
 
     def test_pushState_handlesPushWithOnEnterCallback (self):
@@ -266,18 +265,18 @@ class Test_Tomayto (unittest.TestCase):
     def test_pushState_handlesPushWithArgument (self):
         global varFromArgument
         if "varFromArgument" in globals():
-            self.assertNotEquals(varFromArgument, "Bob")
+            self.assertNotEqual(varFromArgument, "Bob")
         else:
             self.assertRaises(NameError, lambda: varFromArgument)
         self.tom.pushState((stateThatAcceptsAnArgument, ["Bob"]))
-        self.assertEquals(varFromArgument, "Bob")
+        self.assertEqual(varFromArgument, "Bob")
 
     def test_popState_stateIsPopped (self):
         self.tom.pushState(stateSimple)
         [(cls, inst)] = self.tom.stateStack
-        self.assertEquals(cls, stateSimple)
+        self.assertEqual(cls, stateSimple)
         self.tom.popState()
-        self.assertEquals(self.tom.stateStack, [])
+        self.assertEqual(self.tom.stateStack, [])
 
     def test_popState_onPopToCallbackIsCalled (self):
         self.tom.pushState(stateWithOnPopToCallback)
@@ -294,7 +293,7 @@ class Test_Tomayto (unittest.TestCase):
         self.assertRaises(NameError, lambda: varFromOnPopToWithArgument)
         [_, (__, inst)] = self.tom.stateStack
         self.tom.popState(inst.popCallback)
-        self.assertEquals(varFromOnPopToWithArgument, "popCallbackReturnValue")
+        self.assertEqual(varFromOnPopToWithArgument, "popCallbackReturnValue")
 
     def test_getCurrentStateInfo_noEvents (self):
         self.tom.pushState(stateSimple)
@@ -304,7 +303,7 @@ class Test_Tomayto (unittest.TestCase):
     stateSimple
     stateExampleSTART
 """
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
     def test_getCurrentStateInfo_namedPushEvent (self):
         self.tom.pushState(stateForTestingInfoOutput_namedPushEvent)
@@ -317,7 +316,7 @@ class Test_Tomayto (unittest.TestCase):
 Current state events:
     > p     - PUSH - Simple State
 """
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
     def test_getCurrentStateInfo_namedPushEventWithArgumentForOnEnter (self):
         self.tom.pushState(stateForTestingInfoOutput_namedPushEventWithArgumentForOnEnter)
@@ -330,7 +329,7 @@ Current state events:
 Current state events:
     > p     - PUSH - State w/ Argument
 """
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
     def test_getCurrentStateInfo_namedPopEvent (self):
         self.tom.pushState(stateForTestingInfoOutput_namedPopEvent)
@@ -343,7 +342,7 @@ Current state events:
 Current state events:
     > P     - POP  - Pop State
 """
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 
     def test_getCurrentStateInfo_namedRunEvent (self):
         self.tom.pushState(stateForTestingInfoOutput_namedRunEvent)
@@ -356,5 +355,5 @@ Current state events:
 Current state events:
     > R     - RUN  - Run State
 """
-        self.assertEquals(result, expected)
+        self.assertEqual(result, expected)
 

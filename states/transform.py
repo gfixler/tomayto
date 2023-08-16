@@ -1,9 +1,9 @@
 try:
     import maya.cmds as cmds
 except ImportError:
-    print 'WARNING (%s): failed to load maya.cmds module.' % __file__
+    print('WARNING (%s): failed to load maya.cmds module.' % __file__)
 
-import selection
+from . import selection
 
 
 class stateMove (object):

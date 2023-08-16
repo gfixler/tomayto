@@ -1,11 +1,11 @@
 try:
     import maya.cmds as cmds
 except ImportError:
-    print 'WARNING (%s): failed to load maya.cmds module.' % __file__
+    print('WARNING (%s): failed to load maya.cmds module.' % __file__)
 
 
-import core
-from states import START
+from . import core
+from . states import START
 
 
 def initialize (refreshKeymap=True):

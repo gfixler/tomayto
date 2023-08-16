@@ -1,7 +1,7 @@
 try:
     import maya.cmds as cmds
 except ImportError:
-    print 'WARNING (%s): failed to load maya.cmds module.' % __file__
+    print('WARNING (%s): failed to load maya.cmds module.' % __file__)
 
 
 from .. core import ALT, NOALT, CTRL, NOCTRL, PRESS, RELEASE
@@ -31,11 +31,11 @@ class stateVimline (object):
         self.vim = self.mainInst.vimline
 
     def onEnter (self):
-        print "entering Vimline"
+        print("entering Vimline")
         self.mainInst.pushState(stateVimlineNormalMode)
 
     def onPopTo (self, *_):
-        print "exiting Vimline"
+        print("exiting Vimline")
         self.mainInst.popState()
 
 
@@ -117,7 +117,7 @@ class stateVimlineNormalMode (object):
         }
 
     def onEnter (self):
-        print "Entering vimline Normal Mode"
+        print("Entering vimline Normal Mode")
 
     def onPopTo (self, *_):
         self.mainInst.vimline["mode"] = "NORMAL"
@@ -136,7 +136,7 @@ class stateVimlineNormalMode (object):
 
     def handleEscape (self):
         # TODO: remove visible cursor from text(?)
-        # print "^["
+        # print("^[")
         pass
 
     def cursorLeft (self):
@@ -176,7 +176,7 @@ class stateVimlineEnterInsertMode (object):
         self.mainInst = mainInst
         self.vim = self.mainInst.vimline
         # TODO: handle cursor position based on entry mode
-        print "entered via", entryMode
+        print("entered via", entryMode)
         if entryMode == "insert":
             self.mainInst.vimline["mode"] = "insert"
         elif entryMode == "INSERT":
@@ -194,7 +194,7 @@ class stateVimlineEnterInsertMode (object):
             self.vim["left"] = self.vim["left"] + self.vim["right"]
             self.vim["right"] = ""
         else:
-            raise keyError, 'insert mode entry mode "' + entryMode + '" unknown'
+            raise(keyError, 'insert mode entry mode "' + entryMode + '" unknown')
         self.keymap = {
             ("h", NOALT, CTRL, PRESS): ("RUN", self.handleBackspace),
             ("a", NOALT, CTRL, PRESS): ("RUN", self.emacsHome),
@@ -216,17 +216,17 @@ class stateVimlineEnterInsertMode (object):
                 self.vim["onChange"](self.vim)
 
     def handleBackspace (self):
-        # print "^h"
+        # print("^h")
         vim = self.vim
         if vim["left"]:
             vim["left"] = vim["left"][:-1]
         self.handleChange()
 
     def handleEscape (self):
-        # print "^["
+        # print("^[")
         self.mainInst.vimline["lastInsertMode"] = self.mainInst.vimline["mode"]
         self.mainInst.vimline["mode"] = "NORMAL"
-        print "popping back from insert mode"
+        print("popping back from insert mode")
 
     def emacsHome (self):
         vim = self.vim
@@ -241,7 +241,7 @@ class stateVimlineEnterInsertMode (object):
         self.handleChange()
 
     def handleReturn (self):
-        print "^M"
+        print("^M")
         self.mainInst.popState(self.handleEscape)
 
 

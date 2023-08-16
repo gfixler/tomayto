@@ -1,12 +1,12 @@
 try:
     import maya.cmds as cmds
 except ImportError:
-    print 'WARNING (%s): failed to load maya.cmds module.' % __file__
+    print('WARNING (%s): failed to load maya.cmds module.' % __file__)
 
 try:
     import maya.mel as mel
 except ImportError:
-    print 'WARNING (%s): failed to load maya.cmds module.' % __file__
+    print('WARNING (%s): failed to load maya.cmds module.' % __file__)
 
 
 from .. core import ALT, NOALT, CTRL, NOCTRL, PRESS, RELEASE
@@ -171,8 +171,8 @@ class stateSelectWindow (object):
         self.wins = filter(lambda x: x != "MayaWindow", existingWins)
 
     def selectWin (self):
-        print self.wins[self.ix]
-        print cmds.window(self.wins[self.ix], query=True, topLeftCorner=True)
+        print(self.wins[self.ix])
+        print(cmds.window(self.wins[self.ix], query=True, topLeftCorner=True))
         cmds.window(self.wins[self.ix], edit=True, visible=True)
         cmds.setFocus(self.wins[self.ix])
 

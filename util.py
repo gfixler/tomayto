@@ -1,12 +1,12 @@
 try:
     import maya.cmds as cmds
 except ImportError:
-    print 'WARNING (%s): failed to load maya.cmds module.' % __file__
+    print('WARNING (%s): failed to load maya.cmds module.' % __file__)
 
 try:
     import maya.mel as mel
 except ImportError:
-    print 'WARNING (%s): failed to load maya.mel module.' % __file__
+    print('WARNING (%s): failed to load maya.mel module.' % __file__)
 
 
 import os
@@ -80,7 +80,7 @@ def listNameCommands ():
     # from http://help.autodesk.com/cloudhelp/2018/ENU/Maya-Tech-Docs/CommandsPython/assignCommand.html
     count = cmds.assignCommand(query=True, numElements=True)
 
-    print ('There are ' + str(count) + ' named command objects.')
+    print('There are ' + str(count) + ' named command objects.')
 
     for index in range(1, count+1):
 
@@ -100,11 +100,11 @@ def listNameCommands ():
 
             output += ')'
 
-            print index, cmds.assignCommand(index, query=True, name=True), output
+            print(index, cmds.assignCommand(index, query=True, name=True), output)
 
 
 def listHotkeySets ():
-    print cmds.hotkeySet(query=True, hotkeySetArray=True)
+    print(cmds.hotkeySet(query=True, hotkeySetArray=True))
 
 def currentHotkeySet ():
     return cmds.hotkeySet(query=True, current=True)
@@ -137,7 +137,7 @@ def createTomaytoKeymap (callbackName="tomaytoCB", nameCommandPrefix="tomayto", 
                                 , annotation = nameCommandName + "_press"
                                 , command = callback
                                 )
-                print "created", nameCommandName + "_press nameCommand"
+                print("created", nameCommandName + "_press nameCommand")
 
                 # release nameCommand
                 callback = "python(\"" + callbackName + "(\\\"" + key + "\\\", " + str(a) + ", " + str(c) + ", False)\")"
@@ -145,7 +145,7 @@ def createTomaytoKeymap (callbackName="tomaytoCB", nameCommandPrefix="tomayto", 
                                 , annotation = nameCommandName + "_release"
                                 , command = callback
                                 )
-                print "created", nameCommandName + "_release nameCommand"
+                print("created", nameCommandName + "_release nameCommand")
 
                 # hotkey for both press and release nameCommands for current key + mods
                 cmds.hotkey( keyShortcut = key
@@ -154,7 +154,7 @@ def createTomaytoKeymap (callbackName="tomaytoCB", nameCommandPrefix="tomayto", 
                             , altModifier = a
                             , ctrlModifier = c
                             )
-                print "created", nameCommandName, " press/release hotkey"
+                print("created", nameCommandName, " press/release hotkey")
 
 
 def removeTomaytoKeymap (nameCommandPrefix="tomayto", **kwargs):
@@ -166,47 +166,47 @@ def removeTomaytoKeymap (nameCommandPrefix="tomayto", **kwargs):
     finding all with the matching prefix, working backwards from the end.
     """
     nameCmdCount = cmds.assignCommand(query=True, numElements=True)
-    for i in reversed(xrange(1, nameCmdCount + 1)):
+    for i in reversed(range(1, nameCmdCount + 1)):
         keyString = cmds.assignCommand(i, query=True, name=True)
         if keyString and keyString.startswith(nameCommandPrefix + "_"):
             cmds.assignCommand(edit=True, delete=i)
-            print "deleted", keyString
+            print("deleted", keyString)
         else:
-            print "preserved", keyString
+            print("preserved", keyString)
 
 
 def backupDoDeleteScriptPath ():
-    print "Begin doDelete script path discovery..."
+    print("Begin doDelete script path discovery...")
     opvar = "scriptPath_doDelete"
     if cmds.optionVar(exists=opvar):
-        print "  Found option var:", opvar
+        print("  Found option var:", opvar)
         storedPath = str(cmds.optionVar(query=opvar))
-        print "  Stored path:", storedPath
+        print("  Stored path:", storedPath)
         if os.path.exists(storedPath):
-            print "  Path exists."
+            print("  Path exists.")
         else:
-            print "  Path does not exist."
-            print "  Querying location of doDelete..."
+            print("  Path does not exist.")
+            print("  Querying location of doDelete...")
             locMsg = mel.eval("whatIs doDelete;")
-            print "    Result: ", locMsg
+            print("    Result: ", locMsg)
             melHeader = "Mel procedure found in: " # Linux, Maya 2017
             scriptHeader = "Script found in: " # Windows, Mayas 2016 and 2018
             scriptPath = ""
             if locMsg.startswith(melHeader):
-                print "  Found prefix: ", melHeader
+                print("  Found prefix: ", melHeader)
                 scriptPath = locMsg[len(melHeader):]
             elif locMsg.startswith(scriptHeader):
-                print "  Found prefix: ", scriptHeader
+                print("  Found prefix: ", scriptHeader)
                 scriptPath = locMsg[len(scriptHeader):]
             else:
-                print "  Could not find doDelete path via whatIs."
+                print("  Could not find doDelete path via whatIs.")
             if os.path.exists(scriptPath):
-                print "  Path found at:", scriptPath
+                print("  Path found at:", scriptPath)
                 cmds.optionVar(stringValue=(opvar, scriptPath))
-                print "  Stored in optionVar."
+                print("  Stored in optionVar.")
             else:
-                print "  Found path does not exist."
-        print ("End doDelete script path discovery.")
+                print("  Found path does not exist.")
+        print("End doDelete script path discovery.")
 
 def hackDeleteKeys (callbackName="tomaytoCB", nameCommandPrefix="tomayto"):
     """
@@ -216,7 +216,7 @@ def hackDeleteKeys (callbackName="tomaytoCB", nameCommandPrefix="tomayto"):
     of the modifier keys will work with them, but it's something, at least.
     """
     backupDoDeleteScriptPath()
-    print "Overriding doDelete (this session only) with:"
+    print("Overriding doDelete (this session only) with:")
     override = 'global proc doDelete () { python("' + callbackName + '(\\"Backspace\\", False, False, True)"); };'
     print(override)
     mel.eval(override)
@@ -229,10 +229,10 @@ def restoreDeleteKeys ():
     opvar = "scriptPath_doDelete"
     scriptPath = str(cmds.optionVar(query=opvar))
     if os.path.exists(scriptPath):
-        print "Restoring doDelete function"
-        print "Sourcing:", scriptPath
+        print("Restoring doDelete function")
+        print("Sourcing:", scriptPath)
         mel.eval('source "' + scriptPath + '";')
     else:
-        print "Unable to locate original doDelete script path, but"
-        print "functionality should be restored on program restart."
+        print("Unable to locate original doDelete script path, but")
+        print("functionality should be restored on program restart.")
 
