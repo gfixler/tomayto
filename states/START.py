@@ -1,17 +1,18 @@
 try:
     import maya.cmds as cmds
 except ImportError:
-    print 'WARNING (%s): failed to load maya.cmds module.' % __file__
+    print('WARNING (%s): failed to load maya.cmds module.' % __file__)
 
 from .. ui import SelectionList
 from .. core import ALT, NOALT, CTRL, NOCTRL, PRESS, RELEASE
 
-import selection
-import transform
-import vimline
+from . import selection
+from . import transform
+from . import vimline
 
 
-fst = lambda (x, _) :  x
+fst = lambda xy : xy[0]
+fst = lambda xy : xy[1]
 
 minTime = lambda: cmds.playbackOptions(query=True, minTime=True)
 maxTime = lambda: cmds.playbackOptions(query=True, maxTime=True)
@@ -127,9 +128,9 @@ class stateSelectionListDemo (object):
 
     def returnValues (self, selOrder, selected):
         if selected:
-            seld = filter(lambda (_, v): v["selected"] > 0, self.sl.entries.items())
+            seld = filter(lambda e: e[1]["selected"] > 0, self.sl.entries.items())
             if selOrder:
-                vals = map(fst, sorted(seld, key=lambda (_, v): v["selected"]))
+                vals = map(fst, sorted(seld, key=lambda e: e[1]["selected"]))
             else:
                 vals = [v for v in self.sl.values if self.sl.entries[v]["selected"] > 0]
         else:
@@ -138,9 +139,9 @@ class stateSelectionListDemo (object):
             cmds.deleteUI(self.win)
         except:
             pass
-        print
+        print()
         for val in vals:
-            print val
+            print(val)
         self.mainInst.popState(vals)
 
     def returnOrderedSelected (self):

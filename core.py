@@ -1,10 +1,10 @@
 try:
     import maya.cmds as cmds
 except ImportError:
-    print 'WARNING (%s): failed to load maya.cmds module.' % __file__
+    print('WARNING (%s): failed to load maya.cmds module.' % __file__)
 
 
-import util
+from . import util
 
 
 PRESS = True
@@ -17,7 +17,7 @@ CTRL = True
 NOCTRL = False
 
 
-fst = lambda (x, _): x
+fst = lambda xy: xy[0]
 getName = lambda x: x.__name__
 
 
@@ -96,8 +96,8 @@ class Tomayto (object):
     def getCurrentStateInfo (self):
         nltab = "\n    "
         stackLine = "State stack:"
-        stackStates = [self.startState] + map(fst, self.stateStack)
-        stackStateNames = map(getName, stackStates)
+        stackStates = [self.startState] + list(map(fst, self.stateStack))
+        stackStateNames = list(map(getName, stackStates))
         stackStateLines = nltab + nltab.join(reversed(stackStateNames))
         infoStr = stackLine + stackStateLines + "\n"
         _, inst = self.getCurrentState()
@@ -121,12 +121,12 @@ class Tomayto (object):
 
     def helpOnCurrentState (self):
         state, stateInst = self.getCurrentState()
-        print "HELP (" + state.__name__ + ")"
+        print("HELP (" + state.__name__ + ")")
         for k, v in stateInst.keymap.items():
-            print "\t", k, v
-        print "STATE STACK:"
+            print("\t", k, v)
+        print("STATE STACK:")
         for c, i in self.stateStack:
-            print "\t", c.__name__, i
+            print("\t", c.__name__, i)
 
 
 def enable (hotkeySetName="Tomayto", **kwargs):

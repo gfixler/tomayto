@@ -1,13 +1,13 @@
 try:
     import maya.cmds as cmds
 except ImportError:
-    print 'WARNING (%s): failed to load maya.cmds module.' % __file__
+    print('WARNING (%s): failed to load maya.cmds module.' % __file__)
 
 
 import math
 
-import color as col
-from util import defaultSettings
+from . import color as col
+from .util import defaultSettings
 
 
 ident = lambda x: x
@@ -29,7 +29,7 @@ class SelectionList (object):
 
     def __init__ (self, values=[], createUI=True, filtF=ident, sortF=ident, settings={}):
         if len(values) != len(set(values)):
-            raise ValueError, "duplicate values to SelectionList not allowed"
+            raise(ValueError, "duplicate values to SelectionList not allowed")
         self.values = values
         self.entries = dict([(value, {"selected": 0}) for value in values])
         self.keyEntries = []
